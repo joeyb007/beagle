@@ -398,3 +398,55 @@ input[type="text"], textarea, select { background: var(--paper); border-radius: 
 table.data { font-size: 12.5px; }
 
 /* the keepsake page stays the one warm, serif "document" surface on purpose */
+
+/* ---- pass 3: collapsible rail, member editors, page transitions ---- */
+.rail { transition: width 0.28s ease-in-out, padding 0.28s ease-in-out; overflow: hidden; }
+.rail .wordmark {
+  display: flex; align-items: center; gap: 9px;
+  background: none; border: 0; cursor: pointer; text-align: left;
+  font: inherit; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink);
+  padding: 5px 8px; margin-bottom: 12px; border-radius: 6px;
+}
+.rail .wordmark:hover { background: var(--hover); }
+.nav-label { white-space: nowrap; transition: opacity 0.18s ease; }
+.rail.collapsed { width: 58px; padding: 16px 10px; }
+.rail.collapsed .nav-label { opacity: 0; width: 0; overflow: hidden; display: inline-block; }
+.rail.collapsed a.nav, .rail.collapsed .wordmark { gap: 0; justify-content: center; }
+.rail.collapsed .rail-label { opacity: 0; height: 0; padding: 0; }
+.rail.collapsed .me { justify-content: center; }
+.rail.collapsed .foot form { display: none; }
+
+/* member editors (per-chat profiles) */
+.member-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.member { background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
+.member summary {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  cursor: pointer; list-style: none;
+}
+.member summary::-webkit-details-marker { display: none; }
+.member-name { font-weight: 600; }
+.member-edit { margin-left: auto; font-size: 12.5px; color: var(--blue); }
+.member[open] { border-color: #d5d5d2; }
+.member-form { padding: 4px 14px 14px; border-top: 1px solid var(--line); }
+.member-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; }
+.member-grid .field { font-size: 12.5px; color: var(--muted); }
+.member-grid input { margin-top: 3px; }
+
+/* segmented page-load transition */
+.page-anim > * { opacity: 0; animation: page-fade-up 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; }
+.page-anim > *:nth-child(1) { animation-delay: 0.03s; }
+.page-anim > *:nth-child(2) { animation-delay: 0.08s; }
+.page-anim > *:nth-child(3) { animation-delay: 0.13s; }
+.page-anim > *:nth-child(4) { animation-delay: 0.18s; }
+.page-anim > *:nth-child(5) { animation-delay: 0.23s; }
+.page-anim > *:nth-child(6) { animation-delay: 0.28s; }
+.page-anim > *:nth-child(7) { animation-delay: 0.33s; }
+.page-anim > *:nth-child(n + 8) { animation-delay: 0.38s; }
+@keyframes page-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-anim > * { animation: none; opacity: 1; }
+  .rail { transition: none; }
+}
