@@ -642,3 +642,9 @@ table.data { font-size: 12.5px; }
 .photo-invite > span:last-child { display: flex; flex-direction: column; gap: 2px; }
 .blend-head { display: flex; align-items: center; gap: 8px; }
 .spotify-mark { flex-shrink: 0; }
+
+/* fade the marquee's edges so mid-crossing prints look intentional, not clipped */
+.string-wrap {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 70px, #000 calc(100% - 70px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 70px, #000 calc(100% - 70px), transparent 100%);
+}

@@ -1,0 +1,85 @@
+- generic [ref=f30e2]:
+  - navigation [ref=f30e3]:
+    - button [ref=f30e4] [cursor=pointer]
+    - link [ref=f30e12] [cursor=pointer]:
+      - /url: /
+    - link [ref=f30e17] [cursor=pointer]:
+      - /url: /matches
+    - link [ref=f30e24] [cursor=pointer]:
+      - /url: /chats
+    - link [ref=f30e28] [cursor=pointer]:
+      - /url: /hangouts
+    - generic [ref=f30e34]:
+      - generic: Joseph
+      - button "sign out" [ref=f30e40] [cursor=pointer]
+  - main [ref=f30e41]:
+    - generic [ref=f30e42]:
+      - paragraph [ref=f30e43]: beagle's read on you
+      - heading "Joseph — the planner" [level=1] [ref=f30e44]:
+        - text: Joseph
+        - generic [ref=f30e45]: — the planner
+      - paragraph [ref=f30e46]:
+        - text: Earned from your messages · solo test profile —
+        - link "correct anything" [ref=f30e47] [cursor=pointer]:
+          - /url: /profiles
+        - text: .
+      - generic [ref=f30e48]:
+        - generic [ref=f30e49]:
+          - generic [ref=f30e50]: beagle's take
+          - button "refresh beagle's take" [ref=f30e51] [cursor=pointer]: ↻
+        - paragraph [ref=f30e52]: You're the one who actually shows up with a plan already half-made — sushi omakase, taco runs, low-key nights that don't ask too much of anyone. You're easy to schedule around once it's Sunday after 8pm, and you don't need a crowd to have a good night (that solo omakase run says it all). No clubs, no chaos — just good food and people you actually want to be there. 🍣
+      - generic [ref=f30e53]:
+        - generic [ref=f30e54]:
+          - heading "Up next" [level=2] [ref=f30e55]
+          - paragraph [ref=f30e56]: Omakase
+          - paragraph [ref=f30e57]: tomorrow
+          - link "see the plan →" [ref=f30e58] [cursor=pointer]:
+            - /url: /hangouts/0247d41a-8348-458d-b9d6-7c12b56e8dc9
+        - generic [ref=f30e59]:
+          - heading "Your people" [level=2] [ref=f30e60]
+          - paragraph [ref=f30e61]: "+15550000002"
+          - paragraph [ref=f30e62]: most-seen face · 2 hangouts
+        - generic [ref=f30e63]:
+          - heading "On this day-ish" [level=2] [ref=f30e64]
+          - generic [ref=f30e65]:
+            - link [ref=f30e66] [cursor=pointer]:
+              - /url: /hangouts/plan-demo-1
+              - img "memory from Ebisu Sushi" [ref=f30e67]
+            - generic [ref=f30e68]:
+              - paragraph [ref=f30e69]: Ebisu Sushi
+              - paragraph [ref=f30e70]: July 2026
+              - button "✨ remind the group" [ref=f30e71] [cursor=pointer]
+      - generic [ref=f30e72]:
+        - generic [ref=f30e73]:
+          - heading "Taste" [level=2] [ref=f30e74]
+          - generic [ref=f30e75]:
+            - generic [ref=f30e76]: sushi
+            - generic [ref=f30e77]: tacos
+            - generic [ref=f30e78]: low-key
+            - generic [ref=f30e79]: no clubs
+        - generic [ref=f30e80]:
+          - heading "When you're around" [level=2] [ref=f30e81]
+          - generic [ref=f30e82]:
+            - generic [ref=f30e83]: M
+            - generic [ref=f30e84]: T
+            - generic [ref=f30e85]: W
+            - generic [ref=f30e86]: T
+            - generic [ref=f30e87]: F
+            - generic [ref=f30e88]: S
+            - generic [ref=f30e89]: S
+          - paragraph [ref=f30e90]: Sunday evening after 8pm
+        - generic [ref=f30e91]:
+          - heading "Pickiness" [level=2] [ref=f30e92]
+          - paragraph [ref=f30e95]: down for almost anything
+      - generic "photos from your past hangouts" [ref=f30e96]:
+        - generic [ref=f30e99]:
+          - img "memory from Ebisu Sushi" [ref=f30e101]
+          - img "memory from Ebisu Sushi" [ref=f30e103]
+          - img "memory from Ebisu Sushi" [ref=f30e105]
+          - img "memory from Tacos El Rey" [ref=f30e107]
+          - img "memory from Tacos El Rey" [ref=f30e109]
+          - img "memory from Ebisu Sushi" [ref=f30e111]
+          - img "memory from Ebisu Sushi" [ref=f30e113]
+          - img "memory from Ebisu Sushi" [ref=f30e115]
+          - img "memory from Tacos El Rey" [ref=f30e117]
+          - img "memory from Tacos El Rey" [ref=f30e119]
