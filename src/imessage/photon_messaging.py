@@ -56,12 +56,13 @@ class PhotonMessaging:
         env["SIDECAR_PORT"] = self._url.rsplit(":", 1)[1]
         if self._fake:
             env["SIDECAR_FAKE"] = "1"
+        log = open(SIDECAR_DIR.parent / "sidecar.log", "a")  # noqa: SIM115 — lives as long as the process
         self._proc = subprocess.Popen(
             ["npm", "run", "start", "--silent"],
             cwd=SIDECAR_DIR,
             env=env,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=log,
+            stderr=log,
         )
         for _ in range(100):  # up to ~10s for tsx cold start
             if await self._healthy():
@@ -99,7 +100,10 @@ class PhotonMessaging:
         await self._post("/messages/text", {"chatId": chat.id, "text": text})
 
     async def set_typing(self, chat: ChatRef, on: bool) -> None:
-        await self._post("/chats/typing", {"chatId": chat.id, "on": on})
+        try:
+            await self._post("/chats/typing", {"chatId": chat.id, "on": on})
+        except Exception as e:  # cosmetic — never let a typing bubble kill a beat
+            print(f"[messaging] set_typing failed (non-fatal): {e}")
 
     async def send_card(self, chat: ChatRef, card: Card) -> None:
         await self._post("/messages/card", {"chatId": chat.id, "card": card.model_dump()})
@@ -112,7 +116,8 @@ class PhotonMessaging:
 
     async def _post(self, path: str, payload: dict) -> dict:
         resp = await self._http.post(path, json=payload)
-        resp.raise_for_status()
+        if resp.status_code >= 400:  # surface the sidecar's error body, not just the code
+            raise RuntimeError(f"sidecar {path} -> {resp.status_code}: {resp.text}")
         return resp.json()
 
     # ------------------------------------------------- T8: event dispatch
