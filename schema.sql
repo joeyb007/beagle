@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS artifacts (
   group_id   INTEGER,                     -- nullable link to groups
   visibility TEXT NOT NULL DEFAULT 'private',  -- 'private' | 'public'
   note       TEXT,                        -- Beagle's memory note (LLM-genned)
+  photo_notes TEXT NOT NULL DEFAULT '{}', -- JSON {photo_url: post-it text} — agent context, keepsake-only UI
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

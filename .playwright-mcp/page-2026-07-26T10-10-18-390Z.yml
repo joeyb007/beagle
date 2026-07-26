@@ -1,0 +1,66 @@
+- generic [ref=f13e2]:
+  - navigation [ref=f13e3]:
+    - button [ref=f13e4] [cursor=pointer]
+    - link [ref=f13e12] [cursor=pointer]:
+      - /url: /
+    - link [ref=f13e17] [cursor=pointer]:
+      - /url: /matches
+    - link [ref=f13e24] [cursor=pointer]:
+      - /url: /chats
+    - link [ref=f13e28] [cursor=pointer]:
+      - /url: /hangouts
+    - generic [ref=f13e34]:
+      - generic: Joseph
+      - button "sign out" [ref=f13e40] [cursor=pointer]
+  - main [ref=f13e41]:
+    - generic [ref=f13e44]:
+      - generic [ref=f13e45]: SUNDAY, JULY 27
+      - heading "That time at Twin Peaks sunset" [level=1] [ref=f13e46]
+      - generic [ref=f13e47]:
+        - generic [ref=f13e48]:
+          - generic [ref=f13e49]: Twin Peaks sunset
+          - generic [ref=f13e50]: admit 4
+        - generic [ref=f13e51]:
+          - term [ref=f13e52]: When
+          - definition [ref=f13e53]: Sunday 7:30 p.m.
+          - term [ref=f13e54]: Where
+          - definition [ref=f13e55]: Twin Peaks, SF
+          - term [ref=f13e56]: Who
+          - definition [ref=f13e57]: Joseph, Madhav, Anthony, Max
+          - term [ref=f13e58]: Beagle says
+          - definition [ref=f13e59]: bring layers, the fog is undefeated
+      - heading [level=2] [ref=f13e60]:
+        - img "Spotify" [ref=f13e61]
+        - text: The blend — everyone’s taste, one tracklist
+      - list [ref=f13e63]:
+        - listitem [ref=f13e64]:
+          - generic [ref=f13e65]:
+            - text: Sofia
+            - generic [ref=f13e66]: — Clairo
+        - listitem [ref=f13e67]:
+          - generic [ref=f13e68]:
+            - text: Show Me How
+            - generic [ref=f13e69]: — Men I Trust
+        - listitem [ref=f13e70]:
+          - generic [ref=f13e71]:
+            - text: Myth
+            - generic [ref=f13e72]: — Beach House
+        - listitem [ref=f13e73]:
+          - generic [ref=f13e74]:
+            - text: Golden Hour
+            - generic [ref=f13e75]: — Kacey Musgraves
+      - heading "Beagle remembers" [level=2] [ref=f13e76]
+      - paragraph [ref=f13e77]: “the fog held off for exactly forty minutes and we got all of them”
+      - heading "How it went" [level=2] [ref=f13e78]
+      - generic [ref=f13e79]:
+        - generic [ref=f13e80]:
+          - img "hangout photo" [ref=f13e82]
+          - button "the exact minute the fog lost" [ref=f13e83] [cursor=pointer]
+        - generic [ref=f13e84]:
+          - img "hangout photo" [ref=f13e86]
+          - button "madhav swore he could see his apartment" [ref=f13e87] [cursor=pointer]
+      - button "Add more photos" [ref=f13e89] [cursor=pointer]
+      - heading "Ask beagle about it" [level=2] [ref=f13e90]
+      - generic [ref=f13e92]:
+        - textbox "ask beagle about this hangout…" [ref=f13e93]
+        - button "ask" [disabled] [ref=f13e94]: ↑

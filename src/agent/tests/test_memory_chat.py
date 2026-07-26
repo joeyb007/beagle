@@ -20,12 +20,13 @@ def db(tmp_path):
         "INSERT INTO profiles (handle, name, json, constraint_score) VALUES ('+1555', 'Maya', '{}', 0)"
     )
     conn.execute(
-        "INSERT INTO artifacts (plan_id, place, time, attendees, playlist, note)"
-        " VALUES ('p1', ?, '2026-07-18T19:00:00', ?, ?, 'the karaoke night')",
+        "INSERT INTO artifacts (plan_id, place, time, attendees, playlist, note, photo_notes)"
+        " VALUES ('p1', ?, '2026-07-18T19:00:00', ?, ?, 'the karaoke night', ?)",
         (
             json.dumps({"name": "Ebisu Sushi"}),
             json.dumps(["+1647", "+1555"]),
             json.dumps([{"title": "Inner Sunset", "artist": "Fog Line"}]),
+            json.dumps({"/uploads/a.jpg": "the encore nobody asked for"}),
         ),
     )
     conn.commit()
@@ -41,7 +42,11 @@ async def test_chat_gets_full_hangout_context_and_replies(db):
     )
     assert reply == "you and maya closed the place down 🐶"
     prompt = llm.calls[-1]["input"]
-    for needle in ("Ebisu Sushi", "Maya", "karaoke", "Inner Sunset", "what happened that night?", "hey yourself"):
+    for needle in (
+        "Ebisu Sushi", "Maya", "karaoke", "Inner Sunset",
+        "what happened that night?", "hey yourself",
+        "the encore nobody asked for",  # photo post-it feeds agent context
+    ):
         assert needle in prompt, f"missing context: {needle}"
 
 

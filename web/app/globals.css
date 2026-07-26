@@ -763,3 +763,20 @@ table.data { font-size: 12.5px; }
 .queue-mark.intro { color: var(--fern); }
 .queue-mark.pass { color: var(--muted); }
 .queue-row.seen { opacity: 0.55; }
+
+/* ---- photo post-its (keepsake only) ---- */
+.print-stack { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.postit {
+  font-family: var(--serif); font-style: italic; font-size: 13px; line-height: 1.4;
+  width: 170px; min-height: 44px; padding: 10px 12px;
+  background: #fdf6c9; color: #4c451e;
+  border: 0; border-radius: 1px;
+  box-shadow: 0 3px 8px rgb(29 28 36 / 0.14);
+  transform: rotate(1.6deg) translateY(-8px);
+  cursor: pointer; text-align: left;
+  transition: transform 0.18s ease-in-out, box-shadow 0.18s ease-in-out;
+}
+.print-stack:nth-child(even) .postit { transform: rotate(-1.8deg) translateY(-8px); }
+.postit:hover { transform: rotate(0deg) translateY(-10px); box-shadow: 0 6px 14px rgb(29 28 36 / 0.18); }
+.postit.blank { background: #faf6e3; color: var(--muted); font-family: var(--sans); font-style: normal; text-align: center; }
+.postit.editing { resize: none; outline: none; font: inherit; font-family: var(--serif); font-style: italic; font-size: 13px; }

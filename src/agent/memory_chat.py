@@ -9,7 +9,8 @@ CHAT_PROMPT = (
     "You are Beagle, the friend who plans this group's hangouts and keeps its "
     "memories. A member is asking about one hangout (it may be past or upcoming).\n"
     "Hangout: {place} on {time}\nWho was there: {people}\n"
-    "Your memory note: {note}\nPlaylist that night: {playlist}\n\n"
+    "Your memory note: {note}\nPlaylist that night: {playlist}\n"
+    "Post-it notes people stuck on the photos: {photo_notes}\n\n"
     "Conversation so far:\n{history}\n\nThey ask: {question}\n\n"
     "Answer like a friend who was there (or is hyped to go) — warm, specific, 1-3 sentences, "
     "one emoji max. Never invent facts beyond the details above; if you don't "
@@ -23,7 +24,7 @@ async def chat_about_memory(
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     row = conn.execute(
-        "SELECT place, time, attendees, playlist, note FROM artifacts WHERE plan_id = ?",
+        "SELECT place, time, attendees, playlist, note, photo_notes FROM artifacts WHERE plan_id = ?",
         (plan_id,),
     ).fetchone()
     if row is None:
@@ -36,6 +37,7 @@ async def chat_about_memory(
         f'{t["title"]} — {t["artist"]}' for t in json.loads(row["playlist"] or "[]")
     ) or "no playlist"
     lines = "\n".join(f'{m.get("role", "user")}: {m.get("text", "")}' for m in history) or "(none)"
+    photo_notes = "; ".join(json.loads(row["photo_notes"] or "{}").values()) or "(none)"
 
     return await llm.complete(
         tier="frontier",
@@ -45,6 +47,7 @@ async def chat_about_memory(
             people=people,
             note=row["note"] or "(no note)",
             playlist=playlist,
+            photo_notes=photo_notes,
             history=lines,
             question=question,
         ),

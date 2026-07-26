@@ -37,6 +37,7 @@ _MIGRATIONS: list[tuple[str, str, str]] = [
     ("artifacts", "group_id", "INTEGER"),
     ("artifacts", "visibility", "TEXT NOT NULL DEFAULT 'private'"),
     ("artifacts", "note", "TEXT"),
+    ("artifacts", "photo_notes", "TEXT NOT NULL DEFAULT '{}'"),
     ("sparks", "photo", "TEXT"),
 ]
 

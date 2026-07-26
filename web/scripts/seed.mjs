@@ -21,6 +21,7 @@ for (const ddl of [
   "ALTER TABLE artifacts ADD COLUMN visibility TEXT NOT NULL DEFAULT 'private'",
   "ALTER TABLE artifacts ADD COLUMN note TEXT",
   "ALTER TABLE sparks ADD COLUMN photo TEXT",
+  "ALTER TABLE artifacts ADD COLUMN photo_notes TEXT NOT NULL DEFAULT '{}'",
 ]) {
   try { db.exec(ddl); } catch { /* column exists */ }
 }
@@ -219,6 +220,17 @@ A("plan-ggp-picnic",
     { title: "Put Your Records On", artist: "Corinne Bailey Rae" },
   ],
   [], 1, "private", null),
+
+// post-its stuck on photos — extra agent context, keepsake-page only
+db.prepare("UPDATE artifacts SET photo_notes = ? WHERE plan_id = 'plan-twin-peaks'").run(
+  JSON.stringify({
+    "/uploads/golden-hour-bridge.jpg": "the exact minute the fog lost",
+    "/uploads/city-towers.jpg": "madhav swore he could see his apartment",
+  })
+);
+db.prepare("UPDATE artifacts SET photo_notes = ? WHERE plan_id = 'plan-falls-hike'").run(
+  JSON.stringify({ "/uploads/summit-scramble.jpg": "mile eight. 'easy five miles.'" })
+);
 
 // ---------------------------------------------------------------- matches + routing
 db.prepare("DELETE FROM matches").run();

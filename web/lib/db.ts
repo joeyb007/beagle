@@ -296,6 +296,24 @@ export function createSpark(planId: string, requestedBy: string, photo?: string)
     .run(planId, requestedBy, photo ?? null);
 }
 
+// Post-it notes pinned to individual photos — extra agent context + something
+// to look back on. Keepsake-page only; never surfaced on the home carousel.
+export function getPhotoNotes(planId: string): Record<string, string> {
+  const row = db().prepare("SELECT photo_notes FROM artifacts WHERE plan_id = ?").get(planId) as
+    | { photo_notes: string }
+    | undefined;
+  return row ? JSON.parse(row.photo_notes || "{}") : {};
+}
+
+export function setPhotoNote(planId: string, src: string, note: string): void {
+  const notes = getPhotoNotes(planId);
+  if (note.trim()) notes[src] = note.trim();
+  else delete notes[src];
+  db()
+    .prepare("UPDATE artifacts SET photo_notes = ? WHERE plan_id = ?")
+    .run(JSON.stringify(notes), planId);
+}
+
 export interface SwipeRow {
   match_handle: string;
   decision: "intro" | "pass";

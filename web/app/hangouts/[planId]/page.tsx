@@ -2,8 +2,9 @@
 import { notFound } from "next/navigation";
 import { MemoryChat } from "@/app/memory-chat";
 import { ArtifactStore } from "@/lib/artifact-store";
-import { listProfiles } from "@/lib/db";
+import { getPhotoNotes, listProfiles } from "@/lib/db";
 import { PhotoUpload } from "./photo-upload";
+import { Prints } from "./prints";
 
 export default async function Hangout({ params }: { params: Promise<{ planId: string }> }) {
   const { planId } = await params;
@@ -70,12 +71,7 @@ export default async function Hangout({ params }: { params: Promise<{ planId: st
 
         <h2>{artifact.isKeepsake ? "How it went" : "After the hangout"}</h2>
         {artifact.photos.length > 0 && (
-          <div className="prints">
-            {artifact.photos.map((src) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <div key={src} className="print"><img src={src} alt="hangout photo" /></div>
-            ))}
-          </div>
+          <Prints planId={planId} photos={artifact.photos} notes={getPhotoNotes(planId)} />
         )}
         <PhotoUpload planId={planId} hasPhotos={artifact.isKeepsake} />
 

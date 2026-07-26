@@ -5,7 +5,7 @@ import { join } from "node:path";
 import Database from "better-sqlite3";
 import { beforeEach, expect, test } from "vitest";
 
-import { onThisDay, peopleStats, upcomingFor } from "../lib/db";
+import { getPhotoNotes, onThisDay, peopleStats, setPhotoNote, upcomingFor } from "../lib/db";
 
 let dbPath: string;
 
@@ -72,6 +72,20 @@ test("onThisDay picks the past photo closest to today's calendar date", () => {
   expect(memory?.plan_id).toBe("near");
   expect(memory?.src).toBe("/uploads/near.svg");
   expect(memory?.others).toEqual(["Maya"]);
+});
+
+test("photo post-its round-trip per photo and never leak into photoMemories", async () => {
+  seedArtifact("p1", "2024-01-01T19:00:00", ["+me"], ["/uploads/a.jpg", "/uploads/b.jpg"]);
+  setPhotoNote("p1", "/uploads/a.jpg", "the moment before the wave hit");
+  setPhotoNote("p1", "/uploads/b.jpg", "sam's face says it all");
+  setPhotoNote("p1", "/uploads/a.jpg", "updated note"); // overwrite, no dup
+  expect(getPhotoNotes("p1")).toEqual({
+    "/uploads/a.jpg": "updated note",
+    "/uploads/b.jpg": "sam's face says it all",
+  });
+  const { photoMemories } = await import("../lib/db");
+  const memory = photoMemories("+me")[0] as Record<string, unknown>;
+  expect(JSON.stringify(memory)).not.toContain("updated note"); // carousel stays photos-only
 });
 
 test("onThisDay is null with no photographed past hangouts", () => {
