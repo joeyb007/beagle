@@ -8,7 +8,9 @@ dispatched to registered handlers. The adapter owns the sidecar lifecycle
 import asyncio
 import json
 import os
+import re
 import subprocess
+from itertools import count
 from pathlib import Path
 from typing import Callable
 
@@ -34,10 +36,14 @@ class PhotonMessaging:
         *,
         fake: bool = False,
         auto_spawn: bool = True,
+        poll_mode: str | None = None,  # "native" | "text"; None -> BEAGLE_POLL_MODE env
     ):
         self._url = sidecar_url.rstrip("/")
         self._fake = fake
         self._auto_spawn = auto_spawn
+        self._poll_mode = poll_mode or os.environ.get("BEAGLE_POLL_MODE", "native")
+        self._text_polls: dict[str, tuple[str, int]] = {}  # chat_id -> (poll_id, n_options)
+        self._poll_seq = count(1)
         self._http = httpx.AsyncClient(base_url=self._url, timeout=10.0)
         self._proc: subprocess.Popen | None = None
         self._ws_task: asyncio.Task | None = None
@@ -109,6 +115,16 @@ class PhotonMessaging:
         await self._post("/messages/card", {"chatId": chat.id, "card": card.model_dump()})
 
     async def create_poll(self, chat: ChatRef, poll: PollSpec) -> PollRef:
+        if self._poll_mode == "text":
+            # Guaranteed-MVP mode: polls ride the two primitives proven live
+            # (text out, text in). Numeric replies become votes in _dispatch.
+            poll_id = f"textpoll-{chat.id}-{next(self._poll_seq)}"
+            lines = [f"📊 {poll.question}"]
+            lines += [f"{i + 1}. {opt}" for i, opt in enumerate(poll.options)]
+            lines.append("\nreply with just the number to vote")
+            await self.send_text(chat, "\n".join(lines))
+            self._text_polls[chat.id] = (poll_id, len(poll.options))
+            return PollRef(id=poll_id)
         data = await self._post(
             "/polls", {"chatId": chat.id, "question": poll.question, "options": poll.options}
         )
@@ -147,6 +163,8 @@ class PhotonMessaging:
     def _dispatch(self, e: dict) -> None:
         if e.get("type") == "message":
             m = InboundMessage(handle=e["handle"], chat_id=e["chatId"], text=e.get("text", ""))
+            if self._maybe_text_vote(m):
+                return  # consumed as a vote — not an inbound message
             for h in self._inbound_handlers:
                 h(m)
         elif e.get("type") == "pollVote":
@@ -155,6 +173,24 @@ class PhotonMessaging:
             )
             for h in self._vote_handlers:
                 h(v)
+
+    def _maybe_text_vote(self, m: InboundMessage) -> bool:
+        """In text poll mode, a leading number in a chat with an active poll
+        is a vote. Out-of-range numbers fall through as normal messages."""
+        active = self._text_polls.get(m.chat_id)
+        if active is None:
+            return False
+        match = re.match(r"\s*(?:option\s+)?(\d+)\b", m.text)
+        if not match:
+            return False
+        poll_id, n_options = active
+        idx = int(match.group(1)) - 1
+        if not 0 <= idx < n_options:
+            return False
+        vote = PollVote(poll_id=poll_id, handle=m.handle, option_index=idx)
+        for h in self._vote_handlers:
+            h(vote)
+        return True
 
     # ------------------------------------------------------ T10: preflight
 
