@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { NavLinks } from "@/app/nav-links";
 import { clearUser, currentUser } from "@/lib/session";
 import "./globals.css";
 
@@ -22,16 +23,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <div className="frame">
           <nav className="rail">
-            <Link href="/" className="wordmark">🐶 beagle</Link>
-            <Link href="/" className="nav">Home</Link>
-            <Link href="/matches" className="nav">People</Link>
-            <Link href="/chats" className="nav">Chats</Link>
-            <Link href="/hangouts" className="nav">Memories</Link>
-            <div className="rail-group">
-              <span className="rail-label">operator</span>
-              <Link href="/dashboard" className="nav">Routing</Link>
-              <Link href="/profiles" className="nav">Profiles</Link>
-            </div>
+            <Link href="/" className="wordmark">Beagle</Link>
+            <NavLinks />
             <div className="foot">
               {user ? (
                 <div className="me">

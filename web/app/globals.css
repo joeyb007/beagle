@@ -312,3 +312,89 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
   .chat-card { flex-direction: column; align-items: flex-start; }
   .chat-meta { text-align: left; }
 }
+
+/* ================= design pass 2: white-base, Notion-esque ================= */
+
+:root {
+  --paper: #ffffff;          /* content: pure white */
+  --rail-bg: #f7f7f5;        /* sidebar: Notion's faint warm gray */
+  --card: #ffffff;
+  --ink: #1f1f1f;
+  --muted: #787774;
+  --line: #e9e9e7;
+  --blue: #2383e2;           /* restrained Notion-adjacent accent */
+  --hover: #efefed;
+}
+
+body { font-size: 14px; }
+
+/* ---- sidebar ---- */
+.rail {
+  width: 224px;
+  background: var(--rail-bg);
+  border-right: 1px solid var(--line);
+  padding: 16px 10px;
+  gap: 1px;
+}
+.wordmark {
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding: 4px 8px;
+  margin-bottom: 12px;
+}
+.rail a.nav {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  color: var(--muted);
+}
+.rail a.nav:hover { background: var(--hover); color: var(--ink); }
+.rail a.nav.active { background: var(--hover); color: var(--ink); font-weight: 600; }
+.nav-icon { display: inline-flex; opacity: 0.75; }
+.rail a.nav.active .nav-icon { opacity: 1; }
+.rail-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  color: var(--muted);
+  padding: 4px 8px 2px;
+}
+.rail-group { margin-top: 20px; }
+.rail .foot { padding: 6px 8px; }
+.me-name { font-size: 13.5px; }
+
+/* ---- structure: all-sans console, tight and clean ---- */
+h1 { font-family: var(--sans); font-weight: 700; font-size: 26px; letter-spacing: -0.015em; }
+h2 { font-size: 14px; }
+.eyebrow { font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: none; color: var(--muted); }
+.persona-headline { font-size: 28px; }
+.persona-label { font-style: normal; font-weight: 500; color: var(--muted); }
+.login-name, .chat-name, .memory-title, .swipe-name { font-family: var(--sans); letter-spacing: -0.01em; }
+.chat-name, .memory-title { font-size: 15px; }
+.swipe-name { font-size: 19px; }
+
+/* ---- surfaces: hairlines over shadows ---- */
+.card { border-radius: 8px; padding: 16px 18px; box-shadow: none; }
+.swipe-card { border-radius: 10px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 14px rgb(0 0 0 / 0.05); }
+.memory-card { border-radius: 8px; }
+.login-card { border-radius: 8px; box-shadow: none; }
+.thumb, .memory-cover { border-radius: 0 0 0 0; }
+button.primary, a.button {
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-top: 12px;
+}
+input[type="text"], textarea, select { background: var(--paper); border-radius: 6px; }
+table.data { font-size: 12.5px; }
+
+/* the keepsake page stays the one warm, serif "document" surface on purpose */
