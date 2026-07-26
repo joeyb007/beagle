@@ -1,0 +1,64 @@
+- generic [ref=f14e2]:
+  - navigation [ref=f14e3]:
+    - button [ref=f14e4] [cursor=pointer]
+    - link [ref=f14e12] [cursor=pointer]:
+      - /url: /
+    - link [ref=f14e17] [cursor=pointer]:
+      - /url: /matches
+    - link [ref=f14e24] [cursor=pointer]:
+      - /url: /chats
+    - link [ref=f14e28] [cursor=pointer]:
+      - /url: /hangouts
+    - generic [ref=f14e34]:
+      - generic: Joseph
+      - button "sign out" [ref=f14e40] [cursor=pointer]
+  - main [ref=f14e41]:
+    - generic [ref=f14e44]:
+      - generic [ref=f14e45]: SATURDAY, JANUARY 17
+      - heading "That time at Tahoe snow day" [level=1] [ref=f14e46]
+      - generic [ref=f14e47]:
+        - generic [ref=f14e48]:
+          - generic [ref=f14e49]: Tahoe snow day
+          - generic [ref=f14e50]: admit 4
+        - generic [ref=f14e51]:
+          - term [ref=f14e52]: When
+          - definition [ref=f14e53]: Saturday 9:00 a.m.
+          - term [ref=f14e54]: Where
+          - definition [ref=f14e55]: South Lake Tahoe
+          - term [ref=f14e56]: Who
+          - definition [ref=f14e57]: Joseph, Madhav, Anthony, Max
+          - term [ref=f14e58]: Beagle says
+          - definition [ref=f14e59]: max drove, blizzard chains and all
+      - heading [level=2] [ref=f14e60]:
+        - img "Spotify" [ref=f14e61]
+        - text: The blend — everyone’s taste, one tracklist
+      - list [ref=f14e63]:
+        - listitem [ref=f14e64]:
+          - generic [ref=f14e65]:
+            - text: Mess Is Mine
+            - generic [ref=f14e66]: — Vance Joy
+        - listitem [ref=f14e67]:
+          - generic [ref=f14e68]:
+            - text: Big Sur
+            - generic [ref=f14e69]: — Jack Johnson
+        - listitem [ref=f14e70]:
+          - generic [ref=f14e71]:
+            - text: Holocene
+            - generic [ref=f14e72]: — Bon Iver
+      - heading "Beagle remembers" [level=2] [ref=f14e73]
+      - paragraph [ref=f14e74]: “anthony ate it on the bunny hill six times and rated the day 10/10”
+      - heading "How it went" [level=2] [ref=f14e75]
+      - generic [ref=f14e76]:
+        - generic [ref=f14e77]:
+          - img "hangout photo" [ref=f14e79]
+          - button "before the six bunny-hill falls" [ref=f14e80] [cursor=pointer]
+        - generic [ref=f14e81]:
+          - img "hangout photo" [ref=f14e83]
+          - button "+ note" [ref=f14e84] [cursor=pointer]
+        - button "anthony rated the day 10/10 from the ground" [ref=f14e86] [cursor=pointer]
+        - button "+ post-it" [ref=f14e88] [cursor=pointer]
+      - button "Add more photos" [ref=f14e90] [cursor=pointer]
+      - heading "Ask beagle about it" [level=2] [ref=f14e91]
+      - generic [ref=f14e93]:
+        - textbox "ask beagle about this hangout…" [ref=f14e94]
+        - button "ask" [disabled] [ref=f14e95]: ↑

@@ -17,6 +17,9 @@ export function Prints({
   const [draft, setDraft] = useState("");
   const router = useRouter();
 
+  // keys starting "note:" are free-standing post-its, pinned between the prints
+  const standalone = Object.entries(notes).filter(([k]) => k.startsWith("note:"));
+
   async function save(src: string) {
     setEditing(null);
     await fetch(`/api/hangouts/${planId}/photo-note`, {
@@ -27,6 +30,23 @@ export function Prints({
     router.refresh();
   }
 
+  function editor(key: string) {
+    return (
+      <textarea
+        className="postit editing"
+        autoFocus
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => save(key)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); save(key); }
+          if (e.key === "Escape") setEditing(null);
+        }}
+        placeholder="what do you want to remember?"
+      />
+    );
+  }
+
   return (
     <div className="prints">
       {photos.map((src) => (
@@ -34,18 +54,7 @@ export function Prints({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="print"><img src={src} alt="hangout photo" /></div>
           {editing === src ? (
-            <textarea
-              className="postit editing"
-              autoFocus
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onBlur={() => save(src)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); save(src); }
-                if (e.key === "Escape") setEditing(null);
-              }}
-              placeholder="what was happening here?"
-            />
+            editor(src)
           ) : notes[src] ? (
             <button className="postit" onClick={() => { setDraft(notes[src]); setEditing(src); }}>
               {notes[src]}
@@ -57,6 +66,27 @@ export function Prints({
           )}
         </div>
       ))}
+
+      {standalone.map(([key, text]) => (
+        <div key={key} className="print-stack solo">
+          {editing === key ? (
+            editor(key)
+          ) : (
+            <button className="postit solo" onClick={() => { setDraft(text); setEditing(key); }}>
+              {text}
+            </button>
+          )}
+        </div>
+      ))}
+      <div className="print-stack solo">
+        <button
+          className="postit blank solo"
+          onClick={() => { setDraft(""); setEditing(`note:${Date.now()}`); }}
+        >
+          + post-it
+        </button>
+        {editing?.startsWith("note:") && !notes[editing] && editor(editing)}
+      </div>
     </div>
   );
 }

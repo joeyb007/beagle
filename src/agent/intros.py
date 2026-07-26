@@ -30,11 +30,13 @@ class IntroWorker:
         messaging: MessagingPort,
         llm: LLMRouter,
         interval_s: float = 5.0,
+        demo_target: str | None = None,  # route ALL intro DMs to this real number
     ):
         self._db_path = db_path
         self._messaging = messaging
         self._llm = llm
         self._interval_s = interval_s
+        self._demo_target = demo_target
 
     async def run_forever(self) -> None:
         while True:
@@ -82,8 +84,9 @@ class IntroWorker:
                 match_profile=match_prof,
             ),
         )
+        target = self._demo_target or row["match_handle"]
         try:
-            chat = await self._messaging.open_direct(row["match_handle"])
+            chat = await self._messaging.open_direct(target)
             await self._messaging.send_text(chat, text)
             print(f"[intros] warm intro sent: {name} -> {match_name}")
             return True

@@ -780,3 +780,7 @@ table.data { font-size: 12.5px; }
 .postit:hover { transform: rotate(0deg) translateY(-10px); box-shadow: 0 6px 14px rgb(29 28 36 / 0.18); }
 .postit.blank { background: #faf6e3; color: var(--muted); font-family: var(--sans); font-style: normal; text-align: center; }
 .postit.editing { resize: none; outline: none; font: inherit; font-family: var(--serif); font-style: italic; font-size: 13px; }
+.print-stack.solo { justify-content: center; }
+.postit.solo { width: 190px; min-height: 96px; font-size: 13.5px; transform: rotate(-1.2deg); }
+.print-stack.solo:nth-child(odd) .postit.solo { transform: rotate(2deg); }
+.postit.solo:hover { transform: rotate(0deg) translateY(-2px); }

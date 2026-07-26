@@ -219,18 +219,40 @@ A("plan-ggp-picnic",
     { title: "Sunday Best", artist: "Surfaces" },
     { title: "Put Your Records On", artist: "Corinne Bailey Rae" },
   ],
-  [], 1, "private", null),
+  [], 1, "private", null);
 
-// post-its stuck on photos — extra agent context, keepsake-page only
-db.prepare("UPDATE artifacts SET photo_notes = ? WHERE plan_id = 'plan-twin-peaks'").run(
-  JSON.stringify({
+// post-its — per-photo AND free-standing ("note:*") — extra agent context,
+// keepsake-page only, scattered through the year
+const photoNotes = {
+  "plan-twin-peaks": {
     "/uploads/golden-hour-bridge.jpg": "the exact minute the fog lost",
     "/uploads/city-towers.jpg": "madhav swore he could see his apartment",
-  })
-);
-db.prepare("UPDATE artifacts SET photo_notes = ? WHERE plan_id = 'plan-falls-hike'").run(
-  JSON.stringify({ "/uploads/summit-scramble.jpg": "mile eight. 'easy five miles.'" })
-);
+    "note:1": "we stayed 40 min past sunset and nobody said the word 'leave'",
+  },
+  "plan-tahoe": {
+    "/uploads/snow-summit.jpg": "before the six bunny-hill falls",
+    "note:1": "anthony rated the day 10/10 from the ground",
+  },
+  "plan-aurora": {
+    "note:1": "'it's just clouds' — madhav, four seconds too early",
+  },
+  "plan-canyon": {
+    "/uploads/river-lookout.jpg": "the pull-over that saved the whole day",
+    "note:1": "one aux cord, zero skips",
+  },
+  "plan-falls-hike": {
+    "/uploads/summit-scramble.jpg": "mile eight. 'easy five miles.'",
+  },
+  "plan-harbor": {
+    "/uploads/harbor-night.jpg": "nobody wanted to call it",
+  },
+};
+const setNotes = db.prepare("UPDATE artifacts SET photo_notes = ? WHERE plan_id = ?");
+for (const [planId, notes] of Object.entries(photoNotes)) setNotes.run(JSON.stringify(notes), planId);
+
+// full-run reset: clear queued work so a fresh demo starts quiet
+db.prepare("DELETE FROM intros").run();
+db.prepare("UPDATE sparks SET status = 'skipped' WHERE status = 'pending'").run();
 
 // ---------------------------------------------------------------- matches + routing
 db.prepare("DELETE FROM matches").run();

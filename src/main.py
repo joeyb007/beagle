@@ -37,6 +37,9 @@ async def lifespan(app: FastAPI):
         db_path=os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
         messaging=messaging,
         llm=orchestrator._llm,
+        # demo safety: every warm intro goes to this real allowlisted number,
+        # never to the (fake) nearby-pool handles
+        demo_target=os.environ.get("BEAGLE_INTRO_TARGET"),
     )
     intro_task = asyncio.create_task(intros.run_forever())
     app.state.orchestrator = orchestrator

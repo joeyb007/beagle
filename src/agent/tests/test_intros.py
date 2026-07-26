@@ -61,6 +61,20 @@ async def test_pending_intro_sends_warm_dm_with_number(db):
     assert status == "sent"
 
 
+async def test_demo_target_reroutes_every_intro_to_one_real_number(db):
+    sqlite3.connect(db).execute(
+        "INSERT INTO intros (handle, match_handle, decision) VALUES ('+1647', '+1415', 'intro')"
+    ).connection.commit()
+    messaging = StubMessaging()
+    llm = ScriptedLLM(default="warm intro text")
+    worker = IntroWorker(db_path=db, messaging=messaging, llm=llm, demo_target="+1929")
+
+    await worker.process_once()
+
+    chat, _ = messaging.texts[0]
+    assert chat == "dm-+1929"  # the teammate's phone, never the fake number
+
+
 async def test_pass_rows_are_never_texted(db):
     sqlite3.connect(db).execute(
         "INSERT INTO intros (handle, match_handle, decision) VALUES ('+1647', '+1415', 'pass')"
