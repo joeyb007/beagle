@@ -173,6 +173,47 @@ export function photosOf(handle: string): string[] {
     .flatMap((r) => JSON.parse(r.photos) as string[]);
 }
 
+export interface PhotoMemory {
+  src: string;
+  plan_id: string;
+  place: string;
+  time: string;
+  note: string | null;
+  others: string[]; // names of the other people who were there
+}
+
+export function photoMemories(handle: string): PhotoMemory[] {
+  const conn = db();
+  const names = new Map(
+    (conn.prepare("SELECT handle, name FROM profiles").all() as { handle: string; name: string }[])
+      .map((r) => [r.handle, r.name])
+  );
+  const rows = conn
+    .prepare("SELECT plan_id, place, time, attendees, photos, note FROM artifacts ORDER BY time DESC")
+    .all() as { plan_id: string; place: string; time: string; attendees: string; photos: string; note: string | null }[];
+  return rows
+    .filter((r) => (JSON.parse(r.attendees) as string[]).includes(handle))
+    .flatMap((r) => {
+      const others = (JSON.parse(r.attendees) as string[])
+        .filter((h) => h !== handle)
+        .map((h) => names.get(h) ?? h);
+      return (JSON.parse(r.photos) as string[]).map((src) => ({
+        src,
+        plan_id: r.plan_id,
+        place: (JSON.parse(r.place) as { name: string }).name,
+        time: r.time,
+        note: r.note,
+        others,
+      }));
+    });
+}
+
+export function createSpark(planId: string, requestedBy: string): void {
+  db()
+    .prepare("INSERT INTO sparks (plan_id, requested_by) VALUES (?, ?)")
+    .run(planId, requestedBy);
+}
+
 export function setArtifactVisibility(planId: string, visibility: "private" | "public"): void {
   db().prepare("UPDATE artifacts SET visibility = ? WHERE plan_id = ?").run(visibility, planId);
 }

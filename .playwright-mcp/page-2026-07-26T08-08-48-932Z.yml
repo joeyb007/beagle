@@ -1,0 +1,60 @@
+- generic [ref=f15e2]:
+  - navigation [ref=f15e3]:
+    - button [ref=f15e4] [cursor=pointer]
+    - link [ref=f15e12] [cursor=pointer]:
+      - /url: /
+    - link [ref=f15e17] [cursor=pointer]:
+      - /url: /matches
+    - link [ref=f15e24] [cursor=pointer]:
+      - /url: /chats
+    - link [ref=f15e28] [cursor=pointer]:
+      - /url: /hangouts
+    - generic [ref=f15e34]:
+      - generic: Joseph
+      - button "sign out" [ref=f15e40] [cursor=pointer]
+  - main [ref=f15e41]:
+    - generic [ref=f15e42]:
+      - paragraph [ref=f15e43]: beagle's read on you
+      - heading "Joseph — the planner" [level=1] [ref=f15e44]:
+        - text: Joseph
+        - generic [ref=f15e45]: — the planner
+      - paragraph [ref=f15e46]:
+        - text: Earned from your messages · keeps the group alive —
+        - link "correct anything" [ref=f15e47] [cursor=pointer]:
+          - /url: /profiles
+        - text: .
+      - generic [ref=f15e48]:
+        - generic [ref=f15e49]:
+          - heading "Taste" [level=2] [ref=f15e50]
+          - generic [ref=f15e51]:
+            - generic [ref=f15e52]: sushi
+            - generic [ref=f15e53]: tacos
+            - generic [ref=f15e54]: low-key
+            - generic [ref=f15e55]: no clubs
+        - generic [ref=f15e56]:
+          - heading "When you're around" [level=2] [ref=f15e57]
+          - generic [ref=f15e58]:
+            - generic [ref=f15e59]: M
+            - generic [ref=f15e60]: T
+            - generic [ref=f15e61]: W
+            - generic [ref=f15e62]: T
+            - generic [ref=f15e63]: F
+            - generic [ref=f15e64]: S
+            - generic [ref=f15e65]: S
+          - paragraph [ref=f15e66]: weekend evenings
+        - generic [ref=f15e67]:
+          - heading "Pickiness" [level=2] [ref=f15e68]
+          - paragraph [ref=f15e71]: somewhere in the middle
+      - heading "The string" [level=2] [ref=f15e72]
+      - generic "photos from your past hangouts" [ref=f15e73]:
+        - generic [ref=f15e75]:
+          - img "memory from Ebisu Sushi" [ref=f15e77]
+          - img "memory from Ebisu Sushi" [ref=f15e79]
+          - img "memory from Ebisu Sushi" [ref=f15e81]
+          - img "memory from Tacos El Rey" [ref=f15e83]
+          - img "memory from Tacos El Rey" [ref=f15e85]
+          - img "memory from Ebisu Sushi" [ref=f15e87]
+          - img "memory from Ebisu Sushi" [ref=f15e89]
+          - img "memory from Ebisu Sushi" [ref=f15e91]
+          - img "memory from Tacos El Rey" [ref=f15e93]
+          - img "memory from Tacos El Rey" [ref=f15e95]

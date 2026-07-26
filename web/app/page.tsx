@@ -2,23 +2,22 @@
 // of every hangout you were part of.
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { StringStrip } from "@/app/string-strip";
 import { DAY_LABELS, availableDays } from "@/lib/availability";
-import { photosOf } from "@/lib/db";
+import { photoMemories } from "@/lib/db";
 import { currentUser } from "@/lib/session";
 
 export default async function Home() {
   const user = await currentUser();
   if (!user) redirect("/login");
 
-  const photos = photosOf(user.handle);
+  const memories = photoMemories(user.handle);
   const days = availableDays(user.data.typical_availability);
   const chips = [
     ...(user.data.cuisines ?? []).map((c) => ({ kind: "likes", text: c })),
     ...(user.data.vibe ?? []).map((v) => ({ kind: "vibe", text: v })),
     ...(user.data.hard_nos ?? []).map((n) => ({ kind: "no", text: `no ${n}` })),
   ];
-  // duplicate the strip so the marquee loops seamlessly
-  const strip = photos.length ? [...photos, ...photos] : [];
 
   return (
     <>
@@ -68,24 +67,7 @@ export default async function Home() {
       </div>
 
       <h2>The string</h2>
-      {strip.length === 0 ? (
-        <div className="card">
-          No photos yet — they appear here after your first{" "}
-          <Link href="/hangouts">hangout keepsake</Link>.
-        </div>
-      ) : (
-        <div className="string-wrap" aria-label="photos from your past hangouts">
-          <div className="string-line" />
-          <div className="string-track">
-            {strip.map((src, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <div key={i} className="string-print" style={{ ["--tilt" as string]: `${(i % 5) - 2}deg` }}>
-                <img src={src} alt="hangout memory" />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <StringStrip memories={memories} />
     </>
   );
 }

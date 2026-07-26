@@ -8,6 +8,8 @@ import { beforeEach, expect, test } from "vitest";
 
 import {
   createGroup,
+  createSpark,
+  photoMemories,
   getGroup,
   listGroupsWithHangouts,
   photosOf,
@@ -66,4 +68,30 @@ test("availableDays maps availability text to weekday indexes (0=Mon)", () => {
   expect(availableDays("most evenings")).toEqual([0, 1, 2, 3, 4, 5, 6]);
   expect(availableDays("after 8pm on weekdays")).toEqual([0, 1, 2, 3, 4]);
   expect(availableDays(null)).toEqual([]);
+});
+
+test("photoMemories returns photos with their hangout context", () => {
+  new Database(dbPath)
+    .prepare("INSERT OR REPLACE INTO profiles (handle, name, json, constraint_score) VALUES (?, ?, ?, 0)")
+    .run("+2", "Maya", JSON.stringify({ handle: "+2", name: "Maya" }));
+  seedArtifact("m1", "2026-07-18T19:00:00", ["+1", "+2"], ["/uploads/a.svg", "/uploads/b.svg"]);
+  new Database(dbPath).prepare("UPDATE artifacts SET note = ? WHERE plan_id = 'm1'").run("wild night");
+  const memories = photoMemories("+1");
+  expect(memories).toHaveLength(2);
+  expect(memories[0]).toMatchObject({
+    src: "/uploads/a.svg",
+    plan_id: "m1",
+    place: "m1",
+    note: "wild night",
+    others: ["Maya"],
+  });
+});
+
+test("createSpark inserts a pending spark for the agent to send", () => {
+  seedArtifact("s1", "2026-07-18T19:00:00", ["+1"]);
+  createSpark("s1", "+1");
+  const row = new Database(dbPath)
+    .prepare("SELECT plan_id, requested_by, status FROM sparks")
+    .get() as { plan_id: string; requested_by: string; status: string };
+  expect(row).toMatchObject({ plan_id: "s1", requested_by: "+1", status: "pending" });
 });

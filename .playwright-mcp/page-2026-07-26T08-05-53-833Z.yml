@@ -1,0 +1,55 @@
+- generic [ref=f14e2]:
+  - navigation [ref=f14e3]:
+    - button [ref=f14e4] [cursor=pointer]
+    - link [ref=f14e12] [cursor=pointer]:
+      - /url: /
+    - link [ref=f14e17] [cursor=pointer]:
+      - /url: /matches
+    - link [ref=f14e24] [cursor=pointer]:
+      - /url: /chats
+    - link [ref=f14e28] [cursor=pointer]:
+      - /url: /hangouts
+    - generic [ref=f14e34]:
+      - generic: Joseph
+      - button "sign out" [ref=f14e40] [cursor=pointer]
+  - main [ref=f14e41]:
+    - generic [ref=f14e43]:
+      - heading "Who are you?" [level=1] [ref=f14e44]
+      - paragraph [ref=f14e45]: Pick your profile — Beagle takes it from there.
+      - generic [ref=f14e46]:
+        - button "J Joseph the planner" [ref=f14e48] [cursor=pointer]:
+          - generic [ref=f14e49]: J
+          - generic [ref=f14e50]: Joseph
+          - generic [ref=f14e51]: the planner
+        - button "J Jules the night owl" [ref=f14e53] [cursor=pointer]:
+          - generic [ref=f14e54]: J
+          - generic [ref=f14e55]: Jules
+          - generic [ref=f14e56]: the night owl
+        - button "L Lena the flexible one" [ref=f14e58] [cursor=pointer]:
+          - generic [ref=f14e59]: L
+          - generic [ref=f14e60]: Lena
+          - generic [ref=f14e61]: the flexible one
+        - button "M Maya down for anything" [ref=f14e63] [cursor=pointer]:
+          - generic [ref=f14e64]: M
+          - generic [ref=f14e65]: Maya
+          - generic [ref=f14e66]: down for anything
+        - button "M Mia the flexible one" [ref=f14e68] [cursor=pointer]:
+          - generic [ref=f14e69]: M
+          - generic [ref=f14e70]: Mia
+          - generic [ref=f14e71]: the flexible one
+        - button "P Priya the flexible one" [ref=f14e73] [cursor=pointer]:
+          - generic [ref=f14e74]: P
+          - generic [ref=f14e75]: Priya
+          - generic [ref=f14e76]: the flexible one
+        - button "R Rayhan the busy one" [ref=f14e78] [cursor=pointer]:
+          - generic [ref=f14e79]: R
+          - generic [ref=f14e80]: Rayhan
+          - generic [ref=f14e81]: the busy one
+        - button "R Rayhan the picky one" [ref=f14e83] [cursor=pointer]:
+          - generic [ref=f14e84]: R
+          - generic [ref=f14e85]: Rayhan
+          - generic [ref=f14e86]: the picky one
+        - button "T Theo the busy one" [ref=f14e88] [cursor=pointer]:
+          - generic [ref=f14e89]: T
+          - generic [ref=f14e90]: Theo
+          - generic [ref=f14e91]: the busy one

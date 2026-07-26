@@ -468,3 +468,61 @@ table.data { font-size: 12.5px; }
 }
 .signout:hover { color: var(--ink); }
 .rail.collapsed .foot { padding-left: 11px; }
+
+/* ---- serendipity memory card ---- */
+.string-wrap.paused .string-track { animation-play-state: paused; }
+.memory-pop {
+  position: fixed;
+  transform: translate(-50%, calc(-100% - 12px));
+  z-index: 50;
+  width: 260px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 0.10);
+  animation: pop-in 0.18s ease-out;
+}
+.memory-pop::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--card);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.memory-pop-date { font-size: 12px; color: var(--muted); }
+.memory-pop-place { font-weight: 600; font-size: 15px; margin: 1px 0 4px; }
+.memory-pop-note { font-family: var(--serif); font-style: italic; font-size: 13px; color: var(--copper); margin-bottom: 4px; }
+.memory-pop-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.memory-pop-actions a { font-size: 13px; color: var(--blue); text-decoration: none; }
+.memory-pop-actions a:hover { text-decoration: underline; }
+.spark {
+  font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px;
+  background: var(--paper); color: var(--ink); text-align: left;
+}
+.spark:hover:not(:disabled) { border-color: var(--copper); color: var(--copper); }
+.spark:disabled { cursor: default; color: var(--muted); }
+@keyframes pop-in {
+  from { opacity: 0; transform: translate(-50%, calc(-100% - 4px)); }
+  to { opacity: 1; transform: translate(-50%, calc(-100% - 12px)); }
+}
+
+/* invisible hover bridge: no dead zone between the print and the memory card */
+.memory-pop::before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 24px;
+}
+
+/* the fixed memory card is a direct child of .page-anim — exempt it from the
+   page-load fade (whose opacity:0 was re-applying after pop-in finished) */
+.page-anim > .memory-pop { opacity: 1; animation: pop-in 0.18s ease-out; }
