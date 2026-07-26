@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS sparks (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   plan_id      TEXT NOT NULL,
   requested_by TEXT NOT NULL,               -- handle of the person sparking
+  photo        TEXT,                        -- specific photo to send with the nudge
   status       TEXT NOT NULL DEFAULT 'pending',  -- pending | sent | skipped
   created_at   TEXT NOT NULL DEFAULT (datetime('now')),
   sent_at      TEXT

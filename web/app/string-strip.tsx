@@ -3,6 +3,8 @@
 // up; ask Beagle what happened, or spark a "remember this day" text to the group.
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { MemoryChat } from "@/app/memory-chat";
+import { SparkButton } from "@/app/spark-button";
 import type { PhotoMemory } from "@/lib/db";
 
 interface CardState {
@@ -20,7 +22,6 @@ function datePhrase(iso: string): string {
 
 export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
   const [card, setCard] = useState<CardState | null>(null);
-  const [sparked, setSparked] = useState<Set<string>>(new Set());
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const strip = memories.length ? [...memories, ...memories] : [];
 
@@ -35,15 +36,6 @@ export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
   }
   function cancelHide() {
     if (hideTimer.current) clearTimeout(hideTimer.current);
-  }
-
-  async function spark(planId: string) {
-    setSparked((s) => new Set(s).add(planId));
-    await fetch("/api/sparks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plan_id: planId }),
-    });
   }
 
   if (strip.length === 0) {
@@ -61,6 +53,7 @@ export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
         aria-label="photos from your past hangouts"
         onMouseLeave={scheduleHide}
       >
+        <div className="string-inner">
         <div className="string-line" />
         <div className="string-track">
           {strip.map((m, i) => (
@@ -74,6 +67,7 @@ export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
               <img src={m.src} alt={`memory from ${m.place}`} />
             </div>
           ))}
+        </div>
         </div>
       </div>
 
@@ -91,14 +85,11 @@ export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
             <div className="muted">with {card.memory.others.join(" & ")}</div>
           )}
           <div className="memory-pop-actions">
-            <Link href={`/hangouts/${card.memory.plan_id}`}>what happened that day →</Link>
-            <button
-              className="spark"
-              disabled={sparked.has(card.memory.plan_id)}
-              onClick={() => spark(card.memory.plan_id)}
-            >
-              {sparked.has(card.memory.plan_id) ? "✨ beagle's on it" : "✨ remind the group"}
-            </button>
+            <SparkButton planId={card.memory.plan_id} photo={card.memory.src} />
+            <MemoryChat planId={card.memory.plan_id} compact />
+            <Link href={`/hangouts/${card.memory.plan_id}`} className="memory-pop-more">
+              open the keepsake →
+            </Link>
           </div>
         </div>
       )}

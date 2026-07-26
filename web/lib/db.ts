@@ -208,10 +208,10 @@ export function photoMemories(handle: string): PhotoMemory[] {
     });
 }
 
-export function createSpark(planId: string, requestedBy: string): void {
+export function createSpark(planId: string, requestedBy: string, photo?: string): void {
   db()
-    .prepare("INSERT INTO sparks (plan_id, requested_by) VALUES (?, ?)")
-    .run(planId, requestedBy);
+    .prepare("INSERT INTO sparks (plan_id, requested_by, photo) VALUES (?, ?, ?)")
+    .run(planId, requestedBy, photo ?? null);
 }
 
 export function setArtifactVisibility(planId: string, visibility: "private" | "public"): void {

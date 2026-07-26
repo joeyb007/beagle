@@ -114,6 +114,9 @@ class PhotonMessaging:
     async def send_card(self, chat: ChatRef, card: Card) -> None:
         await self._post("/messages/card", {"chatId": chat.id, "card": card.model_dump()})
 
+    async def send_image(self, chat: ChatRef, path: str) -> None:
+        await self._post("/messages/image", {"chatId": chat.id, "path": path})
+
     async def create_poll(self, chat: ChatRef, poll: PollSpec) -> PollRef:
         if self._poll_mode == "text":
             # Guaranteed-MVP mode: polls ride the two primitives proven live

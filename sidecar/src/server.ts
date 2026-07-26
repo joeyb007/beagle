@@ -48,6 +48,9 @@ async function main() {
           else await photon.sendText(body.chatId, text);
           return json(res, { ok: true });
         }
+        case "POST /messages/image":
+          await photon.sendImage(body.chatId, body.path);
+          return json(res, { ok: true });
         case "POST /polls":
           return json(res, await photon.createPoll(body.chatId, body.question, body.options));
         case "GET /addresses/check":

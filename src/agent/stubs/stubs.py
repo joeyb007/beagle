@@ -23,6 +23,7 @@ class StubMessaging:
     def __init__(self):
         self.texts: list[tuple[str, str]] = []  # (chat_id, text)
         self.cards: list[tuple[str, Card]] = []
+        self.images: list[tuple[str, str]] = []  # (chat_id, path)
         self.polls: list[tuple[str, PollSpec]] = []
         self.typing: list[tuple[str, bool]] = []
         self._inbound_handlers: list[Callable[[InboundMessage], None]] = []
@@ -43,6 +44,9 @@ class StubMessaging:
 
     async def send_card(self, chat: ChatRef, card: Card) -> None:
         self.cards.append((chat.id, card))
+
+    async def send_image(self, chat: ChatRef, path: str) -> None:
+        self.images.append((chat.id, path))
 
     async def create_poll(self, chat: ChatRef, poll: PollSpec) -> PollRef:
         self._poll_seq += 1

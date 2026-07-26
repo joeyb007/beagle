@@ -16,6 +16,7 @@ for (const ddl of [
   "ALTER TABLE artifacts ADD COLUMN group_id INTEGER",
   "ALTER TABLE artifacts ADD COLUMN visibility TEXT NOT NULL DEFAULT 'private'",
   "ALTER TABLE artifacts ADD COLUMN note TEXT",
+  "ALTER TABLE sparks ADD COLUMN photo TEXT",
 ]) {
   try { db.exec(ddl); } catch { /* column exists */ }
 }

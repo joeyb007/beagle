@@ -11,7 +11,7 @@ export interface OutEvent {
 }
 
 export interface SentRecord {
-  kind: "text" | "card" | "poll" | "typing_on" | "typing_off";
+  kind: "text" | "card" | "poll" | "typing_on" | "typing_off" | "image";
   chatId: string;
   text?: string;
   options?: string[];
@@ -22,6 +22,7 @@ export interface PhotonLayer {
   sendText(chatId: string, text: string): Promise<void>;
   setTyping(chatId: string, on: boolean): Promise<void>;
   createPoll(chatId: string, question: string, options: string[]): Promise<{ id: string }>;
+  sendImage(chatId: string, path: string): Promise<void>;
   isIMessageAvailable(handle: string): Promise<boolean>;
   onEvent(handler: (e: OutEvent) => void): void;
 }
@@ -42,6 +43,9 @@ export class FakePhoton implements PhotonLayer {
   }
   async setTyping(chatId: string, on: boolean) {
     this.sent.push({ kind: on ? "typing_on" : "typing_off", chatId });
+  }
+  async sendImage(chatId: string, path: string) {
+    this.sent.push({ kind: "image", chatId, text: path });
   }
   async createPoll(chatId: string, question: string, options: string[]) {
     this.sent.push({ kind: "poll", chatId, text: question, options });
@@ -215,6 +219,10 @@ export async function createRealPhoton(): Promise<PhotonLayer> {
     async setTyping(chatId, on) {
       const space = await getSpace(chatId);
       await (on ? space.startTyping() : space.stopTyping());
+    },
+    async sendImage(chatId, path) {
+      const { attachment } = await import("spectrum-ts");
+      await (await getSpace(chatId)).send(attachment(path));
     },
     async createPoll(chatId, question, options) {
       const space = await getSpace(chatId);

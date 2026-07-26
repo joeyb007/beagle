@@ -153,3 +153,10 @@ async def test_text_mode_out_of_range_vote_ignored(messaging):
     await asyncio.sleep(0.3)
     assert votes == []
     await m2.close()
+
+
+async def test_send_image_crosses_the_bridge(messaging):
+    chat = await messaging.open_direct("+15550000001")
+    await messaging.send_image(chat, "/tmp/photo.svg")
+    images = [r for r in await sent_records() if r["kind"] == "image"]
+    assert images and images[-1]["text"] == "/tmp/photo.svg"

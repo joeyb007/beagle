@@ -1,5 +1,6 @@
 // T5: the memory artifact — plan-turned-keepsake. The demo's peak.
 import { notFound } from "next/navigation";
+import { MemoryChat } from "@/app/memory-chat";
 import { ArtifactStore } from "@/lib/artifact-store";
 import { listProfiles } from "@/lib/db";
 import { PhotoUpload } from "./photo-upload";
@@ -69,6 +70,9 @@ export default async function Hangout({ params }: { params: Promise<{ planId: st
           </div>
         )}
         <PhotoUpload planId={planId} hasPhotos={artifact.isKeepsake} />
+
+        <h2>Ask beagle about it</h2>
+        <MemoryChat planId={planId} />
       </div>
     </div>
   );

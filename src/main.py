@@ -12,7 +12,9 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+from pydantic import BaseModel
 
+from src.agent.memory_chat import chat_about_memory
 from src.agent.sparks import SparkWorker
 from src.wiring import REPO_ROOT, build_orchestrator
 
@@ -37,6 +39,24 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="beagle-agent", lifespan=lifespan)
+
+
+class MemoryChatRequest(BaseModel):
+    plan_id: str
+    question: str
+    history: list[dict] = []
+
+
+@app.post("/api/memory-chat")
+async def memory_chat(req: MemoryChatRequest) -> dict:
+    reply = await chat_about_memory(
+        app.state.orchestrator._llm,
+        os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
+        plan_id=req.plan_id,
+        question=req.question,
+        history=req.history,
+    )
+    return {"reply": reply}
 
 
 @app.get("/health")

@@ -56,7 +56,7 @@ a { color: inherit; }
 .rail a.nav.active { color: var(--blue); font-weight: 600; }
 .rail .foot { margin-top: auto; font-size: 12px; color: var(--muted); }
 
-main.content { flex: 1; padding: 40px 48px 80px; max-width: 920px; }
+main.content { flex: 1; min-width: 0; padding: 40px 48px 48px; max-width: 1760px; display: flex; flex-direction: column; }
 
 h1 { font-family: var(--serif); font-weight: 600; font-size: 28px; margin: 0 0 4px; }
 p.sub { color: var(--muted); margin: 0 0 28px; }
@@ -526,3 +526,53 @@ table.data { font-size: 12.5px; }
 /* the fixed memory card is a direct child of .page-anim — exempt it from the
    page-load fade (whose opacity:0 was re-applying after pop-in finished) */
 .page-anim > .memory-pop { opacity: 1; animation: pop-in 0.18s ease-out; }
+
+/* ---- spark button phases ---- */
+.spark { display: inline-flex; align-items: center; gap: 7px; }
+.spark.sent { color: var(--fern); border-color: var(--fern); }
+.spark-spinner {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--line); border-top-color: var(--muted);
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.ck-circle { stroke-dasharray: 63; stroke-dashoffset: 63; animation: draw 0.4s ease-out forwards; }
+.ck-mark { stroke-dasharray: 20; stroke-dashoffset: 20; animation: draw 0.3s ease-out 0.35s forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+/* ---- memory chat ---- */
+.mchat-input { display: flex; gap: 6px; }
+.mchat-input input {
+  flex: 1; font: inherit; font-size: 13px; padding: 6px 10px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--paper);
+}
+.mchat-input button {
+  width: 30px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--card); cursor: pointer; font-size: 14px; color: var(--muted);
+}
+.mchat-input button:hover:not(:disabled) { color: var(--ink); border-color: var(--muted); }
+.mchat-input button:disabled { cursor: default; opacity: 0.5; }
+.mchat-thread {
+  display: flex; flex-direction: column; gap: 6px;
+  max-height: 180px; overflow-y: auto; margin-bottom: 8px; padding-right: 2px;
+}
+.mchat.compact .mchat-thread { max-height: 130px; }
+.mchat-msg {
+  font-size: 13px; padding: 6px 10px; border-radius: 10px; max-width: 85%;
+  width: fit-content; line-height: 1.4;
+}
+.mchat-msg.user { align-self: flex-end; background: var(--blue); color: #fff; border-bottom-right-radius: 3px; }
+.mchat-msg.beagle { align-self: flex-start; background: var(--hover); color: var(--ink); border-bottom-left-radius: 3px; }
+.mchat-msg.thinking { color: var(--muted); animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.4; } }
+.mchat:not(.compact) { max-width: 560px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.memory-pop-more { font-size: 12.5px; }
+/* keepsake page renders on warm paper — keep the pane legible there */
+.keepsake .mchat:not(.compact) { background: #fff; }
+
+/* ---- fill the viewport: page is a column, string centers in leftover space ---- */
+.page-anim { flex: 1; display: flex; flex-direction: column; }
+.string-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 260px; }
+.string-inner { position: relative; padding-top: 26px; }
+.string-inner .string-line { top: 20px; }
+.string-print img { width: clamp(150px, 12vw, 230px); height: auto; aspect-ratio: 75 / 59; }

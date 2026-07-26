@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+from pathlib import Path
 
 import pytest
 
@@ -29,10 +30,10 @@ def db(tmp_path):
     return path
 
 
-def make_worker(db):
+def make_worker(db, photo_root=None):
     messaging = StubMessaging()
     llm = ScriptedLLM(default="remember the karaoke night at Ebisu? 🐶 iconic.")
-    return SparkWorker(db_path=db, messaging=messaging, llm=llm), messaging
+    return SparkWorker(db_path=db, messaging=messaging, llm=llm, photo_root=photo_root), messaging
 
 
 async def test_spark_sent_to_group_chat(db):
@@ -71,3 +72,22 @@ async def test_no_pending_sparks_is_a_noop(db):
     worker, messaging = make_worker(db)
     assert await worker.process_once() == 0
     assert messaging.texts == []
+
+
+async def test_spark_sends_the_specific_photo_then_text(db):
+    conn = sqlite3.connect(db)
+    conn.execute(
+        "INSERT INTO sparks (plan_id, requested_by, photo) VALUES ('p1', '+1647', '/uploads/x.svg')"
+    )
+    conn.commit()
+    root = Path(db).parent
+    (root / "uploads").mkdir(exist_ok=True)
+    (root / "uploads" / "x.svg").write_text("<svg/>")
+    worker, messaging = make_worker(db, photo_root=str(root))
+
+    await worker.process_once()
+
+    # image first, then the nostalgic text, same chat
+    assert messaging.images and messaging.images[0][0] == "imsg-group-9"
+    assert messaging.images[0][1].endswith("/uploads/x.svg")
+    assert messaging.texts and messaging.texts[0][0] == "imsg-group-9"

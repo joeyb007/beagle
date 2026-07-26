@@ -7,6 +7,7 @@ import asyncio
 import json
 import sqlite3
 from datetime import datetime
+from pathlib import Path
 
 from src.contracts import ChatRef, LLMRouter, MessagingPort
 
@@ -26,11 +27,15 @@ class SparkWorker:
         messaging: MessagingPort,
         llm: LLMRouter,
         interval_s: float = 5.0,
+        photo_root: str | None = None,  # where web photo urls live on disk
     ):
         self._db_path = db_path
         self._messaging = messaging
         self._llm = llm
         self._interval_s = interval_s
+        self._photo_root = Path(photo_root) if photo_root else (
+            Path(db_path).resolve().parent / "web" / "public"
+        )
 
     async def run_forever(self) -> None:
         while True:
@@ -44,7 +49,7 @@ class SparkWorker:
         conn = sqlite3.connect(self._db_path)
         conn.row_factory = sqlite3.Row
         rows = conn.execute(
-            """SELECT s.id, s.plan_id, a.place, a.time, a.attendees, a.note,
+            """SELECT s.id, s.plan_id, s.photo, a.place, a.time, a.attendees, a.note,
                       g.chat_id AS group_chat
                FROM sparks s
                JOIN artifacts a ON a.plan_id = s.plan_id
@@ -70,16 +75,32 @@ class SparkWorker:
             input=SPARK_PROMPT.format(place=place, date=date, note=row["note"] or "a great time"),
         )
 
+        photo_path = self._resolve_photo(row["photo"])
+
+        async def send_to(chat: ChatRef) -> None:
+            if photo_path:  # the specific memory, if we can attach it
+                try:
+                    await self._messaging.send_image(chat, photo_path)
+                except Exception as e:
+                    print(f"[sparks] image send failed (text still goes): {e}")
+            await self._messaging.send_text(chat, text)
+
         if row["group_chat"]:
-            await self._messaging.send_text(ChatRef(id=row["group_chat"]), text)
+            await send_to(ChatRef(id=row["group_chat"]))
             return True
 
         delivered = False  # no live group chat yet -> DM everyone who was there
         for handle in json.loads(row["attendees"]):
             try:
-                dm = await self._messaging.open_direct(handle)
-                await self._messaging.send_text(dm, text)
+                await send_to(await self._messaging.open_direct(handle))
                 delivered = True
             except Exception as e:
                 print(f"[sparks] DM to {handle} failed: {e}")
         return delivered
+
+    def _resolve_photo(self, photo: str | None) -> str | None:
+        """Web photo urls (/uploads/x.svg) live on disk under photo_root."""
+        if not photo:
+            return None
+        candidate = self._photo_root / photo.lstrip("/")
+        return str(candidate) if candidate.exists() else None
