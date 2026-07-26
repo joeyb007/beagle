@@ -103,6 +103,7 @@ class ActiveSession:
     threads: dict[str, list[str]] = field(default_factory=dict)  # handle -> their msgs
     follow_ups: dict[str, int] = field(default_factory=dict)  # handle -> asks sent
     votes: dict[str, int] = field(default_factory=dict)  # handle -> option_index
+    poll_ids: set[str] = field(default_factory=set)  # den mode: one poll per member DM
     timers: list[asyncio.Task] = field(default_factory=list)
 
 
@@ -125,8 +126,10 @@ class Orchestrator:
         vote_timeout_s: float | None = None,  # armed at first vote when set
         max_follow_ups: int = 5,  # agentic clarification, runaway-capped
         voice_notes=None,  # optional VoiceNotes — spoken confirm when enabled
+        den_mode: bool = False,  # shared-line groups blocked -> broadcast to member DMs
     ):
         self._voice_notes = voice_notes
+        self.den_mode = den_mode
         self.reply_timeout_s = reply_timeout_s
         self.vote_timeout_s = vote_timeout_s
         self.max_follow_ups = max_follow_ups
@@ -167,7 +170,11 @@ class Orchestrator:
 
     async def handle_poll_vote(self, v: PollVote) -> None:
         active = next(
-            (a for a in self.sessions.values() if a.session.poll_id == v.poll_id),
+            (
+                a
+                for a in self.sessions.values()
+                if a.session.poll_id == v.poll_id or v.poll_id in a.poll_ids
+            ),
             None,
         )
         if active is None or active.state != "vote":
@@ -176,6 +183,15 @@ class Orchestrator:
             await self._record_vote(active, v)
         except Exception:
             await self._abort(active)
+
+    async def _group_chats(self, active: "ActiveSession") -> list[ChatRef]:
+        """Where 'group' messages go: the group chat, or (den mode) every
+        member's DM — the group experience without a group thread."""
+        if not self.den_mode:
+            return [ChatRef(id=active.session.group_chat_id)]
+        return [
+            await self._messaging.open_direct(h) for h in active.session.members
+        ]
 
     def _session_for_dm(self, chat_id: str) -> "ActiveSession | None":
         return next(
@@ -312,15 +328,16 @@ class Orchestrator:
             query += f"; avoid: {', '.join(dict.fromkeys(hard_nos))}"
         session.candidates = await self._venues.find(query, self._near)
 
-        poll = await self._messaging.create_poll(
-            ChatRef(id=session.group_chat_id),
-            PollSpec(
-                question="beagle says: where are we going?",
-                options=[c.name for c in session.candidates],
-            ),
+        spec = PollSpec(
+            question="beagle says: where are we going?",
+            options=[c.name for c in session.candidates],
         )
-        session.poll_id = poll.id
-        active.state = "vote"  # only after poll_id is set — votes match on it
+        for chat in await self._group_chats(active):
+            poll = await self._messaging.create_poll(chat, spec)
+            active.poll_ids.add(poll.id)
+            if session.poll_id is None:
+                session.poll_id = poll.id
+        active.state = "vote"  # only after poll_ids are set — votes match on them
 
     # -------------------------------------------------------- T8: vote+tally
 
@@ -365,29 +382,35 @@ class Orchestrator:
         active.state = "confirm"
         names = ", ".join(active.profiles[h].name for h in attendees)
         when = plan.time.strftime("%a %b %-d, %-I:%M %p")
-        group_chat = ChatRef(id=session.group_chat_id)
-        await self._messaging.send_card(
-            group_chat,
-            Card(
-                title=f"🐶 locked in: {winner.name}",
-                body=f"{when} — {names}. playlist's on the hangout page.",
-                fields=None,
-                url=None,
-            ),
-        )
+        group_chats = await self._group_chats(active)
+        for gc in group_chats:
+            await self._messaging.send_card(
+                gc,
+                Card(
+                    title=f"🐶 locked in: {winner.name}",
+                    body=f"{when} — {names}. playlist's on the hangout page.",
+                    fields=None,
+                    url=None,
+                ),
+            )
         # the chat transforms around the plan: confetti burst + group rename,
         # then a tappable calendar invite. cosmetic — never let it kill a lock.
-        try:
-            await self._messaging.celebrate(
-                group_chat,
-                f"it's happening — {winner.name}, {when} 🎉",
-                name=f"🐶 {winner.name} · {plan.time.strftime('%a %-I:%M%p').lower()}",
-            )
-        except Exception as e:
-            print(f"[orchestrator] celebrate failed (non-fatal): {e}")
+        for gc in group_chats:
+            try:
+                await self._messaging.celebrate(
+                    gc,
+                    f"it's happening — {winner.name}, {when} 🎉",
+                    # renaming only makes sense on a real group thread
+                    name=None if self.den_mode else
+                    f"🐶 {winner.name} · {plan.time.strftime('%a %-I:%M%p').lower()}",
+                )
+            except Exception as e:
+                print(f"[orchestrator] celebrate failed (non-fatal): {e}")
         try:
             names_list = [active.profiles[h].name for h in attendees]
-            await self._messaging.send_file(group_chat, build_ics(plan, names_list))
+            ics_path = build_ics(plan, names_list)
+            for gc in group_chats:
+                await self._messaging.send_file(gc, ics_path)
         except Exception as e:
             print(f"[orchestrator] ics send failed (non-fatal): {e}")
         if self._voice_notes and self._voice_notes.enabled:
@@ -403,7 +426,8 @@ class Orchestrator:
                 )
                 audio = await self._voice_notes.synthesize(spoken)
                 if audio:
-                    await self._messaging.send_voice(group_chat, audio)
+                    for gc in group_chats:
+                        await self._messaging.send_voice(gc, audio)
             except Exception as e:
                 print(f"[orchestrator] voice note failed (non-fatal): {e}")
         await self._send_match_card(active)  # T11 — after confirm
@@ -418,15 +442,14 @@ class Orchestrator:
         if not matches:
             return
         top = matches[0]
-        await self._messaging.send_card(
-            ChatRef(id=active.session.group_chat_id),
-            Card(
-                title="🐶 someone nearby you'd click with",
-                body=f"{top.match_name} — {'; '.join(top.reasons)}",
-                fields=None,
-                url=None,
-            ),
+        card = Card(
+            title="🐶 someone nearby you'd click with",
+            body=f"{top.match_name} — {'; '.join(top.reasons)}",
+            fields=None,
+            url=None,
         )
+        for gc in await self._group_chats(active):
+            await self._messaging.send_card(gc, card)
 
     # ------------------------------------------------------- T10: fail closed
 
@@ -434,9 +457,8 @@ class Orchestrator:
         if active is None:
             return
         try:
-            await self._messaging.send_text(
-                ChatRef(id=active.session.group_chat_id), ABORT_TEXT
-            )
+            for gc in await self._group_chats(active):
+                await self._messaging.send_text(gc, ABORT_TEXT)
         finally:
             self._cleanup(active)
 

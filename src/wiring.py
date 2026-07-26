@@ -143,5 +143,8 @@ def build_orchestrator() -> tuple[Orchestrator, PhotonMessaging]:
         reply_timeout_s=float(os.environ.get("REPLY_TIMEOUT_S", "180")),
         vote_timeout_s=float(os.environ.get("VOTE_TIMEOUT_S", "90")),
         voice_notes=VoiceNotes(api_key=os.environ.get("ELEVENLABS_API_KEY")),
+        # shared-line groups are blocked server-side; den mode broadcasts the
+        # group experience across every member's DM instead
+        den_mode=os.environ.get("BEAGLE_DEN_MODE") == "1",
     )
     return orchestrator, messaging
