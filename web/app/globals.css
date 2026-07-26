@@ -794,7 +794,9 @@ table.data { font-size: 12.5px; }
   transition: transform 0.16s ease-in-out, box-shadow 0.16s ease-in-out,
     border-color 0.16s ease-in-out, color 0.16s ease-in-out, background 0.16s ease-in-out;
 }
-.round:hover { transform: scale(1.1) translateY(-1px); box-shadow: 0 4px 12px rgb(29 28 36 / 0.14); }
-.round:active { transform: scale(0.92); box-shadow: 0 1px 3px rgb(29 28 36 / 0.12); transition-duration: 0.07s; }
-.round.pass:hover { background: color-mix(in srgb, #a04545 8%, white); }
-.round.like:hover { background: color-mix(in srgb, var(--fern) 10%, white); }
+.round:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 4px 12px rgb(29 28 36 / 0.14); }
+.round:active { transform: scale(0.94) translateY(0); box-shadow: 0 1px 3px rgb(29 28 36 / 0.12); transition-duration: 0.07s; }
+/* icon color floods the button on hover; glyph goes white */
+.round.pass { color: #a04545; }
+.round.pass:hover { background: #a04545; border-color: #a04545; color: #fff; }
+.round.like:hover { background: var(--fern); border-color: var(--fern); color: #fff; }
