@@ -22,5 +22,11 @@ dependencies = [
     "sentence-transformers",  # CLIP-style image + text embeddings
 ]
 
+[dependency-groups]
+dev = ["pytest", "pytest-asyncio"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
 [tool.setuptools]
 packages = ["src"]
