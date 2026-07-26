@@ -678,7 +678,7 @@ table.data { font-size: 12.5px; }
   margin-top: 8px;
 }
 .match-deck-col { display: flex; justify-content: center; padding-top: 10px; }
-.match-deck-col .deck { max-width: 420px; width: 420px; height: 500px; margin-top: 0; }
+.match-deck-col .deck { max-width: 420px; width: 420px; height: 560px; margin-top: 0; }
 .swipe-persona { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--copper); margin: 1px 0 2px; }
 .match-queue {
   background: var(--card);
@@ -717,3 +717,44 @@ table.data { font-size: 12.5px; }
 .take-chat-toggle:hover { text-decoration: underline; }
 .take-chat { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 12px; }
 .take-loading { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+
+/* ---- people page, native edition: memory hooks + beagle's pitch ---- */
+.swipe-card { padding: 0 22px 20px; overflow: hidden; gap: 10px; }
+.swipe-card .swipe-actions { margin-top: auto; }
+.swipe-photo {
+  margin: 0 -22px 16px;
+  position: relative;
+  height: 150px;
+  background: linear-gradient(120deg, #d9d4c9, #efece4);
+}
+.swipe-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.swipe-photo-cap {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 18px 14px 8px;
+  font-size: 12px; color: #fff;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.55));
+}
+.swipe-name { font-family: var(--serif); font-size: 21px; font-weight: 600; }
+.swipe-says { font-size: 13.5px; color: var(--copper); margin: 12px 0 2px; }
+.deck-toast {
+  position: absolute; left: 50%; top: -46px; transform: translateX(-50%);
+  white-space: nowrap;
+  background: var(--ink); color: #fff;
+  font-size: 13px; padding: 8px 14px; border-radius: 999px;
+  animation: toast-in 0.25s ease-out;
+  z-index: 10;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* chat fake-stream */
+.stream-word {
+  display: inline-block;
+  animation: word-in 0.3s ease-out both;
+}
+@keyframes word-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}

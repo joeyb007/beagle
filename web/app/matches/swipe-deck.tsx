@@ -12,6 +12,8 @@ export interface SwipeCard {
   km: number | null;
   persona: string | null;
   tastes: string[];
+  says: string; // beagle's matchmaker pitch
+  hook: { src: string; place: string } | null; // a memory of MINE they'd have loved
 }
 
 export function SwipeDeck({
@@ -24,14 +26,18 @@ export function SwipeDeck({
   const [top, setTop] = useState(0);
   const [drag, setDrag] = useState<{ dx: number; dy: number } | null>(null);
   const [leaving, setLeaving] = useState<"left" | "right" | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const remaining = cards.slice(top);
-  if (remaining.length === 0) {
-    return <div className="card">That&apos;s everyone nearby for now — beagle keeps looking. 🐶</div>;
-  }
 
   function fling(dir: "left" | "right") {
+    if (dir === "right") {
+      setToast(`🐶 on it — texting ${remaining[0].match_name} an intro`);
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+      toastTimer.current = setTimeout(() => setToast(null), 2600);
+    }
     setLeaving(dir);
     setTimeout(() => {
       setTop((t) => {
@@ -41,6 +47,15 @@ export function SwipeDeck({
       setLeaving(null);
       setDrag(null);
     }, 260);
+  }
+
+  if (remaining.length === 0) {
+    return (
+      <div className="card">
+        That&apos;s everyone nearby for now — beagle keeps sniffing. 🐶
+        {toast && <div className="deck-toast">{toast}</div>}
+      </div>
+    );
   }
 
   function onPointerDown(e: React.PointerEvent) {
@@ -62,6 +77,7 @@ export function SwipeDeck({
 
   return (
     <div className="deck">
+      {toast && <div className="deck-toast">{toast}</div>}
       {remaining.slice(0, 3).map((c, i) => {
         const isTop = i === 0;
         return (
@@ -81,6 +97,15 @@ export function SwipeDeck({
             onPointerMove={isTop ? onPointerMove : undefined}
             onPointerUp={isTop ? onPointerUp : undefined}
           >
+            {c.hook ? (
+              <div className="swipe-photo">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={c.hook.src} alt="" />
+                <span className="swipe-photo-cap">would&apos;ve loved: {c.hook.place}</span>
+              </div>
+            ) : (
+              <div className="swipe-photo blank" />
+            )}
             <div className="swipe-head">
               <span className="avatar lg">{c.match_name[0]}</span>
               <div>
@@ -91,6 +116,7 @@ export function SwipeDeck({
                 </div>
               </div>
             </div>
+            <p className="swipe-says">“{c.says}”</p>
             {c.tastes.length > 0 && (
               <div className="chips">
                 {c.tastes.map((t, j) => (<span key={j} className="chip chip-likes">{t}</span>))}
@@ -104,13 +130,10 @@ export function SwipeDeck({
                 ))}
               </div>
             </div>
-            <ul className="swipe-reasons">
-              {c.reasons.map((r, j) => (<li key={j}>{r}</li>))}
-            </ul>
             {isTop && (
               <div className="swipe-actions">
                 <button className="round pass" onClick={() => fling("left")} aria-label="pass">✕</button>
-                <button className="round like" onClick={() => fling("right")} aria-label="say hi">🐶</button>
+                <button className="round like" onClick={() => fling("right")} aria-label="beagle intros you" title="beagle texts the intro">🐶</button>
               </div>
             )}
           </div>

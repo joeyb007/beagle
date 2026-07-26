@@ -1,0 +1,155 @@
+- generic [ref=f10e2]:
+  - navigation [ref=f10e3]:
+    - button [ref=f10e4] [cursor=pointer]
+    - link [ref=f10e12] [cursor=pointer]:
+      - /url: /
+    - link [ref=f10e17] [cursor=pointer]:
+      - /url: /matches
+    - link [ref=f10e24] [cursor=pointer]:
+      - /url: /chats
+    - link [ref=f10e28] [cursor=pointer]:
+      - /url: /hangouts
+    - generic [ref=f10e34]:
+      - generic: Joseph
+      - button "sign out" [ref=f10e40] [cursor=pointer]
+  - main [ref=f10e41]:
+    - generic [ref=f10e42]:
+      - paragraph [ref=f10e43]: beagle's intros
+      - heading "People your plans would love" [level=1] [ref=f10e44]
+      - paragraph [ref=f10e45]: Beagle matched 8 people nearby against everything it knows about you. Swipe right and it texts the intro for you — that's the whole point of a dog with a phone.
+      - generic [ref=f10e46]:
+        - generic [ref=f10e48]:
+          - generic [ref=f10e49]:
+            - generic [ref=f10e50]: "would've loved: Harbor night walk"
+            - generic [ref=f10e52]:
+              - generic [ref=f10e53]: S
+              - generic [ref=f10e54]:
+                - generic [ref=f10e55]: Sam K.
+                - generic [ref=f10e56]: your taste twin
+                - generic [ref=f10e57]: 100% similar · 1.2 km away
+            - paragraph [ref=f10e58]: “you both say no to clubs — that's basically friendship already 🐶”
+            - generic [ref=f10e59]:
+              - generic [ref=f10e60]: sushi
+              - generic [ref=f10e61]: tacos
+              - generic [ref=f10e62]: low-key
+              - generic [ref=f10e63]: outdoors
+            - generic [ref=f10e64]:
+              - text: free this week
+              - generic [ref=f10e65]:
+                - generic [ref=f10e66]: M
+                - generic [ref=f10e67]: T
+                - generic [ref=f10e68]: W
+                - generic [ref=f10e69]: T
+                - generic [ref=f10e70]: F
+                - generic [ref=f10e71]: S
+                - generic [ref=f10e72]: S
+            - generic [ref=f10e73]:
+              - button "pass" [ref=f10e74] [cursor=pointer]: ✕
+              - button "beagle intros you" [ref=f10e75] [cursor=pointer]: 🐶
+          - generic [ref=f10e76]:
+            - generic [ref=f10e77]: "would've loved: Harbor night walk"
+            - generic [ref=f10e79]:
+              - generic [ref=f10e80]: P
+              - generic [ref=f10e81]:
+                - generic [ref=f10e82]: Priya N.
+                - generic [ref=f10e83]: the sunrise hiker
+                - generic [ref=f10e84]: 70% similar · 2.8 km away
+            - paragraph [ref=f10e85]: “you both say no to clubs — that's basically friendship already 🐶”
+            - generic [ref=f10e86]:
+              - generic [ref=f10e87]: tacos
+              - generic [ref=f10e88]: thai
+              - generic [ref=f10e89]: outdoors
+            - generic [ref=f10e90]:
+              - text: free this week
+              - generic [ref=f10e91]:
+                - generic [ref=f10e92]: M
+                - generic [ref=f10e93]: T
+                - generic [ref=f10e94]: W
+                - generic [ref=f10e95]: T
+                - generic [ref=f10e96]: F
+                - generic [ref=f10e97]: S
+                - generic [ref=f10e98]: S
+          - generic [ref=f10e99]:
+            - generic [ref=f10e100]: "would've loved: Harbor night walk"
+            - generic [ref=f10e102]:
+              - generic [ref=f10e103]: "N"
+              - generic [ref=f10e104]:
+                - generic [ref=f10e105]: Noor A.
+                - generic [ref=f10e106]: the late-dinner loyalist
+                - generic [ref=f10e107]: 62% similar · 3.3 km away
+            - paragraph [ref=f10e108]: “you both say no to clubs — that's basically friendship already 🐶”
+            - generic [ref=f10e109]:
+              - generic [ref=f10e110]: lebanese
+              - generic [ref=f10e111]: sushi
+              - generic [ref=f10e112]: low-key
+            - generic [ref=f10e113]:
+              - text: free this week
+              - generic [ref=f10e114]:
+                - generic [ref=f10e115]: M
+                - generic [ref=f10e116]: T
+                - generic [ref=f10e117]: W
+                - generic [ref=f10e118]: T
+                - generic [ref=f10e119]: F
+                - generic [ref=f10e120]: S
+                - generic [ref=f10e121]: S
+        - complementary [ref=f10e122]:
+          - generic [ref=f10e123]:
+            - generic [ref=f10e124]: the ranking
+            - generic [ref=f10e125]: 1 of 8
+          - generic [ref=f10e126]:
+            - generic [ref=f10e127]: "01"
+            - generic [ref=f10e128]: S
+            - generic [ref=f10e129]:
+              - text: Sam K.
+              - generic [ref=f10e130]: · your taste twin
+            - generic [ref=f10e131]: "100"
+          - generic [ref=f10e135]:
+            - generic [ref=f10e136]: "02"
+            - generic [ref=f10e137]: P
+            - generic [ref=f10e138]:
+              - text: Priya N.
+              - generic [ref=f10e139]: · the sunrise hiker
+            - generic [ref=f10e140]: "70"
+          - generic [ref=f10e144]:
+            - generic [ref=f10e145]: "03"
+            - generic [ref=f10e146]: "N"
+            - generic [ref=f10e147]:
+              - text: Noor A.
+              - generic [ref=f10e148]: · the late-dinner loyalist
+            - generic [ref=f10e149]: "62"
+          - generic [ref=f10e153]:
+            - generic [ref=f10e154]: "04"
+            - generic [ref=f10e155]: K
+            - generic [ref=f10e156]:
+              - text: Kaito S.
+              - generic [ref=f10e157]: · the omakase scholar
+            - generic [ref=f10e158]: "57"
+          - generic [ref=f10e162]:
+            - generic [ref=f10e163]: "05"
+            - generic [ref=f10e164]: L
+            - generic [ref=f10e165]:
+              - text: Lena T.
+              - generic [ref=f10e166]: · the flexible one
+            - generic [ref=f10e167]: "27"
+          - generic [ref=f10e171]:
+            - generic [ref=f10e172]: "06"
+            - generic [ref=f10e173]: M
+            - generic [ref=f10e174]:
+              - text: Mia C.
+              - generic [ref=f10e175]: · the 7am person
+            - generic [ref=f10e176]: "19"
+          - generic [ref=f10e180]:
+            - generic [ref=f10e181]: "07"
+            - generic [ref=f10e182]: T
+            - generic [ref=f10e183]:
+              - text: Theo B.
+              - generic [ref=f10e184]: · the plus-one magnet
+            - generic [ref=f10e185]: "10"
+          - generic [ref=f10e189]:
+            - generic [ref=f10e190]: "08"
+            - generic [ref=f10e191]: D
+            - generic [ref=f10e192]:
+              - text: Diego M.
+              - generic [ref=f10e193]: · the contrarian
+            - generic [ref=f10e194]: "0"
+          - paragraph [ref=f10e197]: cosine similarity over earned taste vectors — cuisines, vibe, aversions, free days

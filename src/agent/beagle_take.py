@@ -1,10 +1,22 @@
 """Beagle's take: a short LLM-written read on one member, cached in their profile."""
 
 import json
+import random
 import sqlite3
 from datetime import datetime, timezone
 
 from src.contracts import LLMRouter
+
+# A fresh angle each generation so refresh never converges on the same take.
+ANGLES = [
+    "their food loyalties",
+    "how they schedule (or dodge scheduling)",
+    "their role in the group chat",
+    "their outdoors streak",
+    "one specific hangout from the history",
+    "what they always say no to",
+    "who they always show up with",
+]
 
 TAKE_PROMPT = (
     "You are Beagle, the friend who plans this group's hangouts and quietly "
@@ -17,6 +29,7 @@ TAKE_PROMPT = (
     "- the group's mom, and honestly you love it\n"
     "- allergic to clubs, addicted to golden hour\n"
     "- says 'easy hike' — means nine miles\n\n"
+    "This time, angle it on: {angle}.\n\n"
     "Profile: {profile}\nPickiness (0-1): {score}\n"
     "Their hangout history (place, date, who else, Beagle's note):\n{history}"
 )
@@ -55,6 +68,7 @@ async def beagle_take(
     take = await llm.complete(
         tier="frontier",
         input=TAKE_PROMPT.format(
+            angle=random.choice(ANGLES),
             name=row["name"],
             profile=json.dumps({k: v for k, v in data.items() if k != "beagle_take"}),
             score=row["constraint_score"],

@@ -19,15 +19,17 @@ export default async function Matches() {
     km: m.km,
     persona: m.persona,
     tastes: m.tastes,
+    says: m.says,
+    hook: m.hook,
   }));
 
   return (
     <>
-      <p className="eyebrow">people nearby</p>
-      <h1>You&apos;d actually click</h1>
+      <p className="eyebrow">beagle&apos;s intros</p>
+      <h1>People your plans would love</h1>
       <p className="sub">
-        {matches.length} people within range, ranked by cosine similarity over earned taste — not a
-        signup form. Drag, or use the buttons.
+        Beagle matched {matches.length} people nearby against everything it knows about you. Swipe
+        right and it texts the intro for you — that&apos;s the whole point of a dog with a phone.
       </p>
       <MatchStage cards={cards} />
     </>

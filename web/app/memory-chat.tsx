@@ -1,11 +1,33 @@
 "use client";
 // Ask Beagle about one hangout (past or upcoming). Reusable: compact mode
 // lives inside the string's memory card; full mode is the event page pane.
-import { useRef, useState } from "react";
+// Beagle replies fake-stream in word by word.
+import { useEffect, useRef, useState } from "react";
 
 interface Msg {
   role: "user" | "beagle";
   text: string;
+  stream?: boolean; // newly arrived beagle reply → animate in
+}
+
+function StreamedText({ text, onGrow }: { text: string; onGrow?: () => void }) {
+  const words = text.split(" ");
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    if (shown >= words.length) return;
+    const t = setTimeout(() => {
+      setShown((n) => n + 1);
+      onGrow?.();
+    }, 45);
+    return () => clearTimeout(t);
+  }, [shown, words.length, onGrow]);
+  return (
+    <>
+      {words.slice(0, shown).map((w, i) => (
+        <span key={i} className="stream-word">{w}&nbsp;</span>
+      ))}
+    </>
+  );
 }
 
 export function MemoryChat({
@@ -39,11 +61,15 @@ export function MemoryChat({
       body: JSON.stringify({ ...(planId ? { plan_id: planId } : {}), ...body, question, history: msgs }),
     });
     const { reply } = await resp.json();
-    setMsgs((m) => [...m, { role: "beagle", text: reply }]);
+    setMsgs((m) => [...m, { role: "beagle", text: reply, stream: true }]);
     setBusy(false);
     requestAnimationFrame(() =>
       scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" })
     );
+  }
+
+  function followStream() {
+    scroller.current?.scrollTo({ top: scroller.current.scrollHeight });
   }
 
   return (
@@ -51,7 +77,13 @@ export function MemoryChat({
       {msgs.length > 0 && (
         <div className="mchat-thread" ref={scroller}>
           {msgs.map((m, i) => (
-            <div key={i} className={`mchat-msg ${m.role}`}>{m.text}</div>
+            <div key={i} className={`mchat-msg ${m.role}`}>
+              {m.role === "beagle" && m.stream ? (
+                <StreamedText text={m.text} onGrow={followStream} />
+              ) : (
+                m.text
+              )}
+            </div>
           ))}
           {busy && <div className="mchat-msg beagle thinking">…</div>}
         </div>

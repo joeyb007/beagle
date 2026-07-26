@@ -3,7 +3,7 @@
 // profiles flagged nearby:true (the sample pool / non-friends), ranked highest
 // similarity first for the swipe deck.
 import { availableDays } from "./availability";
-import { listProfiles, ProfileRow } from "./db";
+import { listProfiles, photoMemories, ProfileRow } from "./db";
 
 interface Taste {
   cuisines?: string[];
@@ -42,6 +42,8 @@ export interface NearbyMatch {
   reasons: string[];
   persona: string | null;
   tastes: string[]; // their cuisines + vibes, for chips
+  says: string; // beagle's matchmaker pitch
+  hook: { src: string; place: string } | null; // my memory they'd have loved
 }
 
 function sharedReasons(mine: Taste, theirs: Taste): string[] {
@@ -58,6 +60,40 @@ function sharedReasons(mine: Taste, theirs: Taste): string[] {
   const dayOverlap = availableDays(theirs.typical_availability ?? null).filter((d) => myDays.has(d));
   if (dayOverlap.length) reasons.push(`${dayOverlap.length} free day${dayOverlap.length === 1 ? "" : "s"} in common`);
   return reasons;
+}
+
+/** Beagle's one-line matchmaker pitch, in its own voice. Priority: shared
+ *  aversions bond hardest, then food, then vibe, then plain optimism. */
+export function beagleLine(mine: Taste, theirs: Taste): string {
+  const shared = (a?: string[], b?: string[]) =>
+    (a ?? []).filter((x) => (b ?? []).map((y) => y.toLowerCase()).includes(x.toLowerCase()));
+  const nos = shared(mine.hard_nos, theirs.hard_nos);
+  if (nos.length) return `you both say no to ${nos[0]} — that's basically friendship already 🐶`;
+  const cuisines = shared(mine.cuisines, theirs.cuisines);
+  if (cuisines.length) return `two people who'd split the ${cuisines[0]} order without discussion`;
+  const vibes = shared(mine.vibe, theirs.vibe);
+  if (vibes.length) return `${vibes[0]} energy on both ends — beagle can feel it`;
+  return "beagle just has a feeling about this one 🐶";
+}
+
+// taste → words that show up in hangout names when that taste is being fed
+const MEMORY_HOOKS: Record<string, string[]> = {
+  outdoors: ["peak", "park", "hike", "falls", "trail", "canyon", "lake", "picnic", "sunset", "snow", "harbor", "aurora"],
+  "low-key": ["picnic", "sunset", "walk", "harbor"],
+  casual: ["picnic", "park", "walk"],
+  loud: ["karaoke", "arcade"],
+  spontaneous: ["road trip", "canyon", "aurora"],
+};
+
+/** A photo from MY hangouts that someone with these tastes would have loved. */
+export function wouldLove(myHandle: string, tastes: string[]): { src: string; place: string } | null {
+  const memories = photoMemories(myHandle);
+  for (const taste of tastes.map((t) => t.toLowerCase())) {
+    const hooks = MEMORY_HOOKS[taste] ?? [taste];
+    const hit = memories.find((m) => hooks.some((h) => m.place.toLowerCase().includes(h)));
+    if (hit) return { src: hit.src, place: hit.place };
+  }
+  return null;
 }
 
 export function nearbyMatches(handle: string): NearbyMatch[] {
@@ -77,6 +113,8 @@ export function nearbyMatches(handle: string): NearbyMatch[] {
       reasons: sharedReasons(mine.data, p.data),
       persona: p.data.persona_label ?? null,
       tastes: [...(p.data.cuisines ?? []), ...(p.data.vibe ?? [])],
+      says: beagleLine(mine.data, p.data),
+      hook: wouldLove(handle, [...(p.data.vibe ?? []), ...(p.data.cuisines ?? [])]),
     }))
     .sort((a, b) => b.score - a.score);
 }
