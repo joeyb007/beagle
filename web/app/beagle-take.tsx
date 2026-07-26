@@ -40,12 +40,18 @@ export function BeagleTake({ handle, initial }: { handle: string; initial: strin
           aria-label="refresh beagle's take"
           title="ask again"
         >
-          {busy ? <span className="spark-spinner" aria-hidden /> : "↻"}
+          ↻
         </button>
       </div>
-      <p className="take-text">
-        {take ?? (busy ? "reading back through everything…" : "beagle's brain is napping — start the agent to hear its take 🐶")}
-      </p>
+      {busy ? (
+        <p className="take-text take-loading">
+          <span className="spark-spinner" aria-hidden /> re-reading everything…
+        </p>
+      ) : (
+        <p className="take-text">
+          {take ?? "beagle's brain is napping — start the agent to hear its take 🐶"}
+        </p>
+      )}
       <div className="take-chat">
         <MemoryChat
           compact

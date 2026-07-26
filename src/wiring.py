@@ -72,7 +72,7 @@ class DemoLLM:
         elif "JSON array" in input and "venues" in input.lower():
             out = _DEMO_VENUES
         elif "Write Beagle's take" in input:
-            out = "you plan the hangout, drive the car, and still act surprised when everyone calls you the group's mom 🐶"
+            out = "you're the group's mom and you know it 🐶"
         else:
             out = await self._delegate.complete(tier=tier, input=input, system=system)
         self._log(tier, int((time.monotonic() - start) * 1000))

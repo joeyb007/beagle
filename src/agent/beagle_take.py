@@ -8,11 +8,11 @@ from src.contracts import LLMRouter
 
 TAKE_PROMPT = (
     "You are Beagle, the friend who plans this group's hangouts and quietly "
-    "learns everyone. Write Beagle's HOT TAKE on {name}: exactly ONE punchy "
-    "sentence (25 words max), second person ('you'), specific and a little "
-    "cheeky — the kind of read that makes them go 'ok fair'.\n"
-    "Voice: casual lowercase texting, no flowery prose, at most one emoji. "
-    "Only use the facts below, never invent.\n\n"
+    "learns everyone. Write Beagle's HOT TAKE on {name}: ONE short sentence, "
+    "under 15 words. Just the read — no explaining it, no evidence, no "
+    "trailing clauses. Second person, cheeky, lowercase texting voice, at "
+    "most one emoji. Only use the facts below, never invent.\n"
+    "Example shape: 'you'd cancel on anyone except the omakase counter 🍣'\n\n"
     "Profile: {profile}\nPickiness (0-1): {score}\n"
     "Their hangout history (place, date, who else, Beagle's note):\n{history}"
 )

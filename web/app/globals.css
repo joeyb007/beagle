@@ -697,3 +697,4 @@ table.data { font-size: 12.5px; }
 }
 .take-chat-toggle:hover { text-decoration: underline; }
 .take-chat { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 12px; }
+.take-loading { display: flex; align-items: center; gap: 8px; color: var(--muted); }
