@@ -117,6 +117,20 @@ class PhotonMessaging:
     async def send_image(self, chat: ChatRef, path: str) -> None:
         await self._post("/messages/image", {"chatId": chat.id, "path": path})
 
+    async def celebrate(
+        self, chat: ChatRef, text: str, name: str | None = None, background_path: str | None = None
+    ) -> None:
+        await self._post(
+            "/messages/celebrate",
+            {"chatId": chat.id, "text": text, "name": name, "backgroundPath": background_path},
+        )
+
+    async def send_voice(self, chat: ChatRef, path: str) -> None:
+        await self._post("/messages/voice", {"chatId": chat.id, "path": path})
+
+    async def send_file(self, chat: ChatRef, path: str) -> None:
+        await self._post("/messages/file", {"chatId": chat.id, "path": path})
+
     async def create_poll(self, chat: ChatRef, poll: PollSpec) -> PollRef:
         if self._poll_mode == "text":
             # Guaranteed-MVP mode: polls ride the two primitives proven live

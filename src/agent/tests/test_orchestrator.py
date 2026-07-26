@@ -234,6 +234,16 @@ async def test_all_votes_lock_plan_confirm_card_artifact_match_refresh():
     (replies,) = deps["refresher"].refreshed_with
     assert {r.handle for r in replies} == {"+15550000001", "+15550000002"}
     assert any("saturday" in r.text for r in replies)
+    # celebrate-on-lock: confetti message + group renamed after the plan
+    (chat_id, text, name, _bg), = m.celebrations
+    assert chat_id == "g1"
+    assert "Ebisu Sushi" in text
+    assert name is not None and "Ebisu Sushi" in name
+    # .ics invite lands in the thread so the plan hits real calendars
+    (file_chat, ics_path), = m.files
+    assert file_chat == "g1"
+    ics = open(ics_path).read()
+    assert "BEGIN:VEVENT" in ics and "Ebisu Sushi" in ics
     # session complete and cleaned up
     assert "g1" not in orch.sessions
 

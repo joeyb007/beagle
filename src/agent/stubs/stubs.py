@@ -30,6 +30,9 @@ class StubMessaging:
         self._vote_handlers: list[Callable[[PollVote], None]] = []
         self._poll_seq = 0
         self.fail_handles: set[str] = set()  # simulate not-allowlisted targets
+        self.celebrations: list[tuple] = []  # (chat_id, text, name, background)
+        self.voices: list[tuple[str, str]] = []
+        self.files: list[tuple[str, str]] = []
 
     async def open_direct(self, handle: str) -> ChatRef:
         if handle in self.fail_handles:
@@ -41,6 +44,15 @@ class StubMessaging:
 
     async def send_text(self, chat: ChatRef, text: str) -> None:
         self.texts.append((chat.id, text))
+
+    async def celebrate(self, chat, text, name=None, background_path=None):
+        self.celebrations.append((chat.id, text, name, background_path))
+
+    async def send_voice(self, chat, path):
+        self.voices.append((chat.id, path))
+
+    async def send_file(self, chat, path):
+        self.files.append((chat.id, path))
 
     async def set_typing(self, chat: ChatRef, on: bool) -> None:
         self.typing.append((chat.id, on))

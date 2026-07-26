@@ -11,7 +11,7 @@ export interface OutEvent {
 }
 
 export interface SentRecord {
-  kind: "text" | "card" | "poll" | "typing_on" | "typing_off" | "image";
+  kind: "text" | "card" | "poll" | "typing_on" | "typing_off" | "image" | "celebrate" | "voice" | "file";
   chatId: string;
   text?: string;
   options?: string[];
@@ -23,6 +23,12 @@ export interface PhotonLayer {
   setTyping(chatId: string, on: boolean): Promise<void>;
   createPoll(chatId: string, question: string, options: string[]): Promise<{ id: string }>;
   sendImage(chatId: string, path: string): Promise<void>;
+  /** Confetti-effect message + optional group rename + optional chat background. */
+  celebrate(chatId: string, text: string, name?: string, backgroundPath?: string): Promise<void>;
+  /** Native voice-note bubble from an audio file. */
+  sendVoice(chatId: string, path: string): Promise<void>;
+  /** Arbitrary file attachment (e.g. an .ics calendar invite). */
+  sendFile(chatId: string, path: string): Promise<void>;
   isIMessageAvailable(handle: string): Promise<boolean>;
   onEvent(handler: (e: OutEvent) => void): void;
 }
@@ -46,6 +52,15 @@ export class FakePhoton implements PhotonLayer {
   }
   async sendImage(chatId: string, path: string) {
     this.sent.push({ kind: "image", chatId, text: path });
+  }
+  async celebrate(chatId: string, text: string, name?: string, backgroundPath?: string) {
+    this.sent.push({ kind: "celebrate", chatId, text, options: [name ?? "", backgroundPath ?? ""] });
+  }
+  async sendVoice(chatId: string, path: string) {
+    this.sent.push({ kind: "voice", chatId, text: path });
+  }
+  async sendFile(chatId: string, path: string) {
+    this.sent.push({ kind: "file", chatId, text: path });
   }
   async createPoll(chatId: string, question: string, options: string[]) {
     this.sent.push({ kind: "poll", chatId, text: question, options });
@@ -224,6 +239,26 @@ export async function createRealPhoton(): Promise<PhotonLayer> {
       const { attachment } = await import("spectrum-ts");
       await (await getSpace(chatId)).send(attachment(path));
     },
+    async celebrate(chatId, celebrationText, name, backgroundPath) {
+      const space = await getSpace(chatId);
+      const { effect, background } = await import("spectrum-ts/providers/imessage");
+      await space.send(effect(celebrationText, "com.apple.messages.effect.CKConfettiEffect"));
+      if (name) {
+        const { rename } = await import("spectrum-ts");
+        try { await space.send(rename(name)); } catch (e) { console.error("[sidecar] rename failed:", e); }
+      }
+      if (backgroundPath) {
+        try { await space.send(background(backgroundPath)); } catch (e) { console.error("[sidecar] background failed:", e); }
+      }
+    },
+    async sendVoice(chatId, path) {
+      const { voice } = await import("spectrum-ts");
+      await (await getSpace(chatId)).send(voice(path, { mimeType: "audio/mp4" }));
+    },
+    async sendFile(chatId, path) {
+      const { attachment } = await import("spectrum-ts");
+      await (await getSpace(chatId)).send(attachment(path));
+    },
     async createPoll(chatId, question, options) {
       const space = await getSpace(chatId);
       const msg = await space.send(poll(question, ...options));
@@ -297,6 +332,19 @@ export async function createAdvancedGrpcPhoton(): Promise<PhotonLayer> {
     async isIMessageAvailable(handle) {
       const res: any = await client.addresses.isIMessageAvailable(handle);
       return Boolean(res?.available ?? res?.imessage ?? res);
+    },
+    // spare layer: no effect/voice/file support — degrade to plain text
+    async sendImage() {
+      throw new Error("images not supported on legacy gRPC layer");
+    },
+    async celebrate(chatId, celebrationText) {
+      await client.messages.sendText(chatId, celebrationText);
+    },
+    async sendVoice() {
+      throw new Error("voice not supported on legacy gRPC layer");
+    },
+    async sendFile() {
+      throw new Error("file attachments not supported on legacy gRPC layer");
     },
     onEvent(handler) {
       handlers.push(handler);

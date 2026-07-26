@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from uuid import uuid4
 
+from src.agent.ics import build_ics
 from src.contracts import (
     ArtifactStore,
     CalendarProvider,
@@ -362,8 +363,9 @@ class Orchestrator:
         active.state = "confirm"
         names = ", ".join(active.profiles[h].name for h in attendees)
         when = plan.time.strftime("%a %b %-d, %-I:%M %p")
+        group_chat = ChatRef(id=session.group_chat_id)
         await self._messaging.send_card(
-            ChatRef(id=session.group_chat_id),
+            group_chat,
             Card(
                 title=f"🐶 locked in: {winner.name}",
                 body=f"{when} — {names}. playlist's on the hangout page.",
@@ -371,6 +373,21 @@ class Orchestrator:
                 url=None,
             ),
         )
+        # the chat transforms around the plan: confetti burst + group rename,
+        # then a tappable calendar invite. cosmetic — never let it kill a lock.
+        try:
+            await self._messaging.celebrate(
+                group_chat,
+                f"it's happening — {winner.name}, {when} 🎉",
+                name=f"🐶 {winner.name} · {plan.time.strftime('%a %-I:%M%p').lower()}",
+            )
+        except Exception as e:
+            print(f"[orchestrator] celebrate failed (non-fatal): {e}")
+        try:
+            names_list = [active.profiles[h].name for h in attendees]
+            await self._messaging.send_file(group_chat, build_ics(plan, names_list))
+        except Exception as e:
+            print(f"[orchestrator] ics send failed (non-fatal): {e}")
         await self._send_match_card(active)  # T11 — after confirm
         try:
             await self._refresher.refresh(active.replies)  # T12 — never blocks
