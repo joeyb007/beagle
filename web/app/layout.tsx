@@ -17,19 +17,30 @@ async function signOut() {
   redirect("/login");
 }
 
+function UserIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="10" r="3" />
+      <path d="M6.2 18.6c1.1-2.3 3.2-3.6 5.8-3.6s4.7 1.3 5.8 3.6" />
+    </svg>
+  );
+}
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
   const footer = user ? (
     <div className="me">
-      <span className="avatar">{user.name[0]}</span>
+      <span className="nav-icon me-icon"><UserIcon /></span>
       <span className="nav-label me-name">{user.name}</span>
       <form action={signOut} className="nav-label">
-        <button className="linkish" type="submit">sign out</button>
+        <button className="signout" type="submit">sign out</button>
       </form>
     </div>
   ) : (
     <Link href="/login" className="me me-link">
-      <span className="avatar">?</span>
+      <span className="nav-icon me-icon"><UserIcon /></span>
       <span className="nav-label me-name">sign in</span>
     </Link>
   );
