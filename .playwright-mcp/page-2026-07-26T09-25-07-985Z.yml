@@ -1,0 +1,85 @@
+- generic [ref=f1e2]:
+  - navigation [ref=f1e3]:
+    - button [ref=f1e4] [cursor=pointer]
+    - link [ref=f1e12] [cursor=pointer]:
+      - /url: /
+    - link [ref=f1e17] [cursor=pointer]:
+      - /url: /matches
+    - link [ref=f1e24] [cursor=pointer]:
+      - /url: /chats
+    - link [ref=f1e28] [cursor=pointer]:
+      - /url: /hangouts
+    - generic [ref=f1e34]:
+      - generic: Joseph
+      - button "sign out" [ref=f1e40] [cursor=pointer]
+  - main [ref=f1e41]:
+    - generic [ref=f1e42]:
+      - paragraph [ref=f1e43]: beagle's read on you
+      - heading "Joseph — the planner" [level=1] [ref=f1e44]:
+        - text: Joseph
+        - generic [ref=f1e45]: — the planner
+      - paragraph [ref=f1e46]:
+        - text: Earned from your messages · solo test profile —
+        - link "correct anything" [ref=f1e47] [cursor=pointer]:
+          - /url: /profiles
+        - text: .
+      - generic [ref=f1e48]:
+        - generic [ref=f1e49]:
+          - generic [ref=f1e50]: beagle's take
+          - button "refresh beagle's take" [ref=f1e51] [cursor=pointer]: ↻
+        - paragraph [ref=f1e52]: you're always down for sushi or tacos, low-key is the whole vibe, sunday nights after 8 are basically your standing slot. not picky, just no clubs, and honestly you might be the only one who actually shows up solo to omakase and calls it a night out 🍣
+      - generic [ref=f1e53]:
+        - generic [ref=f1e54]:
+          - heading "Up next" [level=2] [ref=f1e55]
+          - paragraph [ref=f1e56]: Omakase
+          - paragraph [ref=f1e57]: tomorrow
+          - link "see the plan →" [ref=f1e58] [cursor=pointer]:
+            - /url: /hangouts/0247d41a-8348-458d-b9d6-7c12b56e8dc9
+        - generic [ref=f1e59]:
+          - heading "Your people" [level=2] [ref=f1e60]
+          - paragraph [ref=f1e61]: "+15550000002"
+          - paragraph [ref=f1e62]: most-seen face · 2 hangouts
+        - generic [ref=f1e63]:
+          - heading "On this day-ish" [level=2] [ref=f1e64]
+          - generic [ref=f1e65]:
+            - link [ref=f1e66] [cursor=pointer]:
+              - /url: /hangouts/plan-demo-1
+              - img "memory from Ebisu Sushi" [ref=f1e67]
+            - generic [ref=f1e68]:
+              - paragraph [ref=f1e69]: Ebisu Sushi
+              - paragraph [ref=f1e70]: July 2026
+              - button "✨ remind the group" [ref=f1e71] [cursor=pointer]
+      - generic [ref=f1e72]:
+        - generic [ref=f1e73]:
+          - heading "Taste" [level=2] [ref=f1e74]
+          - generic [ref=f1e75]:
+            - generic [ref=f1e76]: sushi
+            - generic [ref=f1e77]: tacos
+            - generic [ref=f1e78]: low-key
+            - generic [ref=f1e79]: no clubs
+        - generic [ref=f1e80]:
+          - heading "When you're around" [level=2] [ref=f1e81]
+          - generic [ref=f1e82]:
+            - generic [ref=f1e83]: M
+            - generic [ref=f1e84]: T
+            - generic [ref=f1e85]: W
+            - generic [ref=f1e86]: T
+            - generic [ref=f1e87]: F
+            - generic [ref=f1e88]: S
+            - generic [ref=f1e89]: S
+          - paragraph [ref=f1e90]: Sunday evening after 8pm
+        - generic [ref=f1e91]:
+          - heading "Pickiness" [level=2] [ref=f1e92]
+          - paragraph [ref=f1e95]: down for almost anything
+      - generic "photos from your past hangouts" [ref=f1e96]:
+        - generic [ref=f1e99]:
+          - img "memory from Ebisu Sushi" [ref=f1e101]
+          - img "memory from Ebisu Sushi" [ref=f1e103]
+          - img "memory from Ebisu Sushi" [ref=f1e105]
+          - img "memory from Tacos El Rey" [ref=f1e107]
+          - img "memory from Tacos El Rey" [ref=f1e109]
+          - img "memory from Ebisu Sushi" [ref=f1e111]
+          - img "memory from Ebisu Sushi" [ref=f1e113]
+          - img "memory from Ebisu Sushi" [ref=f1e115]
+          - img "memory from Tacos El Rey" [ref=f1e117]
+          - img "memory from Tacos El Rey" [ref=f1e119]

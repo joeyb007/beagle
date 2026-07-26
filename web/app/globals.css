@@ -57,10 +57,10 @@ a { color: inherit; }
 .rail .foot { margin-top: auto; font-size: 12px; color: var(--muted); }
 
 /* right padding = rail (58) + left padding (48) so both screen-edge gaps match */
-main.content { flex: 1; min-width: 0; padding: 40px 106px 48px 48px; max-width: 1818px; margin: 0 auto; display: flex; flex-direction: column; }
+main.content { flex: 1; min-width: 0; padding: 40px 106px 24px 48px; max-width: 1818px; margin: 0 auto; display: flex; flex-direction: column; }
 
 h1 { font-family: var(--serif); font-weight: 600; font-size: 28px; margin: 0 0 4px; }
-p.sub { color: var(--muted); margin: 0 0 28px; }
+p.sub { color: var(--muted); margin: 0 0 22px; }
 h2 { font-size: 15px; font-weight: 600; margin: 28px 0 10px; }
 
 /* ---- cards, forms, tables ---- */
@@ -265,7 +265,7 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
 .meter-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--fern), var(--copper)); }
 
 /* ---- home: the polaroid string ---- */
-.string-wrap { position: relative; margin: 8px -106px 0 -48px; padding: 26px 0 14px; overflow: hidden; }
+.string-wrap { position: relative; margin: 0 -106px 0 -48px; padding: 12px 0 8px; overflow: hidden; }
 .string-line { position: absolute; top: 20px; left: 0; right: 0; height: 2px; background: var(--copper); opacity: 0.45; }
 .string-track { display: flex; gap: 26px; width: max-content; animation: string-drift 40s linear infinite; padding: 0 24px; }
 .string-wrap:hover .string-track { animation-play-state: paused; }
@@ -583,9 +583,9 @@ table.data { font-size: 12.5px; }
 
 /* ---- fill the viewport: page is a column, string centers in leftover space ---- */
 .page-anim { flex: 1; display: flex; flex-direction: column; }
-.string-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 260px; }
-.string-inner { position: relative; padding-top: 26px; }
-.string-inner .string-line { top: 20px; }
+.string-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 170px; }
+.string-inner { position: relative; padding-top: 14px; }
+.string-inner .string-line { top: 8px; }
 .string-print img { width: clamp(150px, 12vw, 230px); height: auto; aspect-ratio: 75 / 59; }
 
 /* ---- home widgets: the take bar + 3-box row ---- */
