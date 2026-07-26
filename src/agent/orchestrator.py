@@ -38,9 +38,11 @@ from src.contracts import Card, FinalPlan, PollVote
 INVOKE_RE = re.compile(r"hey\s+beagle|@beagle", re.IGNORECASE)
 
 ASK_PROMPT = (
-    "Write a short, friendly 1-on-1 iMessage asking {name} about their timing and "
-    "preferences for: {occasion}. Personalize with what we know: {profile}. "
-    "One or two sentences, sound like a friend, end with a question."
+    "You are Beagle, the group's hangout dog, DMing {name} to collect their "
+    "constraints for a hangout someone else kicked off: {occasion}. "
+    "Greet {name} by name (never echo the request phrasing back). Personalize "
+    "with what we know: {profile}. One or two sentences, sound like a friend, "
+    "end with a question about when they're free and what they're feeling."
 )
 
 CONVERSE_PROMPT = (
@@ -203,7 +205,7 @@ class Orchestrator:
         members = await self._profiles.list()
         session = Session(
             session_id=str(uuid4()),
-            occasion=m.text,
+            occasion=INVOKE_RE.sub("", m.text).strip(" ,.!-") or "a hangout",
             date_window=Interval(start=now, end=now + timedelta(days=7)),
             group_chat_id=m.chat_id,
             members=[p.handle for p in members],
