@@ -4,12 +4,17 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const rootEnv = join(dirname(fileURLToPath(import.meta.url)), "..", ".env");
+const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 try {
-  for (const line of readFileSync(rootEnv, "utf8").split("\n")) {
+  for (const line of readFileSync(join(repoRoot, ".env"), "utf8").split("\n")) {
     const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
     if (m && process.env[m[1]] === undefined) {
-      process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+      let value = m[2].replace(/^["']|["']$/g, "");
+      // relative paths in the root .env are relative to the repo root, not web/
+      if (m[1].endsWith("_PATH") && (value.startsWith("./") || value.startsWith("../"))) {
+        value = join(repoRoot, value);
+      }
+      process.env[m[1]] = value;
     }
   }
 } catch {
