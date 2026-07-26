@@ -6,12 +6,10 @@ import { DAY_LABELS } from "@/lib/availability";
 
 export interface SwipeCard {
   match_name: string;
-  forName: string;
-  score: number;
+  score: number; // cosine similarity 0..1
   reasons: string[];
-  is_sample: boolean;
   days: number[];
-  km: number;
+  km: number | null;
 }
 
 export function SwipeDeck({ cards }: { cards: SwipeCard[] }) {
@@ -75,11 +73,9 @@ export function SwipeDeck({ cards }: { cards: SwipeCard[] }) {
             <div className="swipe-head">
               <span className="avatar lg">{c.match_name[0]}</span>
               <div>
-                <div className="swipe-name">
-                  {c.match_name} {c.is_sample && <span className="chip">sample</span>}
-                </div>
+                <div className="swipe-name">{c.match_name}</div>
                 <div className="muted">
-                  {Math.round(c.score * 100)}% fit · {c.km} km · for {c.forName}
+                  {Math.round(c.score * 100)}% similar{c.km != null && <> · {c.km} km away</>}
                 </div>
               </div>
             </div>

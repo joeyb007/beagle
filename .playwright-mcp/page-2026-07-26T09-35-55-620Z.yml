@@ -1,0 +1,102 @@
+- generic [ref=f2e2]:
+  - navigation [ref=f2e3]:
+    - button [ref=f2e4] [cursor=pointer]
+    - link [ref=f2e12] [cursor=pointer]:
+      - /url: /
+    - link [ref=f2e17] [cursor=pointer]:
+      - /url: /matches
+    - link [ref=f2e24] [cursor=pointer]:
+      - /url: /chats
+    - link [ref=f2e28] [cursor=pointer]:
+      - /url: /hangouts
+    - generic [ref=f2e34]:
+      - generic: Joseph
+      - button "sign out" [ref=f2e40] [cursor=pointer]
+  - main [ref=f2e41]:
+    - generic [ref=f2e42]:
+      - paragraph [ref=f2e43]: beagle's read on you
+      - heading "Joseph — the planner" [level=1] [ref=f2e44]:
+        - text: Joseph
+        - generic [ref=f2e45]: — the planner
+      - paragraph [ref=f2e46]:
+        - text: Earned from your messages · keeps the thread alive; will drive if someone else picks the playlist —
+        - link "correct anything" [ref=f2e47] [cursor=pointer]:
+          - /url: /profiles
+        - text: .
+      - generic [ref=f2e48]:
+        - generic [ref=f2e49]:
+          - generic [ref=f2e50]: beagle's take
+          - button "refresh beagle's take" [ref=f2e51] [cursor=pointer]: ↻
+        - paragraph [ref=f2e52]: beagle's brain is napping — start the agent to hear its take 🐶
+      - generic [ref=f2e53]:
+        - generic [ref=f2e54]:
+          - heading "Up next" [level=2] [ref=f2e55]
+          - paragraph [ref=f2e56]: Omakase
+          - paragraph [ref=f2e57]: tomorrow
+          - link "see the plan →" [ref=f2e58] [cursor=pointer]:
+            - /url: /hangouts/0247d41a-8348-458d-b9d6-7c12b56e8dc9
+        - generic [ref=f2e59]:
+          - heading "Your people" [level=2] [ref=f2e60]
+          - paragraph [ref=f2e61]: Madhav
+          - paragraph [ref=f2e62]: most-seen face · 5 hangouts
+        - generic [ref=f2e63]:
+          - heading "On this day-ish" [level=2] [ref=f2e64]
+          - generic [ref=f2e65]:
+            - link [ref=f2e66] [cursor=pointer]:
+              - /url: /hangouts/plan-twin-peaks
+              - img "memory from Twin Peaks sunset" [ref=f2e67]
+            - generic [ref=f2e68]:
+              - paragraph [ref=f2e69]: Twin Peaks sunset
+              - paragraph [ref=f2e70]: July 2025
+              - button "✨ remind the group" [ref=f2e71] [cursor=pointer]
+      - generic [ref=f2e72]:
+        - generic [ref=f2e73]:
+          - heading "Taste" [level=2] [ref=f2e74]
+          - generic [ref=f2e75]:
+            - generic [ref=f2e76]: sushi
+            - generic [ref=f2e77]: tacos
+            - generic [ref=f2e78]: low-key
+            - generic [ref=f2e79]: outdoors
+            - generic [ref=f2e80]: no clubs
+        - generic [ref=f2e81]:
+          - heading "When you're around" [level=2] [ref=f2e82]
+          - generic [ref=f2e83]:
+            - generic [ref=f2e84]: M
+            - generic [ref=f2e85]: T
+            - generic [ref=f2e86]: W
+            - generic [ref=f2e87]: T
+            - generic [ref=f2e88]: F
+            - generic [ref=f2e89]: S
+            - generic [ref=f2e90]: S
+          - paragraph [ref=f2e91]: weekend evenings
+        - generic [ref=f2e92]:
+          - heading "Pickiness" [level=2] [ref=f2e93]
+          - paragraph [ref=f2e96]: somewhere in the middle
+      - generic "photos from your past hangouts" [ref=f2e97]:
+        - generic [ref=f2e100]:
+          - img "memory from Harbor night walk" [ref=f2e102]
+          - img "memory from Cascade Falls hike" [ref=f2e104]
+          - img "memory from Cascade Falls hike" [ref=f2e106]
+          - img "memory from Cascade Falls hike" [ref=f2e108]
+          - img "memory from Canyon road trip" [ref=f2e110]
+          - img "memory from Canyon road trip" [ref=f2e112]
+          - img "memory from Canyon road trip" [ref=f2e114]
+          - img "memory from Aurora watch" [ref=f2e116]
+          - img "memory from Aurora watch" [ref=f2e118]
+          - img "memory from Tahoe snow day" [ref=f2e120]
+          - img "memory from Tahoe snow day" [ref=f2e122]
+          - img "memory from Twin Peaks sunset" [ref=f2e124]
+          - img "memory from Twin Peaks sunset" [ref=f2e126]
+          - img "memory from Harbor night walk" [ref=f2e128]
+          - img "memory from Cascade Falls hike" [ref=f2e130]
+          - img "memory from Cascade Falls hike" [ref=f2e132]
+          - img "memory from Cascade Falls hike" [ref=f2e134]
+          - img "memory from Canyon road trip" [ref=f2e136]
+          - img "memory from Canyon road trip" [ref=f2e138]
+          - img "memory from Canyon road trip" [ref=f2e140]
+          - img "memory from Aurora watch" [ref=f2e142]
+          - img "memory from Aurora watch" [ref=f2e144]
+          - img "memory from Tahoe snow day" [ref=f2e146]
+          - img "memory from Tahoe snow day" [ref=f2e148]
+          - img "memory from Twin Peaks sunset" [ref=f2e150]
+          - img "memory from Twin Peaks sunset" [ref=f2e152]

@@ -1,7 +1,11 @@
-// Seed data.sqlite so every screen renders with zero agent dependency —
-// now including groups, photos (generated SVG polaroids), notes, visibility.
+// Seed data.sqlite so every screen renders with zero agent dependency.
+// The friend group uses the four REAL allowlisted numbers so the live demo and
+// the web demo are one world. Nearby people carry nearby:true — the agent's
+// profile store excludes them from fan-out; they exist only for the swipe deck.
+// Photos are real stock scenery (Lorem Picsum), pre-downloaded into
+// public/uploads by this script's sibling step — regenerate with seed-photos.
 import Database from "better-sqlite3";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,115 +25,221 @@ for (const ddl of [
   try { db.exec(ddl); } catch { /* column exists */ }
 }
 
-// -- profiles (Joseph is the live, allowlisted human)
+// ---------------------------------------------------------------- profiles
+// The real crew (allowlisted numbers — safe to fan out).
+const JOSEPH = "+16475550132";
+const MADHAV = "+19295550252";
+const ANTHONY = "+13475550788";
+const MAX = "+19145550081";
+
 const profile = db.prepare(
   "INSERT OR REPLACE INTO profiles (handle, name, json, constraint_score) VALUES (?, ?, ?, ?)"
 );
-const profiles = [
-  ["+16475550132", "Joseph", { cuisines: ["sushi", "tacos"], vibe: ["low-key"], hard_nos: ["clubs"], typical_availability: "weekend evenings", persona_label: "the planner", notes: "keeps the group alive" }, 0.5],
-  ["+15550000001", "Rayhan", { cuisines: ["sushi", "thai"], vibe: ["low-key"], hard_nos: ["clubs"], typical_availability: "weekends only", persona_label: "the picky one", notes: "training for a half marathon" }, 0.9],
-  ["+15550000002", "Maya", { cuisines: ["tacos"], vibe: ["casual", "outdoors"], hard_nos: [], typical_availability: "most evenings", persona_label: "down for anything", notes: null }, 0.2],
-  ["+15550000003", "Jules", { cuisines: ["korean", "pizza"], vibe: ["loud"], hard_nos: ["hiking"], typical_availability: "after 8pm", persona_label: "the night owl", notes: "new to the city" }, 0.5],
+const crew = [
+  [JOSEPH, "Joseph", {
+    cuisines: ["sushi", "tacos"], vibe: ["low-key", "outdoors"], hard_nos: ["clubs"],
+    typical_availability: "weekend evenings", persona_label: "the planner",
+    notes: "keeps the thread alive; will drive if someone else picks the playlist",
+  }, 0.5],
+  [MADHAV, "Madhav", {
+    cuisines: ["indian", "sushi"], vibe: ["low-key"], hard_nos: ["hiking before 10am"],
+    typical_availability: "after 8pm on weekdays", persona_label: "the night owl",
+    notes: "always down after 8, never before coffee",
+  }, 0.6],
+  [ANTHONY, "Anthony", {
+    cuisines: ["korean bbq", "tacos"], vibe: ["loud", "spontaneous"], hard_nos: [],
+    typical_availability: "most evenings", persona_label: "down for anything",
+    notes: "said yes to everything so far. everything.",
+  }, 0.15],
+  [MAX, "Max", {
+    cuisines: ["pizza", "ramen"], vibe: ["outdoors", "casual"], hard_nos: ["karaoke"],
+    typical_availability: "weekends only", persona_label: "the weekend warrior",
+    notes: "will hike anything, will not sing anything",
+  }, 0.7],
 ];
-for (const [handle, name, data, score] of profiles) {
+
+// The nearby pool — swipe-deck candidates, graded overlap with Joseph.
+const nearby = [
+  ["+14155550101", "Sam K.", {
+    cuisines: ["sushi", "tacos"], vibe: ["low-key", "outdoors"], hard_nos: ["clubs"],
+    typical_availability: "weekend evenings", persona_label: "your taste twin",
+    nearby: true, km: 1.2,
+  }, 0.5],
+  ["+14155550102", "Priya N.", {
+    cuisines: ["tacos", "thai"], vibe: ["outdoors"], hard_nos: ["clubs"],
+    typical_availability: "weekends only", persona_label: "the sunrise hiker",
+    nearby: true, km: 2.8,
+  }, 0.4],
+  ["+14155550103", "Kaito S.", {
+    cuisines: ["sushi", "ramen"], vibe: ["low-key"], hard_nos: [],
+    typical_availability: "weekend evenings", persona_label: "the omakase scholar",
+    nearby: true, km: 0.8,
+  }, 0.6],
+  ["+14155550104", "Lena T.", {
+    cuisines: ["pizza", "tacos"], vibe: ["casual"], hard_nos: ["hiking"],
+    typical_availability: "most evenings", persona_label: "the flexible one",
+    nearby: true, km: 4.1,
+  }, 0.3],
+  ["+14155550105", "Noor A.", {
+    cuisines: ["lebanese", "sushi"], vibe: ["low-key"], hard_nos: ["clubs"],
+    typical_availability: "after 8pm", persona_label: "the late-dinner loyalist",
+    nearby: true, km: 3.3,
+  }, 0.5],
+  ["+14155550106", "Theo B.", {
+    cuisines: ["korean bbq"], vibe: ["loud", "spontaneous"], hard_nos: [],
+    typical_availability: "most evenings", persona_label: "the plus-one magnet",
+    nearby: true, km: 5.6,
+  }, 0.2],
+  ["+14155550107", "Mia C.", {
+    cuisines: ["vegan", "thai"], vibe: ["outdoors"], hard_nos: ["late nights"],
+    typical_availability: "weekday mornings", persona_label: "the 7am person",
+    nearby: true, km: 6.9,
+  }, 0.4],
+  ["+14155550108", "Diego M.", {
+    cuisines: ["steak"], vibe: ["loud"], hard_nos: ["sushi"],
+    typical_availability: "weekday mornings", persona_label: "the contrarian",
+    nearby: true, km: 7.4,
+  }, 0.5],
+];
+// retire earlier seed generations (fake +1555 numbers must never fan out live;
+// plan-demo-* artifacts point at deleted SVG placeholders)
+db.prepare("DELETE FROM profiles WHERE handle LIKE '+1555%'").run();
+db.prepare("DELETE FROM artifacts WHERE plan_id LIKE 'plan-demo-%'").run();
+
+for (const [handle, name, data, score] of [...crew, ...nearby]) {
   profile.run(handle, name, JSON.stringify({ handle, name, ...data }), score);
 }
 
-// -- generated polaroid photos (self-contained SVGs, no network)
-const uploads = join(webRoot, "public", "uploads");
-mkdirSync(uploads, { recursive: true });
-const scenes = [
-  ["seed-sunset", "#F4A261", "#7A6FA0", "🌉"],
-  ["seed-tacos", "#E9C46A", "#C4703F", "🌮"],
-  ["seed-karaoke", "#5B7FA6", "#1D1C24", "🎤"],
-  ["seed-hike", "#4F7A5A", "#A8C6A1", "⛰️"],
-  ["seed-sushi", "#B56576", "#FAF3E7", "🍣"],
-  ["seed-arcade", "#6D597A", "#355070", "🕹️"],
-];
-const photoUrl = (id) => `/uploads/${id}.svg`;
-for (const [id, c1, c2, emoji] of scenes) {
-  writeFileSync(
-    join(uploads, `${id}.svg`),
-    `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="236">
-      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/>
-      </linearGradient></defs>
-      <rect width="300" height="236" fill="url(#g)"/>
-      <text x="150" y="132" font-size="64" text-anchor="middle">${emoji}</text>
-    </svg>`
-  );
-}
-
-// -- groups
+// ---------------------------------------------------------------- groups
 db.prepare("DELETE FROM groups").run();
 const group = db.prepare("INSERT INTO groups (id, name, members, chat_id) VALUES (?, ?, ?, ?)");
-group.run(1, "the usual suspects", JSON.stringify(["+16475550132", "+15550000001", "+15550000002"]), null);
-group.run(2, "ex-coworkers 🫠", JSON.stringify(["+16475550132", "+15550000003"]), null);
+group.run(1, "the usual suspects", JSON.stringify([JOSEPH, MADHAV, ANTHONY, MAX]), null);
+group.run(2, "roomies", JSON.stringify([JOSEPH, MAX]), null);
+group.run(3, "ex-coworkers 🫠", JSON.stringify([JOSEPH, MADHAV, ANTHONY]), null);
 
-// -- artifacts: two past keepsakes + one upcoming, tied to groups
+// ---------------------------------------------------------------- artifacts
+const photo = (id) => `/uploads/${id}.jpg`;
+for (const id of [
+  "golden-hour-bridge", "city-towers", "waterfall-trail", "alpine-lake",
+  "summit-scramble", "northern-lights", "night-moon", "canyon-drive",
+  "river-lookout", "fog-ridge", "harbor-night", "snow-summit", "lake-sunset",
+]) {
+  if (!existsSync(join(webRoot, "public", "uploads", `${id}.jpg`)))
+    console.warn(`warning: missing photo ${id}.jpg — run the photo download step`);
+}
+
 const artifact = db.prepare(
   `INSERT OR REPLACE INTO artifacts
    (plan_id, place, time, attendees, playlist, photos, group_id, visibility, note)
    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
 );
-artifact.run(
-  "plan-demo-1",
-  JSON.stringify({ name: "Ebisu Sushi", area: "Inner Sunset", note: "counter seats" }),
-  "2026-07-18T19:00:00",
-  JSON.stringify(["+16475550132", "+15550000001", "+15550000002"]),
-  JSON.stringify([
-    { title: "Blend Opener", artist: "The Stubs" },
-    { title: "Saturday Anthem", artist: "Seed Data" },
-    { title: "Inner Sunset", artist: "Fog Line" },
-  ]),
-  JSON.stringify([photoUrl("seed-sushi"), photoUrl("seed-sunset"), photoUrl("seed-karaoke")]),
-  1,
-  "public",
-  "the night Rayhan finally admitted the omakase was worth it"
-);
-artifact.run(
-  "plan-demo-2",
-  JSON.stringify({ name: "Tacos El Rey", area: "Mission", note: "cash only" }),
-  "2026-07-05T19:30:00",
-  JSON.stringify(["+16475550132", "+15550000002"]),
-  JSON.stringify([{ title: "Mission Nights", artist: "Seed Data" }]),
-  JSON.stringify([photoUrl("seed-tacos"), photoUrl("seed-arcade")]),
-  1,
-  "private",
-  "two-person taco summit; maya ordered for six"
-);
-artifact.run(
-  "plan-demo-3",
-  JSON.stringify({ name: "Golden Gate Park picnic", area: "GGP", note: "bring frisbee" }),
-  "2026-08-01T16:00:00",
-  JSON.stringify(["+16475550132", "+15550000003"]),
-  JSON.stringify([]),
-  JSON.stringify([]),
-  2,
-  "private",
-  null
-);
+const A = (planId, place, time, attendees, playlist, photos, groupId, visibility, note) =>
+  artifact.run(planId, JSON.stringify(place), time, JSON.stringify(attendees),
+    JSON.stringify(playlist), JSON.stringify(photos), groupId, visibility, note);
 
-// -- matches + routing log
+// ~a year of hangouts: spread for cadence, one near today's date last year
+// (on-this-day), one upcoming (up-next).
+A("plan-twin-peaks",
+  { name: "Twin Peaks sunset", area: "Twin Peaks, SF", note: "bring layers, the fog is undefeated" },
+  "2025-07-27T19:30:00", [JOSEPH, MADHAV, ANTHONY, MAX],
+  [
+    { title: "Sofia", artist: "Clairo" },
+    { title: "Show Me How", artist: "Men I Trust" },
+    { title: "Myth", artist: "Beach House" },
+    { title: "Golden Hour", artist: "Kacey Musgraves" },
+  ],
+  [photo("golden-hour-bridge"), photo("city-towers")],
+  1, "public",
+  "the fog held off for exactly forty minutes and we got all of them"),
+
+A("plan-tahoe",
+  { name: "Tahoe snow day", area: "South Lake Tahoe", note: "max drove, blizzard chains and all" },
+  "2026-01-17T09:00:00", [JOSEPH, MADHAV, ANTHONY, MAX],
+  [
+    { title: "Mess Is Mine", artist: "Vance Joy" },
+    { title: "Big Sur", artist: "Jack Johnson" },
+    { title: "Holocene", artist: "Bon Iver" },
+  ],
+  [photo("snow-summit"), photo("lake-sunset")],
+  1, "public",
+  "anthony ate it on the bunny hill six times and rated the day 10/10"),
+
+A("plan-aurora",
+  { name: "Aurora watch", area: "Point Reyes", note: "the solar storm actually delivered" },
+  "2026-02-21T22:30:00", [JOSEPH, MADHAV, ANTHONY],
+  [
+    { title: "Space Song", artist: "Beach House" },
+    { title: "Nightcall", artist: "Kavinsky" },
+    { title: "Midnight City", artist: "M83" },
+  ],
+  [photo("northern-lights"), photo("night-moon")],
+  3, "public",
+  "madhav said 'it's just clouds' four seconds before the sky went green"),
+
+A("plan-canyon",
+  { name: "Canyon road trip", area: "Highway 1 south", note: "no destination, one aux cord" },
+  "2026-04-11T10:00:00", [JOSEPH, MADHAV, ANTHONY, MAX],
+  [
+    { title: "The Less I Know the Better", artist: "Tame Impala" },
+    { title: "Electric Feel", artist: "MGMT" },
+    { title: "Alright", artist: "Supergrass" },
+  ],
+  [photo("canyon-drive"), photo("river-lookout"), photo("fog-ridge")],
+  1, "private",
+  "four hours of driving, zero plans, best day of the spring"),
+
+A("plan-falls-hike",
+  { name: "Cascade Falls hike", area: "Marin", note: "max's pick — 'easy 5 miler' (it was 9)" },
+  "2026-06-13T08:30:00", [JOSEPH, MAX],
+  [
+    { title: "Harvest Moon", artist: "Neil Young" },
+    { title: "Bloom", artist: "The Paper Kites" },
+  ],
+  [photo("waterfall-trail"), photo("alpine-lake"), photo("summit-scramble")],
+  2, "public",
+  "'easy five miles' — max, at mile eight, still lying"),
+
+A("plan-harbor",
+  { name: "Harbor night walk", area: "Embarcadero", note: "post-dinner drift that became a night" },
+  "2026-07-12T21:00:00", [JOSEPH, MADHAV, ANTHONY, MAX],
+  [
+    { title: "Best Part", artist: "Daniel Caesar" },
+    { title: "Come Through and Chill", artist: "Miguel" },
+    { title: "Get You", artist: "Daniel Caesar" },
+  ],
+  [photo("harbor-night")],
+  1, "private",
+  "nobody wanted to call it so we just kept walking until the bridge"),
+
+A("plan-ggp-picnic",
+  { name: "Golden Gate Park picnic", area: "GGP, near the windmill", note: "bring frisbee + one snack each" },
+  "2026-08-02T15:00:00", [JOSEPH, MADHAV, ANTHONY, MAX],
+  [
+    { title: "Sunday Best", artist: "Surfaces" },
+    { title: "Put Your Records On", artist: "Corinne Bailey Rae" },
+  ],
+  [], 1, "private", null),
+
+// ---------------------------------------------------------------- matches + routing
 db.prepare("DELETE FROM matches").run();
 const match = db.prepare(
   "INSERT INTO matches (handle, match_name, score, reasons, is_sample) VALUES (?, ?, ?, ?, ?)"
 );
-match.run("+16475550132", "Sam K.", 0.92, JSON.stringify(["also loves tacos", "2 km away", "free most evenings"]), 1);
-match.run("+16475550132", "Priya N.", 0.87, JSON.stringify(["outdoors vibe", "runs on Saturdays"]), 1);
-match.run("+16475550132", "Diego M.", 0.81, JSON.stringify(["korean food", "night owl hours"]), 1);
+match.run(JOSEPH, "Sam K.", 0.96, JSON.stringify(["both crave sushi & tacos", "both allergic to clubs"]), 1);
+match.run(JOSEPH, "Kaito S.", 0.83, JSON.stringify(["both crave sushi", "weekend evenings overlap"]), 1);
+match.run(JOSEPH, "Priya N.", 0.74, JSON.stringify(["outdoors energy on both sides"]), 1);
 
 db.prepare("DELETE FROM routing_log").run();
 const log = db.prepare(
   "INSERT INTO routing_log (model, tier, cost_estimate, latency_ms) VALUES (?, ?, ?, ?)"
 );
 for (const c of [
-  ["google/gemini-2.0-flash", "cheap", 0.0002, 310],
-  ["google/gemini-2.0-flash", "cheap", 0.0002, 288],
-  ["anthropic/claude-sonnet-4-20250514", "frontier", 0.0041, 920],
-  ["google/gemini-2.0-flash", "cheap", 0.0003, 342],
-  ["anthropic/claude-sonnet-4-20250514", "frontier", 0.0038, 1104],
-  ["google/gemini-2.0-flash", "cheap", 0.0002, 264],
+  ["claude-haiku-4-5-20251001", "cheap", 0.0004, 410],
+  ["claude-haiku-4-5-20251001", "cheap", 0.0003, 388],
+  ["claude-sonnet-5", "frontier", 0.0058, 1220],
+  ["claude-haiku-4-5-20251001", "cheap", 0.0004, 352],
+  ["claude-sonnet-5", "frontier", 0.0049, 1054],
+  ["claude-haiku-4-5-20251001", "cheap", 0.0003, 296],
 ]) log.run(...c);
 
-console.log(`seeded ${dbPath} (profiles, groups, artifacts+photos, matches, routing)`);
+console.log(`seeded ${dbPath}: ${crew.length} crew + ${nearby.length} nearby, 3 groups, 7 hangouts, real photos`);

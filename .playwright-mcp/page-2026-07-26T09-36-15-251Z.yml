@@ -1,0 +1,86 @@
+- generic [ref=f3e2]:
+  - navigation [ref=f3e3]:
+    - button [ref=f3e4] [cursor=pointer]
+    - link [ref=f3e12] [cursor=pointer]:
+      - /url: /
+    - link [ref=f3e17] [cursor=pointer]:
+      - /url: /matches
+    - link [ref=f3e24] [cursor=pointer]:
+      - /url: /chats
+    - link [ref=f3e28] [cursor=pointer]:
+      - /url: /hangouts
+    - generic [ref=f3e34]:
+      - generic: Joseph
+      - button "sign out" [ref=f3e40] [cursor=pointer]
+  - main [ref=f3e41]:
+    - generic [ref=f3e42]:
+      - paragraph [ref=f3e43]: people nearby
+      - heading "You'd actually click" [level=1] [ref=f3e44]
+      - paragraph [ref=f3e45]: Ranked by cosine similarity over earned taste — not a signup form. Drag, or use the buttons.
+      - generic [ref=f3e46]:
+        - generic [ref=f3e47]:
+          - generic [ref=f3e48]:
+            - generic [ref=f3e49]: S
+            - generic [ref=f3e50]:
+              - generic [ref=f3e51]: Sam K.
+              - generic [ref=f3e52]: 100% similar · 1.2 km away
+          - generic [ref=f3e53]:
+            - text: free this week
+            - generic [ref=f3e54]:
+              - generic [ref=f3e55]: M
+              - generic [ref=f3e56]: T
+              - generic [ref=f3e57]: W
+              - generic [ref=f3e58]: T
+              - generic [ref=f3e59]: F
+              - generic [ref=f3e60]: S
+              - generic [ref=f3e61]: S
+          - list [ref=f3e62]:
+            - listitem [ref=f3e63]: both crave sushi & tacos
+            - listitem [ref=f3e64]: low-key, outdoors energy on both sides
+            - listitem [ref=f3e65]: both allergic to clubs
+            - listitem [ref=f3e66]: 2 free days in common
+          - generic [ref=f3e67]:
+            - button "pass" [ref=f3e68] [cursor=pointer]: ✕
+            - button "say hi" [ref=f3e69] [cursor=pointer]: 🐶
+        - generic [ref=f3e70]:
+          - generic [ref=f3e71]:
+            - generic [ref=f3e72]: P
+            - generic [ref=f3e73]:
+              - generic [ref=f3e74]: Priya N.
+              - generic [ref=f3e75]: 70% similar · 2.8 km away
+          - generic [ref=f3e76]:
+            - text: free this week
+            - generic [ref=f3e77]:
+              - generic [ref=f3e78]: M
+              - generic [ref=f3e79]: T
+              - generic [ref=f3e80]: W
+              - generic [ref=f3e81]: T
+              - generic [ref=f3e82]: F
+              - generic [ref=f3e83]: S
+              - generic [ref=f3e84]: S
+          - list [ref=f3e85]:
+            - listitem [ref=f3e86]: both crave tacos
+            - listitem [ref=f3e87]: outdoors energy on both sides
+            - listitem [ref=f3e88]: both allergic to clubs
+            - listitem [ref=f3e89]: 2 free days in common
+        - generic [ref=f3e90]:
+          - generic [ref=f3e91]:
+            - generic [ref=f3e92]: "N"
+            - generic [ref=f3e93]:
+              - generic [ref=f3e94]: Noor A.
+              - generic [ref=f3e95]: 62% similar · 3.3 km away
+          - generic [ref=f3e96]:
+            - text: free this week
+            - generic [ref=f3e97]:
+              - generic [ref=f3e98]: M
+              - generic [ref=f3e99]: T
+              - generic [ref=f3e100]: W
+              - generic [ref=f3e101]: T
+              - generic [ref=f3e102]: F
+              - generic [ref=f3e103]: S
+              - generic [ref=f3e104]: S
+          - list [ref=f3e105]:
+            - listitem [ref=f3e106]: both crave sushi
+            - listitem [ref=f3e107]: low-key energy on both sides
+            - listitem [ref=f3e108]: both allergic to clubs
+            - listitem [ref=f3e109]: 2 free days in common

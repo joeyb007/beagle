@@ -60,4 +60,10 @@ class SqliteProfileStore:
             ).fetchall()
         finally:
             conn.close()
-        return [Profile.model_validate_json(r["json"]) for r in rows]
+        # nearby:true marks match-pool candidates (web's swipe deck), not group
+        # members — they must never be fanned out / DM'd.
+        return [
+            Profile.model_validate_json(r["json"])
+            for r in rows
+            if not json.loads(r["json"]).get("nearby")
+        ]
