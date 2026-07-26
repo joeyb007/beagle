@@ -29,8 +29,11 @@ class StubMessaging:
         self._inbound_handlers: list[Callable[[InboundMessage], None]] = []
         self._vote_handlers: list[Callable[[PollVote], None]] = []
         self._poll_seq = 0
+        self.fail_handles: set[str] = set()  # simulate not-allowlisted targets
 
     async def open_direct(self, handle: str) -> ChatRef:
+        if handle in self.fail_handles:
+            raise RuntimeError(f"Target not allowed: {handle}")
         return ChatRef(id=f"dm-{handle}")
 
     async def open_group(self, handles: list[str]) -> ChatRef:

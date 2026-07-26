@@ -15,6 +15,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from src.agent.beagle_take import beagle_take
+from src.agent.intros import IntroWorker
 from src.agent.memory_chat import chat_about_memory
 from src.agent.profile_chat import chat_about_me
 from src.agent.sparks import SparkWorker
@@ -32,11 +33,18 @@ async def lifespan(app: FastAPI):
         llm=orchestrator._llm,  # consolidation glue: same router, same routing_log
     )
     spark_task = asyncio.create_task(sparks.run_forever())
+    intros = IntroWorker(
+        db_path=os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
+        messaging=messaging,
+        llm=orchestrator._llm,
+    )
+    intro_task = asyncio.create_task(intros.run_forever())
     app.state.orchestrator = orchestrator
     app.state.messaging = messaging
     print("[beagle] agent listening — say 'Hey Beagle' in the group chat")
     yield
     spark_task.cancel()
+    intro_task.cancel()
     await messaging.close()
 
 
