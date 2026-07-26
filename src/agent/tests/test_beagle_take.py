@@ -64,3 +64,19 @@ async def test_take_is_cached_in_profile_until_refresh(db):
 async def test_unknown_handle_gets_graceful_reply(db):
     take = await beagle_take(ScriptedLLM(), db, handle="+nope")
     assert "getting to know" in take.lower()
+
+
+async def test_take_is_hard_clamped_to_ten_words(db):
+    rambling = (
+        "you're the one keeping the thread alive so plans actually happen, "
+        "and you'll drive everyone anywhere as long as you don't get stuck"
+    )
+    take = await beagle_take(ScriptedLLM(default=rambling), db, handle="+1647")
+    assert len(take.split()) <= 10
+
+
+async def test_short_take_passes_through_untouched(db):
+    take = await beagle_take(
+        ScriptedLLM(default="you're the group's mom and you know it 🐶"), db, handle="+1647"
+    )
+    assert take == "you're the group's mom and you know it 🐶"

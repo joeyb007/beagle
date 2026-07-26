@@ -8,14 +8,21 @@ from src.contracts import LLMRouter
 
 TAKE_PROMPT = (
     "You are Beagle, the friend who plans this group's hangouts and quietly "
-    "learns everyone. Write Beagle's HOT TAKE on {name}: ONE short sentence, "
-    "under 15 words. Just the read — no explaining it, no evidence, no "
-    "trailing clauses. Second person, cheeky, lowercase texting voice, at "
-    "most one emoji. Only use the facts below, never invent.\n"
+    "learns everyone. Write Beagle's HOT TAKE on {name}: ONE line, 10 words "
+    "MAX. Just the read — no explaining, no evidence, no second clause. "
+    "Second person, cheeky, lowercase, at most one emoji. Only use the facts "
+    "below, never invent.\n"
     "Example shape: 'you'd cancel on anyone except the omakase counter 🍣'\n\n"
     "Profile: {profile}\nPickiness (0-1): {score}\n"
     "Their hangout history (place, date, who else, Beagle's note):\n{history}"
 )
+
+
+def _clamp(text: str, max_words: int = 10) -> str:
+    """Hard cap: models ramble; the hot take may not. First sentence, then cut."""
+    first = text.strip().split(". ")[0].strip()
+    words = first.split()
+    return first if len(words) <= max_words else " ".join(words[:max_words]) + "…"
 
 
 async def beagle_take(
@@ -48,7 +55,7 @@ async def beagle_take(
         note = a["note"] or "(no note)"
         history_lines.append(f"- {place} on {a['time']} with {others} — {note}")
 
-    take = await llm.complete(
+    raw = await llm.complete(
         tier="frontier",
         input=TAKE_PROMPT.format(
             name=row["name"],
@@ -58,6 +65,7 @@ async def beagle_take(
         ),
     )
 
+    take = _clamp(raw)
     data["beagle_take"] = take
     data["beagle_take_at"] = datetime.now(timezone.utc).isoformat()
     conn.execute("UPDATE profiles SET json = ? WHERE handle = ?", (json.dumps(data), handle))
