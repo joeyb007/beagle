@@ -408,13 +408,20 @@ table.data { font-size: 12.5px; }
   padding: 5px 8px; margin-bottom: 12px; border-radius: 6px;
 }
 .rail .wordmark:hover { background: var(--hover); }
-.nav-label { white-space: nowrap; transition: opacity 0.18s ease; }
-.rail.collapsed { width: 58px; padding: 16px 10px; }
-.rail.collapsed .nav-label { opacity: 0; width: 0; overflow: hidden; display: inline-block; }
-.rail.collapsed a.nav, .rail.collapsed .wordmark { gap: 0; justify-content: center; }
-.rail.collapsed .rail-label { opacity: 0; height: 0; padding: 0; }
-.rail.collapsed .me { justify-content: center; }
-.rail.collapsed .foot form { display: none; }
+/* labels collapse via max-width (animatable) so icons never shift position */
+.nav-label {
+  white-space: nowrap;
+  display: inline-block;
+  overflow: hidden;
+  max-width: 150px;
+  transition: max-width 0.28s ease-in-out, opacity 0.2s ease-in-out;
+}
+.nav-icon { flex-shrink: 0; }
+.rail a.nav, .rail .wordmark { padding-left: 11px; padding-right: 11px; }
+.rail.collapsed { width: 58px; }
+.rail.collapsed .nav-label { max-width: 0; opacity: 0; }
+.rail .foot { transition: padding 0.28s ease-in-out; }
+.rail.collapsed .foot { padding-left: 3px; }
 
 /* member editors (per-chat profiles) */
 .member-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
