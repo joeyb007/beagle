@@ -1,0 +1,21 @@
+# shared runtime state — never commit
+data.sqlite
+data.sqlite-journal
+data.sqlite-wal
+data.sqlite-shm
+
+# secrets
+.env
+.env.*
+
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# node (sidecar/ and web/)
+node_modules/
+.next/
+
+# misc
+.DS_Store

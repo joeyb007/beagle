@@ -1,0 +1,26 @@
+[project]
+name = "beagle"
+version = "0.1.0"
+description = "Beagle — the friend who knows your group, and helps it grow. Agent backend (branches A/B/D)."
+requires-python = ">=3.11"
+dependencies = [
+    # core (A)
+    "fastapi",
+    "uvicorn",
+    "pydantic>=2",
+    "httpx",
+    "websockets",
+    "openai",             # Merge Gateway = OpenAI-compatible base-URL swap
+    "python-dotenv",
+    # data & intelligence (D) — seeded now so pyproject is frozen after hour 0
+    "numpy",
+    "spotipy",
+    "google-api-python-client",
+    "google-auth",
+    "google-auth-oauthlib",
+    "sqlite-vec",
+    "sentence-transformers",  # CLIP-style image + text embeddings
+]
+
+[tool.setuptools]
+packages = ["src"]
