@@ -604,7 +604,7 @@ table.data { font-size: 12.5px; }
 }
 .take-refresh:hover:not(:disabled) { color: var(--ink); background: var(--rail); }
 .take-refresh:disabled { cursor: default; }
-.take-text { font-family: var(--serif); font-style: italic; font-size: 16.5px; line-height: 1.55; color: var(--ink); margin: 0; }
+.take-text { font-size: 15.5px; line-height: 1.55; color: var(--ink); margin: 0; }
 .widget-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
 @media (max-width: 900px) { .widget-row { grid-template-columns: 1fr; } }
 .widget h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; color: var(--muted); }

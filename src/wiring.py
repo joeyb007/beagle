@@ -73,9 +73,9 @@ class DemoLLM:
             out = _DEMO_VENUES
         elif "Write Beagle's take" in input:
             out = (
-                "You're the one who keeps the thread alive — quick to say yes, "
-                "first to lock a time, and fiercely loyal to a good ramen spot. "
-                "The group plans around you more than you know 🐶"
+                "you're the one who keeps the thread alive — quick to say yes, "
+                "first to lock a time, lowkey loyal to a good ramen spot. "
+                "the group plans around you more than you know 🐶"
             )
         else:
             out = await self._delegate.complete(tier=tier, input=input, system=system)
