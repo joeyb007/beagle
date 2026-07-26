@@ -64,3 +64,65 @@ test("unvoted / created deltas and unknown identifiers are dropped", () => {
     null
   );
 });
+
+// ---- spectrum-ts mapping (hosted provider path) ----
+import { mapSpectrumInbound, PollBySpace } from "../src/photon.js";
+
+const space = { id: "any;-;+15550000001" };
+
+test("spectrum inbound text becomes a message OutEvent", () => {
+  const message = {
+    direction: "inbound",
+    sender: { id: "+15550000001" },
+    content: { type: "text", text: "sat works" },
+  };
+  assert.deepEqual(mapSpectrumInbound(space as any, message as any, new PollBySpace()), {
+    type: "message",
+    handle: "+15550000001",
+    chatId: "any;-;+15550000001",
+    text: "sat works",
+  });
+});
+
+test("spectrum outbound and non-text are dropped", () => {
+  assert.equal(
+    mapSpectrumInbound(space as any, { direction: "outbound", content: { type: "text", text: "x" } } as any, new PollBySpace()),
+    null
+  );
+  assert.equal(
+    mapSpectrumInbound(space as any, { direction: "inbound", content: { type: "reaction" } } as any, new PollBySpace()),
+    null
+  );
+});
+
+test("spectrum poll_option vote maps to index from embedded poll order", () => {
+  const polls = new PollBySpace();
+  polls.remember("group-1", "poll-msg-9");
+  const message = {
+    direction: "inbound",
+    sender: { id: "+15550000002" },
+    content: {
+      type: "poll_option",
+      selected: true,
+      option: { title: "Ebisu Sushi" },
+      poll: { type: "poll", title: "where to?", options: [{ title: "Tacos El Rey" }, { title: "Ebisu Sushi" }] },
+    },
+  };
+  assert.deepEqual(mapSpectrumInbound({ id: "group-1" } as any, message as any, polls), {
+    type: "pollVote",
+    handle: "+15550000002",
+    pollId: "poll-msg-9",
+    optionIndex: 1,
+  });
+});
+
+test("spectrum unselect (retracted vote) is dropped", () => {
+  const polls = new PollBySpace();
+  polls.remember("group-1", "poll-msg-9");
+  const message = {
+    direction: "inbound",
+    sender: { id: "+15550000002" },
+    content: { type: "poll_option", selected: false, option: { title: "Ebisu Sushi" }, poll: { options: [{ title: "Ebisu Sushi" }] } },
+  };
+  assert.equal(mapSpectrumInbound({ id: "group-1" } as any, message as any, polls), null);
+});

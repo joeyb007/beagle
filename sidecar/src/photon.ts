@@ -98,9 +98,128 @@ export function mapPollEvent(e: any, index: PollOptionIndex): OutEvent | null {
   };
 }
 
-// ---------------------------------------------------------------- real layer
+// -------------------------------------------- spectrum-ts mapping (pure, tested)
+// Hosted provider path: inbound arrives as [space, message] tuples; votes are
+// "poll_option" content that embeds the full poll with ordered options.
+
+export class PollBySpace {
+  private ids = new Map<string, string>();
+  remember(spaceId: string, pollMessageId: string) {
+    this.ids.set(spaceId, pollMessageId);
+  }
+  idFor(spaceId: string): string | undefined {
+    return this.ids.get(spaceId);
+  }
+}
+
+export function mapSpectrumInbound(space: any, message: any, polls: PollBySpace): OutEvent | null {
+  if (message?.direction !== "inbound") return null;
+  const content = message.content;
+  if (content?.type === "text") {
+    return {
+      type: "message",
+      handle: message.sender?.id ?? "",
+      chatId: space.id,
+      text: content.text ?? "",
+    };
+  }
+  if (content?.type === "poll_option" && content.selected) {
+    const optionIndex = (content.poll?.options ?? []).findIndex(
+      (o: any) => o.title === content.option?.title
+    );
+    if (optionIndex < 0) return null;
+    return {
+      type: "pollVote",
+      handle: message.sender?.id ?? "",
+      pollId: polls.idFor(space.id) ?? space.id,
+      optionIndex,
+    };
+  }
+  return null;
+}
+
+// ---------------------------------------------------- real layer (spectrum-ts)
 
 export async function createRealPhoton(): Promise<PhotonLayer> {
+  const { Spectrum, poll } = await import("spectrum-ts");
+  const { imessage } = await import("spectrum-ts/providers/imessage");
+
+  // Auto-discovery from project credentials is the normal path; an explicit
+  // line (address+token) is supported for independently managed credentials.
+  const explicitLine =
+    process.env.IMESSAGE_ADDRESS && process.env.IMESSAGE_TOKEN
+      ? [{
+          address: process.env.IMESSAGE_ADDRESS,
+          token: process.env.IMESSAGE_TOKEN,
+          phone: process.env.IMESSAGE_PHONE ?? "",
+        }]
+      : undefined;
+
+  const app: any = await Spectrum({
+    projectId: process.env.SPECTRUM_PROJECT_ID,
+    projectSecret: process.env.SPECTRUM_PROJECT_SECRET,
+    providers: [imessage.config(explicitLine ? ({ clients: explicitLine } as any) : undefined)],
+  } as any);
+  const im: any = imessage(app);
+
+  const handlers: ((e: OutEvent) => void)[] = [];
+  const emit = (e: OutEvent | null) => e && handlers.forEach((h) => h(e));
+  const polls = new PollBySpace();
+  const spaces = new Map<string, any>();
+  const getSpace = async (id: string) => {
+    if (!spaces.has(id)) spaces.set(id, await im.space.get(id));
+    return spaces.get(id);
+  };
+
+  (async () => {
+    try {
+      for await (const [space, message] of app.messages) {
+        spaces.set(space.id, space);
+        emit(mapSpectrumInbound(space, message, polls));
+      }
+    } catch (err) {
+      console.error("[sidecar] spectrum message stream ended:", err);
+    }
+  })();
+
+  return {
+    async createChat(handles) {
+      const users = await Promise.all(handles.map((h) => im.user(h)));
+      const space = await im.space.create(handles.length === 1 ? users[0] : users);
+      spaces.set(space.id, space);
+      return { id: space.id };
+    },
+    async sendText(chatId, text) {
+      await (await getSpace(chatId)).send(text);
+    },
+    async setTyping(chatId, on) {
+      const space = await getSpace(chatId);
+      await (on ? space.startTyping() : space.stopTyping());
+    },
+    async createPoll(chatId, question, options) {
+      const space = await getSpace(chatId);
+      const msg = await space.send(poll(question, ...options));
+      const id = msg?.id ?? `poll-${chatId}`;
+      polls.remember(chatId, id);
+      return { id };
+    },
+    async isIMessageAvailable(handle) {
+      try {
+        await im.user(handle);
+        return true; // resolvable handle — best-effort preflight
+      } catch {
+        return false;
+      }
+    },
+    onEvent(handler) {
+      handlers.push(handler);
+    },
+  };
+}
+
+// ------------------------------------- legacy direct-gRPC layer (kept as spare)
+
+export async function createAdvancedGrpcPhoton(): Promise<PhotonLayer> {
   const { createGrpcClient } = await import("@photon-ai/advanced-imessage");
   const client: any = createGrpcClient({
     address: process.env.IMESSAGE_ADDRESS!, // "host:port", no scheme

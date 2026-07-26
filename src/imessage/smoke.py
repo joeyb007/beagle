@@ -20,8 +20,13 @@ from src.imessage.photon_messaging import PhotonMessaging
 async def main() -> None:
     if len(sys.argv) != 2:
         sys.exit("usage: python -m src.imessage.smoke <E.164 phone number>")
-    if not os.environ.get("IMESSAGE_TOKEN"):
-        sys.exit("IMESSAGE_TOKEN not set — provision the Photon line first (hour 0!)")
+    has_spectrum = os.environ.get("SPECTRUM_PROJECT_ID") and os.environ.get("SPECTRUM_PROJECT_SECRET")
+    if not has_spectrum and not os.environ.get("IMESSAGE_TOKEN"):
+        sys.exit(
+            "No Photon credentials — set SPECTRUM_PROJECT_ID + SPECTRUM_PROJECT_SECRET "
+            "(from app.photon.codes project Settings), or IMESSAGE_ADDRESS + IMESSAGE_TOKEN "
+            "for an explicit line"
+        )
     handle = sys.argv[1]
 
     m = PhotonMessaging()  # real mode: sidecar sees IMESSAGE_TOKEN and goes live

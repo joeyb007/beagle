@@ -5,7 +5,10 @@ import { WebSocketServer, WebSocket } from "ws";
 import { FakePhoton, createRealPhoton, PhotonLayer } from "./photon.js";
 
 const PORT = Number(process.env.SIDECAR_PORT ?? 8787);
-const FAKE = process.env.SIDECAR_FAKE === "1" || !process.env.IMESSAGE_TOKEN;
+const HAS_CREDS =
+  Boolean(process.env.SPECTRUM_PROJECT_ID && process.env.SPECTRUM_PROJECT_SECRET) ||
+  Boolean(process.env.IMESSAGE_TOKEN);
+const FAKE = process.env.SIDECAR_FAKE === "1" || !HAS_CREDS;
 
 const sockets = new Set<WebSocket>();
 
