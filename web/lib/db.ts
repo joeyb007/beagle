@@ -108,6 +108,79 @@ export function listMatches(): MatchRow[] {
   return rows.map((r) => ({ ...r, reasons: JSON.parse(r.reasons), is_sample: !!r.is_sample }));
 }
 
+// ------------------------------------------------- groups (frontend re-arch)
+
+export interface HangoutRef {
+  plan_id: string;
+  place: { name: string };
+  time: string;
+}
+
+export interface GroupRow {
+  id: number;
+  name: string;
+  chat_id: string | null;
+  members: string[];
+  lastHangout: HangoutRef | null;
+  upcomingHangout: HangoutRef | null;
+}
+
+function hangoutRef(row: { plan_id: string; place: string; time: string } | undefined): HangoutRef | null {
+  return row ? { plan_id: row.plan_id, place: JSON.parse(row.place), time: row.time } : null;
+}
+
+export function createGroup(name: string, members: string[], chatId?: string): number {
+  const res = db()
+    .prepare("INSERT INTO groups (name, members, chat_id) VALUES (?, ?, ?)")
+    .run(name, JSON.stringify(members), chatId ?? null);
+  return Number(res.lastInsertRowid);
+}
+
+export function getGroup(id: number): GroupRow | null {
+  const rows = listGroupsWithHangouts();
+  return rows.find((g) => g.id === id) ?? null;
+}
+
+export function listGroupsWithHangouts(): GroupRow[] {
+  const conn = db();
+  const groups = conn.prepare("SELECT * FROM groups ORDER BY created_at DESC").all() as {
+    id: number; name: string; chat_id: string | null; members: string;
+  }[];
+  const past = conn.prepare(
+    "SELECT plan_id, place, time FROM artifacts WHERE group_id = ? AND time <= datetime('now') ORDER BY time DESC LIMIT 1"
+  );
+  const future = conn.prepare(
+    "SELECT plan_id, place, time FROM artifacts WHERE group_id = ? AND time > datetime('now') ORDER BY time ASC LIMIT 1"
+  );
+  return groups.map((g) => ({
+    id: g.id,
+    name: g.name,
+    chat_id: g.chat_id,
+    members: JSON.parse(g.members),
+    lastHangout: hangoutRef(past.get(g.id) as never),
+    upcomingHangout: hangoutRef(future.get(g.id) as never),
+  }));
+}
+
+// -------------------------------------- person<->photos + artifact metadata
+
+export function photosOf(handle: string): string[] {
+  const rows = db()
+    .prepare("SELECT attendees, photos FROM artifacts ORDER BY time DESC")
+    .all() as { attendees: string; photos: string }[];
+  return rows
+    .filter((r) => (JSON.parse(r.attendees) as string[]).includes(handle))
+    .flatMap((r) => JSON.parse(r.photos) as string[]);
+}
+
+export function setArtifactVisibility(planId: string, visibility: "private" | "public"): void {
+  db().prepare("UPDATE artifacts SET visibility = ? WHERE plan_id = ?").run(visibility, planId);
+}
+
+export function setArtifactNote(planId: string, note: string): void {
+  db().prepare("UPDATE artifacts SET note = ? WHERE plan_id = ?").run(note, planId);
+}
+
 export interface RoutingRow {
   ts: string;
   model: string;

@@ -1,77 +1,91 @@
-// T2 onboarding: paste chat history → imports (D distills it), connect accounts.
-import { revalidatePath } from "next/cache";
-import { addImport, db, listProfiles } from "@/lib/db";
+// Home: Beagle's read on YOU — the persona it earned, plus the polaroid string
+// of every hangout you were part of.
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { DAY_LABELS, availableDays } from "@/lib/availability";
+import { photosOf } from "@/lib/db";
+import { currentUser } from "@/lib/session";
 
-async function submitImport(formData: FormData) {
-  "use server";
-  const text = String(formData.get("chat") ?? "").trim();
-  if (text) addImport(text);
-  revalidatePath("/");
-}
+export default async function Home() {
+  const user = await currentUser();
+  if (!user) redirect("/login");
 
-function connectedProviders(): Set<string> {
-  const rows = db().prepare("SELECT DISTINCT provider FROM oauth_tokens").all() as {
-    provider: string;
-  }[];
-  return new Set(rows.map((r) => r.provider));
-}
-
-export default function Onboarding() {
-  const profiles = listProfiles();
-  const connected = connectedProviders();
-  const pending = (
-    db().prepare("SELECT COUNT(*) AS n FROM imports WHERE status='pending'").get() as { n: number }
-  ).n;
+  const photos = photosOf(user.handle);
+  const days = availableDays(user.data.typical_availability);
+  const chips = [
+    ...(user.data.cuisines ?? []).map((c) => ({ kind: "likes", text: c })),
+    ...(user.data.vibe ?? []).map((v) => ({ kind: "vibe", text: v })),
+    ...(user.data.hard_nos ?? []).map((n) => ({ kind: "no", text: `no ${n}` })),
+  ];
+  // duplicate the strip so the marquee loops seamlessly
+  const strip = photos.length ? [...photos, ...photos] : [];
 
   return (
     <>
-      <h1>Get Beagle to know your group</h1>
+      <p className="eyebrow">beagle&apos;s read on you</p>
+      <h1 className="persona-headline">
+        {user.name} <span className="persona-label">— {user.data.persona_label ?? "still figuring you out"}</span>
+      </h1>
       <p className="sub">
-        Paste your group chat and Beagle learns who everyone really is — then it plans your
-        hangouts in iMessage.
+        Earned from your messages{user.data.notes ? ` · ${user.data.notes}` : ""} —{" "}
+        <Link href="/profiles">correct anything</Link>.
       </p>
 
-      <div className="card">
-        <h2 style={{ marginTop: 0 }}>1. Chat history</h2>
-        <form action={submitImport}>
-          <label className="field" htmlFor="chat">
-            Paste messages (or an imessage-exporter dump)
-          </label>
-          <textarea id="chat" name="chat" placeholder={"maya: tacos friday?\nrayhan: can't, gym"} />
-          <button className="primary" type="submit">Add to imports</button>
-          {pending > 0 && (
-            <p className="ok">{pending} import{pending === 1 ? "" : "s"} waiting for distillation.</p>
-          )}
-        </form>
+      <div className="persona-grid">
+        <div className="card">
+          <h2 style={{ marginTop: 0 }}>Taste</h2>
+          <div className="chips">
+            {chips.length === 0 && <span className="muted">nothing learned yet — go text your group</span>}
+            {chips.map((c, i) => (
+              <span key={i} className={`chip chip-${c.kind}`}>{c.text}</span>
+            ))}
+          </div>
+        </div>
+        <div className="card">
+          <h2 style={{ marginTop: 0 }}>When you&apos;re around</h2>
+          <div className="day-pills">
+            {DAY_LABELS.map((label, i) => (
+              <span key={i} className={`day-pill${days.includes(i) ? " on" : ""}`}>{label}</span>
+            ))}
+          </div>
+          <p className="muted" style={{ marginBottom: 0 }}>
+            {user.data.typical_availability ?? "no pattern yet"}
+          </p>
+        </div>
+        <div className="card">
+          <h2 style={{ marginTop: 0 }}>Pickiness</h2>
+          <div className="meter">
+            <div className="meter-fill" style={{ width: `${Math.round(user.constraint_score * 100)}%` }} />
+          </div>
+          <p className="muted" style={{ marginBottom: 0 }}>
+            {user.constraint_score >= 0.7
+              ? "beagle asks you first — your answers prune the plan"
+              : user.constraint_score >= 0.4
+                ? "somewhere in the middle"
+                : "down for almost anything"}
+          </p>
+        </div>
       </div>
 
-      <div className="card">
-        <h2 style={{ marginTop: 0 }}>2. Connect accounts</h2>
-        <label className="field" htmlFor="who">Connecting as</label>
-        <select id="who" name="who" defaultValue={profiles[0]?.handle} form="none">
-          {profiles.map((p) => (
-            <option key={p.handle} value={p.handle}>
-              {p.name} ({p.handle})
-            </option>
-          ))}
-        </select>
-        <p style={{ marginBottom: 0 }}>
-          <a className="button" href={`/api/oauth/spotify/start?handle=${profiles[0]?.handle ?? ""}`}>
-            {connected.has("spotify") ? "Spotify connected ✓" : "Connect Spotify"}
-          </a>{" "}
-          <a className="button ghost" href={`/api/oauth/google/start?handle=${profiles[0]?.handle ?? ""}`}>
-            {connected.has("google") ? "Google Calendar connected ✓" : "Connect Google Calendar"}
-          </a>
-        </p>
-      </div>
-
-      <div className="card">
-        <h2 style={{ marginTop: 0 }}>3. Review profiles</h2>
-        <p style={{ margin: 0 }}>
-          Beagle only knows what it can support with evidence — check what it learned on the{" "}
-          <a href="/profiles">profiles page</a> and fix anything it got wrong.
-        </p>
-      </div>
+      <h2>The string</h2>
+      {strip.length === 0 ? (
+        <div className="card">
+          No photos yet — they appear here after your first{" "}
+          <Link href="/hangouts">hangout keepsake</Link>.
+        </div>
+      ) : (
+        <div className="string-wrap" aria-label="photos from your past hangouts">
+          <div className="string-line" />
+          <div className="string-track">
+            {strip.map((src, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <div key={i} className="string-print" style={{ ["--tilt" as string]: `${(i % 5) - 2}deg` }}>
+                <img src={src} alt="hangout memory" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -39,6 +39,18 @@ CREATE TABLE IF NOT EXISTS artifacts (
   attendees  TEXT NOT NULL,               -- JSON array of handles
   playlist   TEXT NOT NULL DEFAULT '[]',  -- JSON array of Track
   photos     TEXT NOT NULL DEFAULT '[]',  -- JSON array of URLs; non-empty = keepsake state
+  group_id   INTEGER,                     -- nullable link to groups
+  visibility TEXT NOT NULL DEFAULT 'private',  -- 'private' | 'public'
+  note       TEXT,                        -- Beagle's memory note (LLM-genned)
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Group chats Beagle lives in; web manages, agent may reference. (frontend re-arch)
+CREATE TABLE IF NOT EXISTS groups (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  name       TEXT NOT NULL,
+  chat_id    TEXT,                        -- iMessage space id once known
+  members    TEXT NOT NULL DEFAULT '[]',  -- JSON array of handles
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

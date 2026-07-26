@@ -1,27 +1,64 @@
-// Hangout index — every artifact the agent has locked.
+// Memories: every hangout artifact — keepsake gallery with private/public.
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import { ArtifactStore } from "@/lib/artifact-store";
+import { setArtifactVisibility } from "@/lib/db";
 
-export default function Hangouts() {
+async function toggleVisibility(formData: FormData) {
+  "use server";
+  setArtifactVisibility(
+    String(formData.get("plan_id")),
+    formData.get("to") === "public" ? "public" : "private"
+  );
+  revalidatePath("/hangouts");
+}
+
+export default function Memories() {
   const artifacts = new ArtifactStore().list();
+  const fmt = (t: string) =>
+    new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+
   return (
     <>
-      <h1>Hangouts</h1>
-      <p className="sub">Every plan Beagle locked — each one becomes a keepsake.</p>
+      <p className="eyebrow">memories</p>
+      <h1>Every hangout, kept</h1>
+      <p className="sub">Plans become keepsakes. Public ones are shareable; private ones are just for the group.</p>
+
       {artifacts.length === 0 && (
-        <div className="card">No hangouts yet. Say “Hey Beagle” in the group chat to make one.</div>
+        <div className="card">No hangouts yet. Say “Hey Beagle” in a group chat to make one.</div>
       )}
-      {artifacts.map((a) => (
-        <Link key={a.plan_id} href={`/hangouts/${a.plan_id}`} style={{ textDecoration: "none" }}>
-          <div className="card">
-            <strong style={{ fontFamily: "var(--serif)", fontSize: 18 }}>{a.place.name}</strong>
-            <span style={{ color: "var(--muted)", marginLeft: 10 }}>
-              {new Date(a.time).toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-              {" · "}{a.attendees.length} going{a.isKeepsake ? " · 📸 keepsake" : ""}
-            </span>
+      <div className="memory-grid">
+        {artifacts.map((a) => (
+          <div key={a.plan_id} className="memory-card">
+            <Link href={`/hangouts/${a.plan_id}`} className="memory-cover-link">
+              {a.photos[0] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img className="memory-cover" src={a.photos[0]} alt="" />
+              ) : (
+                <div className="memory-cover memory-cover-empty">🎟️</div>
+              )}
+            </Link>
+            <div className="memory-body">
+              <Link href={`/hangouts/${a.plan_id}`} className="memory-title">{a.place.name}</Link>
+              <div className="muted">
+                {fmt(a.time)} · {a.attendees.length} went
+                {a.playlist.length > 0 ? ` · ${a.playlist.length} tracks` : ""}
+              </div>
+              {a.note && <div className="memory-note">“{a.note}”</div>}
+              <form action={toggleVisibility} className="vis-row">
+                <input type="hidden" name="plan_id" value={a.plan_id} />
+                <input type="hidden" name="to" value={a.visibility === "public" ? "private" : "public"} />
+                <span className={`chip ${a.visibility === "public" ? "chip-public" : "chip-private"}`}>
+                  {a.visibility}
+                </span>
+                <button className="linkish" type="submit">
+                  make {a.visibility === "public" ? "private" : "public"}
+                </button>
+              </form>
+            </div>
           </div>
-        </Link>
-      ))}
+        ))}
+      </div>
     </>
   );
 }

@@ -25,6 +25,9 @@ export interface HangoutArtifact {
   photos: string[];
   created_at: string;
   isKeepsake: boolean;
+  visibility: "private" | "public";
+  note: string | null;
+  group_id: number | null;
 }
 
 interface Row {
@@ -35,6 +38,9 @@ interface Row {
   playlist: string;
   photos: string;
   created_at: string;
+  visibility?: string;
+  note?: string | null;
+  group_id?: number | null;
 }
 
 function parse(row: Row): HangoutArtifact {
@@ -48,6 +54,9 @@ function parse(row: Row): HangoutArtifact {
     photos,
     created_at: row.created_at,
     isKeepsake: photos.length > 0,
+    visibility: (row.visibility as "private" | "public") ?? "private",
+    note: row.note ?? null,
+    group_id: row.group_id ?? null,
   };
 }
 

@@ -1,33 +1,37 @@
-// T7: matching UI — nearby people you'd actually click with. Samples labeled.
+// People: swipe through nearby matches — cosine-ranked fused vectors,
+// radius-prefiltered. Availability-at-a-glance is the point.
 import { listMatches, listProfiles } from "@/lib/db";
+import { SwipeCard, SwipeDeck } from "./swipe-deck";
+
+// deterministic stub until sample-pool people carry real availability
+function stubDays(name: string): number[] {
+  const seed = [...name].reduce((s, ch) => s + ch.charCodeAt(0), 0);
+  return [0, 1, 2, 3, 4, 5, 6].filter((d) => (seed >> d) & 1 || d >= 5);
+}
+function stubKm(name: string): number {
+  return ([...name].reduce((s, ch) => s + ch.charCodeAt(0), 0) % 80) / 10 + 0.4;
+}
 
 export default function Matches() {
-  const matches = listMatches();
   const names = new Map(listProfiles().map((p) => [p.handle, p.name]));
+  const cards: SwipeCard[] = listMatches().map((m) => ({
+    match_name: m.match_name,
+    forName: names.get(m.handle) ?? m.handle,
+    score: m.score,
+    reasons: m.reasons,
+    is_sample: m.is_sample,
+    days: stubDays(m.match_name),
+    km: Math.round(stubKm(m.match_name) * 10) / 10,
+  }));
 
   return (
     <>
-      <h1>People nearby</h1>
+      <p className="eyebrow">people nearby</p>
+      <h1>You&apos;d actually click</h1>
       <p className="sub">
-        Matched on the full picture — taste, music, photos — not a signup form.
+        Matched on the whole picture — taste, music, photos — not a signup form. Drag, or use the buttons.
       </p>
-      <div className="matches">
-        {matches.map((m, i) => (
-          <div key={i} className="card match">
-            <div className="name">{m.match_name}</div>
-            <div className="for">
-              for {names.get(m.handle) ?? m.handle} · {Math.round(m.score * 100)}% fit{" "}
-              {m.is_sample && <span className="chip">sample</span>}
-            </div>
-            <ul>
-              {m.reasons.map((r, j) => (<li key={j}>{r}</li>))}
-            </ul>
-          </div>
-        ))}
-      </div>
-      {matches.length === 0 && (
-        <div className="card">No matches yet — they appear once profiles have vectors.</div>
-      )}
+      <SwipeDeck cards={cards} />
     </>
   );
 }

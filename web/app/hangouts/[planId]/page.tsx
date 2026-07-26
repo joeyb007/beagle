@@ -52,6 +52,13 @@ export default async function Hangout({ params }: { params: Promise<{ planId: st
           </>
         )}
 
+        {artifact.note && (
+          <>
+            <h2>Beagle remembers</h2>
+            <p className="memory-note big">“{artifact.note}”</p>
+          </>
+        )}
+
         <h2>{artifact.isKeepsake ? "How it went" : "After the hangout"}</h2>
         {artifact.photos.length > 0 && (
           <div className="prints">
