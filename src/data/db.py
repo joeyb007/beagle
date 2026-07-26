@@ -30,6 +30,17 @@ def connect(db_path: str | Path | None = None) -> sqlite3.Connection:
     return conn
 
 
+# Columns added after the schema freeze. CREATE TABLE IF NOT EXISTS skips
+# existing tables, so older database files need explicit ALTERs (kept in sync
+# with web/scripts/seed.mjs, which runs the same list).
+_MIGRATIONS: list[tuple[str, str, str]] = [
+    ("artifacts", "group_id", "INTEGER"),
+    ("artifacts", "visibility", "TEXT NOT NULL DEFAULT 'private'"),
+    ("artifacts", "note", "TEXT"),
+    ("sparks", "photo", "TEXT"),
+]
+
+
 def init_db(db_path: str | Path | None = None) -> Path:
     """Apply the frozen schema (idempotent — all `CREATE TABLE IF NOT EXISTS`)."""
     path = Path(db_path) if db_path else DEFAULT_DB
@@ -37,6 +48,10 @@ def init_db(db_path: str | Path | None = None) -> Path:
     conn = connect(path)
     try:
         conn.executescript(ddl)
+        for table, col, decl in _MIGRATIONS:
+            have = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+            if col not in have:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {col} {decl}")
         conn.commit()
     finally:
         conn.close()

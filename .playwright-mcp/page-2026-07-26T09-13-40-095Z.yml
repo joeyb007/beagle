@@ -1,0 +1,91 @@
+- generic [ref=f27e2]:
+  - navigation [ref=f27e3]:
+    - button [ref=f27e4] [cursor=pointer]
+    - link [ref=f27e12] [cursor=pointer]:
+      - /url: /
+    - link [ref=f27e17] [cursor=pointer]:
+      - /url: /matches
+    - link [ref=f27e24] [cursor=pointer]:
+      - /url: /chats
+    - link [ref=f27e28] [cursor=pointer]:
+      - /url: /hangouts
+    - generic [ref=f27e34]:
+      - generic: Joseph
+      - button "sign out" [ref=f27e40] [cursor=pointer]
+  - main [ref=f27e41]:
+    - generic [ref=f27e44]:
+      - generic [ref=f27e45]: SUNDAY, JULY 26
+      - 'heading "Next up: Omakase" [level=1] [ref=f27e46]'
+      - generic [ref=f27e47]:
+        - generic [ref=f27e48]:
+          - generic [ref=f27e49]: Omakase
+          - generic [ref=f27e50]: admit 1
+        - generic [ref=f27e51]:
+          - term [ref=f27e52]: When
+          - definition [ref=f27e53]: Sunday 8:00 p.m.
+          - term [ref=f27e54]: Where
+          - definition [ref=f27e55]: Dogpatch, San Francisco
+          - term [ref=f27e56]: Who
+          - definition [ref=f27e57]: Joseph
+          - term [ref=f27e58]: Beagle says
+          - definition [ref=f27e59]: High-end sushi omakase, reservations recommended
+      - heading "The blend — everyone’s taste, one tracklist" [level=2] [ref=f27e60]
+      - list [ref=f27e61]:
+        - listitem [ref=f27e62]:
+          - generic [ref=f27e63]:
+            - text: Sofia
+            - generic [ref=f27e64]: — Clairo
+        - listitem [ref=f27e65]:
+          - generic [ref=f27e66]:
+            - text: As It Was
+            - generic [ref=f27e67]: — Harry Styles
+        - listitem [ref=f27e68]:
+          - generic [ref=f27e69]:
+            - text: Electric Feel
+            - generic [ref=f27e70]: — MGMT
+        - listitem [ref=f27e71]:
+          - generic [ref=f27e72]:
+            - text: The Less I Know the Better
+            - generic [ref=f27e73]: — Tame Impala
+        - listitem [ref=f27e74]:
+          - generic [ref=f27e75]:
+            - text: Levitating
+            - generic [ref=f27e76]: — Dua Lipa
+        - listitem [ref=f27e77]:
+          - generic [ref=f27e78]:
+            - text: Blinding Lights
+            - generic [ref=f27e79]: — The Weeknd
+        - listitem [ref=f27e80]:
+          - generic [ref=f27e81]:
+            - text: Best Part
+            - generic [ref=f27e82]: — Daniel Caesar
+        - listitem [ref=f27e83]:
+          - generic [ref=f27e84]:
+            - text: So What
+            - generic [ref=f27e85]: — Miles Davis
+        - listitem [ref=f27e86]:
+          - generic [ref=f27e87]:
+            - text: The Night We Met
+            - generic [ref=f27e88]: — Lord Huron
+        - listitem [ref=f27e89]:
+          - generic [ref=f27e90]:
+            - text: Come Through and Chill
+            - generic [ref=f27e91]: — Miguel
+        - listitem [ref=f27e92]:
+          - generic [ref=f27e93]:
+            - text: Take Five
+            - generic [ref=f27e94]: — Dave Brubeck
+        - listitem [ref=f27e95]:
+          - generic [ref=f27e96]:
+            - text: Tennessee Whiskey
+            - generic [ref=f27e97]: — Chris Stapleton
+      - heading "After the hangout" [level=2] [ref=f27e98]
+      - button "No photos yet drop in the first one from that night — it turns this plan into a keepsake" [ref=f27e100] [cursor=pointer]:
+        - generic [ref=f27e101]: 📸
+        - generic [ref=f27e102]:
+          - strong [ref=f27e103]: No photos yet
+          - generic [ref=f27e104]: drop in the first one from that night — it turns this plan into a keepsake
+      - heading "Ask beagle about it" [level=2] [ref=f27e105]
+      - generic [ref=f27e107]:
+        - textbox "ask beagle about this hangout…" [ref=f27e108]
+        - button "ask" [disabled] [ref=f27e109]: ↑

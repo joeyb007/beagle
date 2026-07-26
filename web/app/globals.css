@@ -7,7 +7,7 @@
   --copper: #c4703f;
   --fern: #4f7a5a;
   --line: #e4e1da;
-  --keep-paper: #faf3e7;
+  --keep-paper: #faf9f6;
   --serif: "Iowan Old Style", "Palatino Nova", Palatino, Georgia, serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, monospace;
@@ -56,7 +56,8 @@ a { color: inherit; }
 .rail a.nav.active { color: var(--blue); font-weight: 600; }
 .rail .foot { margin-top: auto; font-size: 12px; color: var(--muted); }
 
-main.content { flex: 1; min-width: 0; padding: 40px 48px 48px; max-width: 1760px; display: flex; flex-direction: column; }
+/* right padding = rail (58) + left padding (48) so both screen-edge gaps match */
+main.content { flex: 1; min-width: 0; padding: 40px 106px 48px 48px; max-width: 1818px; margin: 0 auto; display: flex; flex-direction: column; }
 
 h1 { font-family: var(--serif); font-weight: 600; font-size: 28px; margin: 0 0 4px; }
 p.sub { color: var(--muted); margin: 0 0 28px; }
@@ -139,7 +140,7 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
 /* ---- the keepsake (artifact page) ---- */
 .keepsake-bg {
   background: var(--keep-paper);
-  margin: -40px -48px -80px;
+  margin: -40px -106px -80px -48px;
   min-height: 100vh;
   padding: 48px;
 }
@@ -264,7 +265,7 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
 .meter-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--fern), var(--copper)); }
 
 /* ---- home: the polaroid string ---- */
-.string-wrap { position: relative; margin: 8px -48px 0; padding: 26px 0 14px; overflow: hidden; }
+.string-wrap { position: relative; margin: 8px -106px 0 -48px; padding: 26px 0 14px; overflow: hidden; }
 .string-line { position: absolute; top: 20px; left: 0; right: 0; height: 2px; background: var(--copper); opacity: 0.45; }
 .string-track { display: flex; gap: 26px; width: max-content; animation: string-drift 40s linear infinite; padding: 0 24px; }
 .string-wrap:hover .string-track { animation-play-state: paused; }
@@ -619,3 +620,25 @@ table.data { font-size: 12.5px; }
 }
 .otd-photo:hover img { transform: rotate(0deg) scale(1.04); }
 .otd-body { min-width: 0; }
+
+/* empty-photos invite: fills the dead space under "How it went" */
+.photo-invite {
+  display: flex; align-items: center; gap: 16px; width: 100%;
+  font: inherit; text-align: left; cursor: pointer;
+  background: var(--card); color: var(--ink);
+  border: 1.5px dashed var(--line); border-radius: 10px;
+  padding: 18px 20px; margin: 14px 0 4px;
+  transition: border-color 0.15s ease-in-out;
+}
+.photo-invite:hover:not(:disabled) { border-color: var(--copper); }
+.photo-invite:disabled { cursor: default; opacity: 0.7; }
+.photo-invite-frame {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 52px; height: 44px; flex-shrink: 0; font-size: 20px;
+  background: #fff; border: 1px solid var(--line);
+  box-shadow: 0 2px 6px rgb(29 28 36 / 0.10);
+  transform: rotate(-3deg);
+}
+.photo-invite > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.blend-head { display: flex; align-items: center; gap: 8px; }
+.spotify-mark { flex-shrink: 0; }

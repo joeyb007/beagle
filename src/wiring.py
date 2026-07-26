@@ -113,10 +113,16 @@ def build_orchestrator() -> tuple[Orchestrator, PhotonMessaging]:
     db_path = os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite"))
     init_db(db_path)
 
-    if os.environ.get("MERGE_API_KEY"):
+    # LLM priority: Anthropic direct → Merge Gateway → offline demo stub.
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        from src.agent.anthropic_router import AnthropicRouter
+
+        print("[wiring] using AnthropicRouter (haiku/sonnet)")
+        llm = AnthropicRouter(db_path=db_path)
+    elif os.environ.get("MERGE_API_KEY"):
         llm = MergeRouter(db_path=db_path)
     else:
-        print("[wiring] MERGE_API_KEY not set — using DemoLLM (deterministic, offline)")
+        print("[wiring] no ANTHROPIC_API_KEY / MERGE_API_KEY — using DemoLLM (deterministic, offline)")
         llm = DemoLLM(db_path)
 
     messaging = PhotonMessaging()  # sidecar self-selects real vs fake via IMESSAGE_TOKEN

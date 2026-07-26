@@ -11,6 +11,7 @@ dependencies = [
     "httpx",
     "websockets",
     "openai",             # Merge Gateway = OpenAI-compatible base-URL swap
+    "anthropic",          # direct Anthropic routing (Merge alternative)
     "python-dotenv",
     # data & intelligence (D) — seeded now so pyproject is frozen after hour 0
     "numpy",

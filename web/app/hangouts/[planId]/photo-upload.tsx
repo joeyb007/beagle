@@ -34,9 +34,19 @@ export function PhotoUpload({ planId, hasPhotos }: { planId: string; hasPhotos: 
         hidden
         onChange={(e) => upload(e.target.files)}
       />
-      <button className="primary" onClick={() => input.current?.click()} disabled={busy}>
-        {busy ? "Uploading…" : hasPhotos ? "Add more photos" : "Add photos"}
-      </button>
+      {hasPhotos ? (
+        <button className="primary" onClick={() => input.current?.click()} disabled={busy}>
+          {busy ? "Uploading…" : "Add more photos"}
+        </button>
+      ) : (
+        <button className="photo-invite" onClick={() => input.current?.click()} disabled={busy}>
+          <span className="photo-invite-frame" aria-hidden>📸</span>
+          <span>
+            <strong>{busy ? "Uploading…" : "No photos yet"}</strong>
+            <span className="muted">drop in the first one from that night — it turns this plan into a keepsake</span>
+          </span>
+        </button>
+      )}
       {error && <p style={{ color: "var(--copper)" }}>{error}</p>}
     </div>
   );
