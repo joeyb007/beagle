@@ -17,6 +17,7 @@ from pydantic import BaseModel
 from src.agent.beagle_take import beagle_take
 from src.agent.intros import IntroWorker
 from src.agent.memory_chat import chat_about_memory
+from src.agent.outreach import OutreachWorker
 from src.agent.profile_chat import chat_about_me
 from src.agent.sparks import SparkWorker
 from src.wiring import REPO_ROOT, build_orchestrator
@@ -42,12 +43,20 @@ async def lifespan(app: FastAPI):
         demo_target=os.environ.get("BEAGLE_INTRO_TARGET"),
     )
     intro_task = asyncio.create_task(intros.run_forever())
+    outreach = OutreachWorker(
+        db_path=os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
+        messaging=messaging,
+        llm=orchestrator._llm,
+    )
+    outreach_task = asyncio.create_task(outreach.run_forever())
+    app.state.outreach = outreach
     app.state.orchestrator = orchestrator
     app.state.messaging = messaging
     print("[beagle] agent listening — say 'Hey Beagle' in the group chat")
     yield
     spark_task.cancel()
     intro_task.cancel()
+    outreach_task.cancel()
     await messaging.close()
 
 
@@ -104,6 +113,17 @@ async def beagle_take_endpoint(req: BeagleTakeRequest) -> dict:
         refresh=req.refresh,
     )
     return {"take": take}
+
+
+class OutreachRequest(BaseModel):
+    group_id: int
+
+
+@app.post("/api/outreach")
+async def trigger_outreach(req: OutreachRequest) -> dict:
+    """Demo trigger: make Beagle notice this group is quiet, right now."""
+    nudged = await app.state.outreach.process_once(force_group_id=req.group_id)
+    return {"nudged": nudged}
 
 
 @app.get("/health")

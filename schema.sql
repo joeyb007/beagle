@@ -97,3 +97,10 @@ CREATE TABLE IF NOT EXISTS intros (
   created_at   TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(handle, match_handle)
 );
+
+-- Autonomous outreach: Beagle noticing a quiet group and reaching out first.
+CREATE TABLE IF NOT EXISTS outreach (
+  id       INTEGER PRIMARY KEY AUTOINCREMENT,
+  group_id INTEGER NOT NULL,
+  sent_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
