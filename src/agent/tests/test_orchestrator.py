@@ -331,3 +331,77 @@ async def test_solo_dm_doubles_as_group_chat():
     active = orch.sessions[dm_chat]
     assert active.state == "vote"           # quorum of 1 → straight to poll
     assert deps["messaging"].polls[0][0] == dm_chat  # poll lands in the DM
+
+
+# ---------------- agentic collect: Beagle decides when a member is done
+
+VAGUE_ENVELOPE = (
+    '{"availability": [], "prefs": [], "hard_nos": [],'
+    ' "complete": false, "follow_up": "ok but like — friday or saturday?"}'
+)
+COMPLETE_AFTER_VAGUE = (
+    '{"availability": [{"start": "2026-08-01T18:00:00", "end": "2026-08-01T22:00:00"}],'
+    ' "prefs": ["sushi"], "hard_nos": [], "complete": true, "follow_up": null}'
+)
+
+
+async def test_incomplete_reply_triggers_follow_up_not_quorum(group_invoke):
+    llm = ScriptedLLM(rules=[
+        ("Rayhan", "yo rayhan"), ("Maya", "maya!"),
+        ("idk whenever tbh", VAGUE_ENVELOPE),
+    ])
+    orch, deps = make_orchestrator(llm=llm, venues=FakeVenues())
+    await orch.handle_inbound(group_invoke)
+
+    await orch.handle_inbound(InboundMessage(
+        handle="+15550000001", chat_id="dm-+15550000001", text="idk whenever tbh"))
+
+    state = orch.sessions["g1"].session.member_states["+15550000001"]
+    assert state.replied is False  # not done with them yet
+    # the follow-up Beagle generated went to their DM
+    assert deps["messaging"].texts_to("dm-+15550000001")[-1] == "ok but like — friday or saturday?"
+    assert orch.sessions["g1"].state == "collect"
+
+
+async def test_full_transcript_reparse_merges_split_messages(group_invoke):
+    llm = ScriptedLLM(rules=[
+        ("Rayhan", "yo rayhan"), ("Maya", "maya!"),
+        # second call sees BOTH messages in the transcript -> complete state
+        ("oh and sushi pls", COMPLETE_AFTER_VAGUE),
+        ("idk whenever tbh", VAGUE_ENVELOPE),
+        ("free after 7", MAYA_STATE),
+    ])
+    orch, deps = make_orchestrator(llm=llm, venues=FakeVenues())
+    await orch.handle_inbound(group_invoke)
+
+    await orch.handle_inbound(InboundMessage(
+        handle="+15550000001", chat_id="dm-+15550000001", text="idk whenever tbh"))
+    await orch.handle_inbound(InboundMessage(
+        handle="+15550000001", chat_id="dm-+15550000001", text="oh and sushi pls"))
+
+    state = orch.sessions["g1"].session.member_states["+15550000001"]
+    assert state.replied is True
+    assert state.prefs == ["sushi"]  # derived from the whole conversation
+    # the completeness call saw the full transcript, not just the last message
+    final_call = [c for c in deps["llm"].calls if "oh and sushi pls" in c["input"]][-1]
+    assert "idk whenever tbh" in final_call["input"]
+
+
+async def test_follow_up_cap_forces_completion(group_invoke):
+    llm = ScriptedLLM(rules=[
+        ("Rayhan", "yo rayhan"), ("Maya", "maya!"),
+        ("hmmm", VAGUE_ENVELOPE),  # LLM never satisfied
+    ])
+    orch, deps = make_orchestrator(llm=llm, venues=FakeVenues())
+    orch.max_follow_ups = 2
+    await orch.handle_inbound(group_invoke)
+
+    for _ in range(3):  # replies keep coming, LLM keeps saying incomplete
+        await orch.handle_inbound(InboundMessage(
+            handle="+15550000001", chat_id="dm-+15550000001", text="hmmm"))
+
+    state = orch.sessions["g1"].session.member_states["+15550000001"]
+    assert state.replied is True  # cap hit -> take what exists and move on
+    follow_ups = [t for t in deps["messaging"].texts_to("dm-+15550000001")
+                  if t == "ok but like — friday or saturday?"]
+    assert len(follow_ups) == 2  # exactly max_follow_ups, no runaway

@@ -42,12 +42,18 @@ ASK_PROMPT = (
     "One or two sentences, sound like a friend, end with a question."
 )
 
-PARSE_PROMPT = (
-    "Parse this reply into JSON with exactly these keys: "
+CONVERSE_PROMPT = (
+    "You are collecting one friend's constraints for a hangout. Their DM "
+    "conversation so far (their messages only, oldest first):\n{transcript}\n\n"
+    "Derive their CURRENT overall answer from the WHOLE conversation and reply "
+    "with JSON, exactly these keys: "
     '{{"availability": [{{"start": ISO8601, "end": ISO8601}}], '
-    '"prefs": [str], "hard_nos": [str]}}. '
+    '"prefs": [str], "hard_nos": [str], '
+    '"complete": bool, "follow_up": str|null}}. '
     "Resolve relative days within {window_start} .. {window_end}. "
-    'Reply text: "{text}". JSON only.'
+    "complete=true when you know when they're free AND roughly what they'd "
+    "enjoy; if not complete, follow_up is ONE short friendly question to get "
+    "what's missing. JSON only."
 )
 
 TIGHTEN_TEMPLATE = 'heads up — {name} said "{text}". does that work for you?'
@@ -93,6 +99,8 @@ class ActiveSession:
     chosen_slot: Interval | None = None
     initiator: str = ""
     replies: list[Reply] = field(default_factory=list)
+    threads: dict[str, list[str]] = field(default_factory=dict)  # handle -> their msgs
+    follow_ups: dict[str, int] = field(default_factory=dict)  # handle -> asks sent
     votes: dict[str, int] = field(default_factory=dict)  # handle -> option_index
     timers: list[asyncio.Task] = field(default_factory=list)
 
@@ -114,9 +122,11 @@ class Orchestrator:
         near: str = "San Francisco",
         reply_timeout_s: float | None = None,  # None = wait for full quorum
         vote_timeout_s: float | None = None,  # armed at first vote when set
+        max_follow_ups: int = 5,  # agentic clarification, runaway-capped
     ):
         self.reply_timeout_s = reply_timeout_s
         self.vote_timeout_s = vote_timeout_s
+        self.max_follow_ups = max_follow_ups
         self._messaging = messaging
         self._llm = llm
         self._profiles = profiles
@@ -227,26 +237,42 @@ class Orchestrator:
             except Exception:
                 await self._abort(active)
 
-    # ------------------------------------------- T6: collect, quorum, tighten
+    # ------------------- T6: agentic collect — Beagle decides when it's done
 
     async def _collect(self, active: ActiveSession, m: InboundMessage) -> None:
+        import json as _json
+
         handle = active.dm_chats[m.chat_id]
+        active.threads.setdefault(handle, []).append(m.text)
+        active.replies.append(Reply(handle=handle, text=m.text))
         window = active.session.date_window
+
         raw = await self._llm.complete(
             tier="cheap",
-            input=PARSE_PROMPT.format(
+            input=CONVERSE_PROMPT.format(
+                transcript="\n".join(active.threads[handle]),
                 window_start=window.start.isoformat(),
                 window_end=window.end.isoformat(),
-                text=m.text,
             ),
         )
-        state = MemberState.model_validate_json(_strip_fences(raw))
-        state.replied = True  # live reply overrides stale profile (FR13)
+        data = _json.loads(_strip_fences(raw))
+        state = MemberState(  # re-derived from the FULL transcript each turn
+            availability=data.get("availability") or [],
+            prefs=data.get("prefs") or [],
+            hard_nos=data.get("hard_nos") or [],
+        )
         active.session.member_states[handle] = state
-        active.replies.append(Reply(handle=handle, text=m.text))
 
+        follow_up = data.get("follow_up")
+        incomplete = data.get("complete") is False
+        under_cap = active.follow_ups.get(handle, 0) < self.max_follow_ups
+        if incomplete and follow_up and under_cap:
+            active.follow_ups[handle] = active.follow_ups.get(handle, 0) + 1
+            await self._messaging.send_text(ChatRef(id=m.chat_id), follow_up)
+            return  # not done with this member — keep the conversation open
+
+        state.replied = True  # complete (or cap hit): take it and move on (FR13)
         await self._tighten(active, replier=handle, reply_text=m.text)
-
         if all(s.replied for s in active.session.member_states.values()):
             await self._reconcile(active)
 

@@ -78,7 +78,7 @@ class DemoLLM:
 
     def _parse_reply(self, prompt: str) -> str:
         window = re.search(r"within (\S+) \.\. (\S+)\.", prompt)
-        text_m = re.search(r'Reply text: "(.*)"\. JSON only', prompt, re.DOTALL)
+        text_m = re.search(r"oldest first\):\n(.*?)\n\nDerive", prompt, re.DOTALL)
         text = (text_m.group(1) if text_m else "").lower()
         prefs = [w for w in _FOOD_WORDS if w in text and f"no {w}" not in text]
         hard_nos = re.findall(r"no (\w+)", text)
@@ -88,6 +88,8 @@ class DemoLLM:
                 "availability": [{"start": start, "end": end}],
                 "prefs": prefs,
                 "hard_nos": [n for n in hard_nos if n not in _FOOD_WORDS or f"no {n}" in text],
+                "complete": True,  # deterministic mode never asks follow-ups
+                "follow_up": None,
             }
         )
 
