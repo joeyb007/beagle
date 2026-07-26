@@ -10,10 +10,13 @@ Run: .venv/bin/python -m src.e2e
 
 import asyncio
 import json
+import os
 import sqlite3
 import sys
 
 import httpx
+
+os.environ["SIDECAR_FAKE"] = "1"  # e2e is the OFFLINE rehearsal — never touch the real line
 
 from src.wiring import REPO_ROOT, build_orchestrator
 
