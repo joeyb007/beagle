@@ -66,17 +66,9 @@ async def test_unknown_handle_gets_graceful_reply(db):
     assert "getting to know" in take.lower()
 
 
-async def test_take_is_hard_clamped_to_ten_words(db):
-    rambling = (
-        "you're the one keeping the thread alive so plans actually happen, "
-        "and you'll drive everyone anywhere as long as you don't get stuck"
-    )
-    take = await beagle_take(ScriptedLLM(default=rambling), db, handle="+1647")
-    assert len(take.split()) <= 10
-
-
-async def test_short_take_passes_through_untouched(db):
-    take = await beagle_take(
-        ScriptedLLM(default="you're the group's mom and you know it 🐶"), db, handle="+1647"
-    )
-    assert take == "you're the group's mom and you know it 🐶"
+async def test_take_prompt_carries_fewshot_examples(db):
+    llm = ScriptedLLM(default="allergic to clubs, addicted to golden hour")
+    await beagle_take(llm, db, handle="+1647")
+    prompt = llm.calls[-1]["input"]
+    assert "omakase counter" in prompt  # few-shot length anchors present
+    assert "easy hike" in prompt
