@@ -33,7 +33,14 @@ async def main() -> None:
         )
     handle = sys.argv[1]
 
-    m = PhotonMessaging()  # real mode: sidecar sees IMESSAGE_TOKEN and goes live
+    m = PhotonMessaging()  # real mode: sidecar sees the Spectrum creds and goes live
+    try:
+        await run(m, handle)
+    finally:
+        await m.close()  # never leak a sidecar with a stale session
+
+
+async def run(m: PhotonMessaging, handle: str) -> None:
     await m.ensure_running()
     print("sidecar healthy (real photon layer)")
 
@@ -58,8 +65,6 @@ async def main() -> None:
         await asyncio.Event().wait()
     except (KeyboardInterrupt, asyncio.CancelledError):
         pass
-    finally:
-        await m.close()
 
 
 if __name__ == "__main__":
