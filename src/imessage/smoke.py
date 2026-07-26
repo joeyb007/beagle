@@ -52,15 +52,22 @@ async def run(m: PhotonMessaging, handle: str) -> None:
 
     chat = await m.open_direct(handle)
     print(f"DM open: {chat.id}")
-    await m.set_typing(chat, True)
-    await asyncio.sleep(1.5)  # visible typing bubble
-    await m.send_text(chat, "hey! beagle smoke test 🐶 — reply anything")
-    await m.set_typing(chat, False)
-    await m.send_card(chat, Card(title="🐶 smoke card", body="if you can read this, cards work"))
-    poll = await m.create_poll(chat, PollSpec(question="smoke poll?", options=["works", "nope"]))
-    print(f"poll created: {poll.id} — vote on the phone")
 
-    print("listening for events (Ctrl-C to stop)…")
+    async def attempt(label: str, coro) -> None:
+        try:
+            result = await coro
+            print(f"  ✓ {label}" + (f": {result}" if result else ""))
+        except Exception as e:
+            print(f"  ✗ {label} FAILED: {e}")
+        await asyncio.sleep(2)  # human-ish spacing; avoid rapid-fire on a shared line
+
+    await attempt("typing on", m.set_typing(chat, True))
+    await attempt("text", m.send_text(chat, "hey! beagle smoke test 🐶 — reply anything"))
+    await attempt("typing off", m.set_typing(chat, False))
+    await attempt("card", m.send_card(chat, Card(title="🐶 smoke card", body="if you can read this, cards work")))
+    await attempt("poll", m.create_poll(chat, PollSpec(question="smoke poll?", options=["works", "nope"])))
+
+    print("listening for events — reply to the text and vote in the poll (Ctrl-C to stop)…")
     try:
         await asyncio.Event().wait()
     except (KeyboardInterrupt, asyncio.CancelledError):
