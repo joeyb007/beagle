@@ -283,7 +283,6 @@ class Orchestrator:
             query += f"; avoid: {', '.join(dict.fromkeys(hard_nos))}"
         session.candidates = await self._venues.find(query, self._near)
 
-        active.state = "vote"
         poll = await self._messaging.create_poll(
             ChatRef(id=session.group_chat_id),
             PollSpec(
@@ -292,6 +291,7 @@ class Orchestrator:
             ),
         )
         session.poll_id = poll.id
+        active.state = "vote"  # only after poll_id is set — votes match on it
 
     # -------------------------------------------------------- T8: vote+tally
 
