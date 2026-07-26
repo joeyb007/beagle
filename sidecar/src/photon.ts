@@ -26,7 +26,7 @@ export interface PhotonLayer {
   /** Confetti-effect message + optional group rename + optional chat background. */
   celebrate(chatId: string, text: string, name?: string, backgroundPath?: string): Promise<void>;
   /** Native voice-note bubble from an audio file. */
-  sendVoice(chatId: string, path: string): Promise<void>;
+  sendVoice(chatId: string, path: string, mimeType?: string): Promise<void>;
   /** Arbitrary file attachment (e.g. an .ics calendar invite). */
   sendFile(chatId: string, path: string): Promise<void>;
   isIMessageAvailable(handle: string): Promise<boolean>;
@@ -251,9 +251,9 @@ export async function createRealPhoton(): Promise<PhotonLayer> {
         try { await space.send(background(backgroundPath)); } catch (e) { console.error("[sidecar] background failed:", e); }
       }
     },
-    async sendVoice(chatId, path) {
+    async sendVoice(chatId, path, mimeType) {
       const { voice } = await import("spectrum-ts");
-      await (await getSpace(chatId)).send(voice(path, { mimeType: "audio/mp4" }));
+      await (await getSpace(chatId)).send(voice(path, { mimeType: mimeType ?? "audio/mp4" }));
     },
     async sendFile(chatId, path) {
       const { attachment } = await import("spectrum-ts");

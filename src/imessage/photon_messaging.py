@@ -125,8 +125,10 @@ class PhotonMessaging:
             {"chatId": chat.id, "text": text, "name": name, "backgroundPath": background_path},
         )
 
-    async def send_voice(self, chat: ChatRef, path: str) -> None:
-        await self._post("/messages/voice", {"chatId": chat.id, "path": path})
+    async def send_voice(self, chat: ChatRef, path: str, mime_type: str = "audio/mpeg") -> None:
+        await self._post(
+            "/messages/voice", {"chatId": chat.id, "path": path, "mimeType": mime_type}
+        )
 
     async def send_file(self, chat: ChatRef, path: str) -> None:
         await self._post("/messages/file", {"chatId": chat.id, "path": path})

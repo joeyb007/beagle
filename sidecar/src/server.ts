@@ -55,7 +55,7 @@ async function main() {
           await photon.celebrate(body.chatId, body.text, body.name, body.backgroundPath);
           return json(res, { ok: true });
         case "POST /messages/voice":
-          await photon.sendVoice(body.chatId, body.path);
+          await photon.sendVoice(body.chatId, body.path, body.mimeType);
           return json(res, { ok: true });
         case "POST /messages/file":
           await photon.sendFile(body.chatId, body.path);

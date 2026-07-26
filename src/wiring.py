@@ -25,6 +25,7 @@ from src.agent.artifact_store import SqliteArtifactStore
 from src.agent.merge_router import MergeRouter
 from src.agent.orchestrator import Orchestrator
 from src.agent.venues import WebVenueSearch
+from src.agent.voice_notes import VoiceNotes
 from src.contracts import LLMTier
 from src.data import (
     Distiller,
@@ -141,5 +142,6 @@ def build_orchestrator() -> tuple[Orchestrator, PhotonMessaging]:
         near=os.environ.get("BEAGLE_NEAR", "San Francisco"),
         reply_timeout_s=float(os.environ.get("REPLY_TIMEOUT_S", "180")),
         vote_timeout_s=float(os.environ.get("VOTE_TIMEOUT_S", "90")),
+        voice_notes=VoiceNotes(api_key=os.environ.get("ELEVENLABS_API_KEY")),
     )
     return orchestrator, messaging

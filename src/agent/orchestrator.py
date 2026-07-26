@@ -124,7 +124,9 @@ class Orchestrator:
         reply_timeout_s: float | None = None,  # None = wait for full quorum
         vote_timeout_s: float | None = None,  # armed at first vote when set
         max_follow_ups: int = 5,  # agentic clarification, runaway-capped
+        voice_notes=None,  # optional VoiceNotes — spoken confirm when enabled
     ):
+        self._voice_notes = voice_notes
         self.reply_timeout_s = reply_timeout_s
         self.vote_timeout_s = vote_timeout_s
         self.max_follow_ups = max_follow_ups
@@ -388,6 +390,22 @@ class Orchestrator:
             await self._messaging.send_file(group_chat, build_ics(plan, names_list))
         except Exception as e:
             print(f"[orchestrator] ics send failed (non-fatal): {e}")
+        if self._voice_notes and self._voice_notes.enabled:
+            try:
+                spoken = await self._llm.complete(
+                    tier="cheap",
+                    input=(
+                        "Write a 15-25 word spoken voice-note from Beagle, the group's "
+                        f"hangout dog, hyping the locked plan: {winner.name}, {when}, with "
+                        f"{names}. Warm, casual, like a friend leaving a quick voice memo. "
+                        "No emoji, no stage directions — just the words to speak."
+                    ),
+                )
+                audio = await self._voice_notes.synthesize(spoken)
+                if audio:
+                    await self._messaging.send_voice(group_chat, audio)
+            except Exception as e:
+                print(f"[orchestrator] voice note failed (non-fatal): {e}")
         await self._send_match_card(active)  # T11 — after confirm
         try:
             await self._refresher.refresh(active.replies)  # T12 — never blocks
