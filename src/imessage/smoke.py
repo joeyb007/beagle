@@ -13,6 +13,10 @@ import asyncio
 import os
 import sys
 
+from dotenv import load_dotenv
+
+load_dotenv()  # .env at repo root — credentials live there
+
 from src.contracts import Card, PollSpec
 from src.imessage.photon_messaging import PhotonMessaging
 

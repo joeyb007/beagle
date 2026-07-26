@@ -17,6 +17,10 @@ import re
 import time
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()  # .env at repo root — covers main.py and e2e.py via import
+
 from src.agent.artifact_store import SqliteArtifactStore
 from src.agent.merge_router import MergeRouter
 from src.agent.orchestrator import Orchestrator
