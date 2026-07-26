@@ -784,3 +784,17 @@ table.data { font-size: 12.5px; }
 .postit.solo { width: 190px; min-height: 96px; font-size: 13.5px; transform: rotate(-1.2deg); }
 .print-stack.solo:nth-child(odd) .postit.solo { transform: rotate(2deg); }
 .postit.solo:hover { transform: rotate(0deg) translateY(-2px); }
+
+/* swipe deck: hover + press feel */
+.swipe-card { transition: box-shadow 0.22s ease-in-out, border-color 0.22s ease-in-out; }
+.swipe-card:not(.top) { transition: transform 0.3s ease-in-out, box-shadow 0.22s ease-in-out; }
+.swipe-card.top:hover { box-shadow: 0 6px 16px rgb(0 0 0 / 0.07), 0 14px 34px rgb(0 0 0 / 0.10); border-color: #d8d4cb; }
+.swipe-card.top:active { box-shadow: 0 2px 8px rgb(0 0 0 / 0.08); }
+.round {
+  transition: transform 0.16s ease-in-out, box-shadow 0.16s ease-in-out,
+    border-color 0.16s ease-in-out, color 0.16s ease-in-out, background 0.16s ease-in-out;
+}
+.round:hover { transform: scale(1.1) translateY(-1px); box-shadow: 0 4px 12px rgb(29 28 36 / 0.14); }
+.round:active { transform: scale(0.92); box-shadow: 0 1px 3px rgb(29 28 36 / 0.12); transition-duration: 0.07s; }
+.round.pass:hover { background: color-mix(in srgb, #a04545 8%, white); }
+.round.like:hover { background: color-mix(in srgb, var(--fern) 10%, white); }
