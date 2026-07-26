@@ -12,6 +12,7 @@ export default async function Matches() {
 
   const matches = nearbyMatches(user.handle);
   const cards: SwipeCard[] = matches.map((m) => ({
+    handle: m.handle,
     match_name: m.name,
     score: m.score,
     reasons: m.reasons,

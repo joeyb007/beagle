@@ -5,6 +5,7 @@ import { join } from "node:path";
 import Database from "better-sqlite3";
 import { beforeEach, expect, test } from "vitest";
 
+import { listSwipes, recordSwipe } from "../lib/db";
 import { beagleLine, cosineSimilarity, nearbyMatches, tasteVector, wouldLove } from "../lib/similarity";
 
 let dbPath: string;
@@ -76,6 +77,16 @@ test("wouldLove finds one of my memories matching their tastes", () => {
   const hit = wouldLove("+me", ["outdoors"]);
   expect(hit).toMatchObject({ src: "/uploads/waterfall-trail.jpg", place: "Cascade Falls hike" });
   expect(wouldLove("+me", ["steak"])).toBeNull();
+});
+
+test("recordSwipe persists pass/intro decisions once per pair", () => {
+  seedProfile("+me", "Joseph", me);
+  seedProfile("+twin", "Twin", { ...me, nearby: true });
+  recordSwipe("+me", "+twin", "intro");
+  recordSwipe("+me", "+twin", "pass"); // re-swipe updates, no dup
+  const rows = listSwipes("+me");
+  expect(rows).toHaveLength(1);
+  expect(rows[0]).toMatchObject({ match_handle: "+twin", decision: "pass" });
 });
 
 test("matches carry human-readable shared-taste reasons and real days", () => {

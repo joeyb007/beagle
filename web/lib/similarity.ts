@@ -85,13 +85,17 @@ const MEMORY_HOOKS: Record<string, string[]> = {
   spontaneous: ["road trip", "canyon", "aurora"],
 };
 
-/** A photo from MY hangouts that someone with these tastes would have loved. */
-export function wouldLove(myHandle: string, tastes: string[]): { src: string; place: string } | null {
+/** A photo from MY hangouts that someone with these tastes would have loved.
+ *  `seed` varies which matching memory is chosen, so cards don't all repeat
+ *  the same photo. */
+export function wouldLove(
+  myHandle: string, tastes: string[], seed = 0
+): { src: string; place: string } | null {
   const memories = photoMemories(myHandle);
   for (const taste of tastes.map((t) => t.toLowerCase())) {
     const hooks = MEMORY_HOOKS[taste] ?? [taste];
-    const hit = memories.find((m) => hooks.some((h) => m.place.toLowerCase().includes(h)));
-    if (hit) return { src: hit.src, place: hit.place };
+    const hits = memories.filter((m) => hooks.some((h) => m.place.toLowerCase().includes(h)));
+    if (hits.length) return { src: hits[seed % hits.length].src, place: hits[seed % hits.length].place };
   }
   return null;
 }
@@ -114,7 +118,11 @@ export function nearbyMatches(handle: string): NearbyMatch[] {
       persona: p.data.persona_label ?? null,
       tastes: [...(p.data.cuisines ?? []), ...(p.data.vibe ?? [])],
       says: beagleLine(mine.data, p.data),
-      hook: wouldLove(handle, [...(p.data.vibe ?? []), ...(p.data.cuisines ?? [])]),
+      hook: wouldLove(
+        handle,
+        [...(p.data.vibe ?? []), ...(p.data.cuisines ?? [])],
+        [...p.handle].reduce((s, ch) => s + ch.charCodeAt(0), 0)
+      ),
     }))
     .sort((a, b) => b.score - a.score);
 }

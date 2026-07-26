@@ -6,11 +6,16 @@ import { SwipeCard, SwipeDeck } from "./swipe-deck";
 
 export function MatchStage({ cards }: { cards: SwipeCard[] }) {
   const [current, setCurrent] = useState(0);
+  const [decisions, setDecisions] = useState<Record<number, "pass" | "intro">>({});
 
   return (
     <div className="match-stage">
       <div className="match-deck-col">
-        <SwipeDeck cards={cards} onAdvance={setCurrent} />
+        <SwipeDeck
+          cards={cards}
+          onAdvance={setCurrent}
+          onDecide={(i, d) => setDecisions((m) => ({ ...m, [i]: d }))}
+        />
       </div>
       <aside className="match-queue">
         <div className="queue-head">
@@ -26,8 +31,16 @@ export function MatchStage({ cards }: { cards: SwipeCard[] }) {
               {c.persona && <span className="queue-persona"> · {c.persona}</span>}
             </span>
             <span className="queue-sim">
-              <span className="sim-bar"><span style={{ width: `${Math.round(c.score * 100)}%` }} /></span>
-              <span className="sim-num">{Math.round(c.score * 100)}</span>
+              {decisions[i] ? (
+                <span className={`queue-mark ${decisions[i]}`}>
+                  {decisions[i] === "intro" ? "✓ intro on the way" : "✕ passed"}
+                </span>
+              ) : (
+                <>
+                  <span className="sim-bar"><span style={{ width: `${Math.round(c.score * 100)}%` }} /></span>
+                  <span className="sim-num">{Math.round(c.score * 100)}</span>
+                </>
+              )}
             </span>
           </div>
         ))}

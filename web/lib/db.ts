@@ -296,6 +296,27 @@ export function createSpark(planId: string, requestedBy: string, photo?: string)
     .run(planId, requestedBy, photo ?? null);
 }
 
+export interface SwipeRow {
+  match_handle: string;
+  decision: "intro" | "pass";
+  status: string;
+}
+
+export function recordSwipe(handle: string, matchHandle: string, decision: "intro" | "pass"): void {
+  db()
+    .prepare(
+      `INSERT INTO intros (handle, match_handle, decision) VALUES (?, ?, ?)
+       ON CONFLICT(handle, match_handle) DO UPDATE SET decision = excluded.decision`
+    )
+    .run(handle, matchHandle, decision);
+}
+
+export function listSwipes(handle: string): SwipeRow[] {
+  return db()
+    .prepare("SELECT match_handle, decision, status FROM intros WHERE handle = ?")
+    .all(handle) as SwipeRow[];
+}
+
 export function setArtifactVisibility(planId: string, visibility: "private" | "public"): void {
   db().prepare("UPDATE artifacts SET visibility = ? WHERE plan_id = ?").run(visibility, planId);
 }

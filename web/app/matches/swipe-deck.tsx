@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { DAY_LABELS } from "@/lib/availability";
 
 export interface SwipeCard {
+  handle: string; // match candidate's handle — the persistence key
   match_name: string;
   score: number; // cosine similarity 0..1
   reasons: string[];
@@ -19,9 +20,11 @@ export interface SwipeCard {
 export function SwipeDeck({
   cards,
   onAdvance,
+  onDecide,
 }: {
   cards: SwipeCard[];
   onAdvance?: (nextIndex: number) => void;
+  onDecide?: (index: number, decision: "pass" | "intro") => void;
 }) {
   const [top, setTop] = useState(0);
   const [drag, setDrag] = useState<{ dx: number; dy: number } | null>(null);
@@ -33,17 +36,24 @@ export function SwipeDeck({
   const remaining = cards.slice(top);
 
   function fling(dir: "left" | "right") {
+    const card = remaining[0];
+    const decision = dir === "right" ? "intro" : "pass";
+    onDecide?.(top, decision);
+    void fetch("/api/swipes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ match_handle: card.handle, decision }),
+    });
     if (dir === "right") {
-      setToast(`🐶 on it — texting ${remaining[0].match_name} an intro`);
+      setToast(`🐶 on it — texting ${card.match_name} an intro`);
       if (toastTimer.current) clearTimeout(toastTimer.current);
       toastTimer.current = setTimeout(() => setToast(null), 2600);
     }
     setLeaving(dir);
+    const next = top + 1;
     setTimeout(() => {
-      setTop((t) => {
-        onAdvance?.(t + 1);
-        return t + 1;
-      });
+      setTop(next);
+      onAdvance?.(next);
       setLeaving(null);
       setDrag(null);
     }, 260);
@@ -133,7 +143,7 @@ export function SwipeDeck({
             {isTop && (
               <div className="swipe-actions">
                 <button className="round pass" onClick={() => fling("left")} aria-label="pass">✕</button>
-                <button className="round like" onClick={() => fling("right")} aria-label="beagle intros you" title="beagle texts the intro">🐶</button>
+                <button className="round like" onClick={() => fling("right")} aria-label="beagle intros you" title="beagle texts the intro">✓</button>
               </div>
             )}
           </div>
