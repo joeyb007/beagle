@@ -298,3 +298,36 @@ async def test_step_failure_aborts_with_friendly_group_message(group_invoke):
     group_texts = deps["messaging"].texts_to("g1")
     assert group_texts and "try again" in group_texts[-1].lower()
     assert "g1" not in orch.sessions
+
+
+# ---------------- solo mode: the DM with the line doubles as the group chat
+
+
+async def test_solo_dm_doubles_as_group_chat():
+    """One allowlisted human: invoke chat == fan-out DM == poll chat."""
+    from src.agent.stubs import StubProfileStore as SPS
+    from src.contracts import Profile
+
+    solo_profile = Profile(handle="+16475550132", name="Joseph", cuisines=["sushi"],
+                           constraint_score=0.5)
+    llm = ScriptedLLM(rules=[
+        ("Joseph", "yo joseph — sat or sun?"),
+        ("only do saturday evening", RAYHAN_STATE),
+    ])
+    orch, deps = make_orchestrator(llm=llm, venues=FakeVenues(),
+                                   profiles=SPS([solo_profile]))
+    dm_chat = "dm-+16475550132"  # StubMessaging.open_direct returns this id
+
+    # invoke arrives in the SAME chat the fan-out DM will use
+    await orch.handle_inbound(InboundMessage(
+        handle="+16475550132", chat_id=dm_chat, text="Hey Beagle, let's hang"))
+    assert dm_chat in orch.sessions
+    assert orch.sessions[dm_chat].state == "collect"
+
+    # the reply in that same chat is collected, not ignored
+    await orch.handle_inbound(InboundMessage(
+        handle="+16475550132", chat_id=dm_chat,
+        text="i can only do saturday evening, sushi pls, no clubs"))
+    active = orch.sessions[dm_chat]
+    assert active.state == "vote"           # quorum of 1 → straight to poll
+    assert deps["messaging"].polls[0][0] == dm_chat  # poll lands in the DM

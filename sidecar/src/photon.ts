@@ -175,7 +175,21 @@ export async function createRealPhoton(): Promise<PhotonLayer> {
     try {
       for await (const [space, message] of app.messages) {
         spaces.set(space.id, space);
-        emit(mapSpectrumInbound(space, message, polls));
+        const mapped = mapSpectrumInbound(space, message, polls);
+        if (mapped) {
+          emit(mapped);
+        } else {
+          // Recon: show exactly what arrived so mapping gaps are diagnosable
+          console.error(
+            "[sidecar] unmapped event:",
+            JSON.stringify({
+              direction: (message as any)?.direction,
+              sender: (message as any)?.sender?.id,
+              space: space.id,
+              content: (message as any)?.content,
+            }).slice(0, 600)
+          );
+        }
       }
     } catch (err) {
       console.error("[sidecar] spectrum message stream ended:", err);
