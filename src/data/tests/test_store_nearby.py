@@ -17,6 +17,7 @@ def db(tmp_path):
     for handle, name, extra in [
         ("+1", "Friend", {}),
         ("+2", "Candidate", {"nearby": True}),
+        ("+3", "Benched", {"bench": True}),
     ]:
         conn.execute(
             "INSERT INTO profiles (handle, name, json, constraint_score) VALUES (?, ?, ?, 0.5)",
