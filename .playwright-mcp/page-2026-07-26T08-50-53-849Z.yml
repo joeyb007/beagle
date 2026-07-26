@@ -1,0 +1,88 @@
+- generic [active] [ref=f22e1]:
+  - generic [ref=f22e2]:
+    - navigation [ref=f22e3]:
+      - button [ref=f22e4] [cursor=pointer]
+      - link [ref=f22e12] [cursor=pointer]:
+        - /url: /
+      - link [ref=f22e17] [cursor=pointer]:
+        - /url: /matches
+      - link [ref=f22e24] [cursor=pointer]:
+        - /url: /chats
+      - link [ref=f22e28] [cursor=pointer]:
+        - /url: /hangouts
+      - generic [ref=f22e101]:
+        - generic: Joseph
+        - button "sign out" [ref=f22e107] [cursor=pointer]
+    - main [ref=f22e40]:
+      - generic [ref=f22e108]:
+        - paragraph [ref=f22e109]: beagle's read on you
+        - heading "Joseph — the planner" [level=1] [ref=f22e110]:
+          - text: Joseph
+          - generic [ref=f22e111]: — the planner
+        - paragraph [ref=f22e112]:
+          - text: Earned from your messages · keeps the group alive —
+          - link "correct anything" [ref=f22e113] [cursor=pointer]:
+            - /url: /profiles
+          - text: .
+        - generic [ref=f22e114]:
+          - generic [ref=f22e115]:
+            - generic [ref=f22e116]: beagle's take
+            - button "refresh beagle's take" [ref=f22e117] [cursor=pointer]: ↻
+          - paragraph [ref=f22e118]: beagle's brain is napping — start the agent to hear its take 🐶
+        - generic [ref=f22e119]:
+          - generic [ref=f22e120]:
+            - heading "Up next" [level=2] [ref=f22e121]
+            - paragraph [ref=f22e122]: Golden Gate Park picnic
+            - paragraph [ref=f22e123]: in 7 days · with Jules
+            - link "see the plan →" [ref=f22e124] [cursor=pointer]:
+              - /url: /hangouts/plan-demo-3
+          - generic [ref=f22e125]:
+            - heading "Your people" [level=2] [ref=f22e126]
+            - paragraph [ref=f22e127]: Maya
+            - paragraph [ref=f22e128]: most-seen face · 2 hangouts
+          - generic [ref=f22e129]:
+            - heading "On this day-ish" [level=2] [ref=f22e130]
+            - generic [ref=f22e131]:
+              - link [ref=f22e132] [cursor=pointer]:
+                - /url: /hangouts/plan-demo-1
+                - img "memory from Ebisu Sushi" [ref=f22e133]
+              - generic [ref=f22e134]:
+                - paragraph [ref=f22e135]: Ebisu Sushi
+                - paragraph [ref=f22e136]: July 2026
+                - button "✨ remind the group" [ref=f22e137] [cursor=pointer]
+        - generic [ref=f22e138]:
+          - generic [ref=f22e139]:
+            - heading "Taste" [level=2] [ref=f22e140]
+            - generic [ref=f22e141]:
+              - generic [ref=f22e142]: sushi
+              - generic [ref=f22e143]: tacos
+              - generic [ref=f22e144]: low-key
+              - generic [ref=f22e145]: no clubs
+          - generic [ref=f22e146]:
+            - heading "When you're around" [level=2] [ref=f22e147]
+            - generic [ref=f22e148]:
+              - generic [ref=f22e149]: M
+              - generic [ref=f22e150]: T
+              - generic [ref=f22e151]: W
+              - generic [ref=f22e152]: T
+              - generic [ref=f22e153]: F
+              - generic [ref=f22e154]: S
+              - generic [ref=f22e155]: S
+            - paragraph [ref=f22e156]: weekend evenings
+          - generic [ref=f22e157]:
+            - heading "Pickiness" [level=2] [ref=f22e158]
+            - paragraph [ref=f22e161]: somewhere in the middle
+        - generic "photos from your past hangouts" [ref=f22e162]:
+          - generic [ref=f22e165]:
+            - img "memory from Ebisu Sushi" [ref=f22e167]
+            - img "memory from Ebisu Sushi" [ref=f22e169]
+            - img "memory from Ebisu Sushi" [ref=f22e171]
+            - img "memory from Tacos El Rey" [ref=f22e173]
+            - img "memory from Tacos El Rey" [ref=f22e175]
+            - img "memory from Ebisu Sushi" [ref=f22e177]
+            - img "memory from Ebisu Sushi" [ref=f22e179]
+            - img "memory from Ebisu Sushi" [ref=f22e181]
+            - img "memory from Tacos El Rey" [ref=f22e183]
+            - img "memory from Tacos El Rey" [ref=f22e185]
+  - button "Open Next.js Dev Tools" [ref=f22e96] [cursor=pointer]
+  - alert [ref=f22e100]

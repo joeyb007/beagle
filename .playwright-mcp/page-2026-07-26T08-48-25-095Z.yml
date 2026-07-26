@@ -1,0 +1,62 @@
+- generic:
+  - generic [active]:
+    - generic [ref=f20e3]:
+      - generic [ref=f20e4]:
+        - navigation [ref=f20e6]:
+          - button [disabled] [ref=f20e7]:
+            - img "previous" [ref=f20e8]
+          - generic [ref=f20e10]:
+            - generic [ref=f20e11]: 1/
+            - text: "1"
+          - button [disabled] [ref=f20e12]:
+            - img "next" [ref=f20e13]
+        - link "Next.js 15.5.22 (outdated) Webpack" [ref=f20e16] [cursor=pointer]:
+          - /url: https://nextjs.org/docs/messages/version-staleness
+          - generic "An outdated version detected (latest is 16.2.12), upgrade is highly recommended!" [ref=f20e19]: Next.js 15.5.22 (outdated)
+          - generic [ref=f20e20]: Webpack
+      - generic [ref=f20e21]:
+        - dialog "Runtime Error" [ref=f20e22]:
+          - generic [ref=f20e25]:
+            - generic [ref=f20e26]:
+              - generic [ref=f20e27]:
+                - generic [ref=f20e28]: Runtime Error
+                - generic [ref=f20e30]:
+                  - button "Copy Error Info" [ref=f20e31] [cursor=pointer]
+                  - button "No related documentation found" [disabled] [ref=f20e34]
+                  - link "Learn more about enabling Node.js inspector for server code with Chrome DevTools" [ref=f20e37] [cursor=pointer]:
+                    - /url: https://nextjs.org/docs/app/building-your-application/configuring/debugging#server-side-code
+              - generic [ref=f20e46]:
+                - paragraph [ref=f20e47]: "Cannot find module './331.js' Require stack: - /Users/josephbarbosa/Desktop/beagle/web/.next/server/webpack-runtime.js - /Users/josephbarbosa/Desktop/beagle/web/.next/server/pages/_document.js - /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/require.js - /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/load-components.js - /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/build/utils.js - /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/build/swc/options.js - /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/build/swc/index.js - /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/build/analysis/parse-module.js - /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/build/analysis/get-page-static-info.js - /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js - /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/lib/router-server.js - /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/lib/start-server.js"
+                - button "Show More" [ref=f20e49] [cursor=pointer]
+            - generic [ref=f20e51]:
+              - generic [ref=f20e52]:
+                - paragraph [ref=f20e53]:
+                  - text: Call Stack
+                  - generic [ref=f20e54]: "43"
+                - button "Show 41 ignore-listed frame(s)" [ref=f20e55] [cursor=pointer]
+              - generic [ref=f20e58]:
+                - generic [ref=f20e59]: <unknown>
+                - text: .next/server/app/page.js (2:9013)
+              - generic [ref=f20e60]:
+                - generic [ref=f20e61]: Object.<anonymous>
+                - text: .next/server/app/page.js (2:9070)
+          - generic [ref=f20e62]:
+            - generic [ref=f20e63]: "1"
+            - generic [ref=f20e64]: "2"
+        - contentinfo [ref=f20e65]:
+          - region "Error feedback" [ref=f20e66]:
+            - paragraph [ref=f20e67]:
+              - link "Was this helpful?" [ref=f20e68] [cursor=pointer]:
+                - /url: https://nextjs.org/telemetry#error-feedback
+            - button "Mark as helpful" [ref=f20e69] [cursor=pointer]
+            - button "Mark as not helpful" [ref=f20e73] [cursor=pointer]
+    - generic [ref=f20e80] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=f20e81]
+      - generic [ref=f20e85]:
+        - button "Open issues overlay" [ref=f20e86]:
+          - generic [ref=f20e87]:
+            - generic [ref=f20e88]: "0"
+            - generic [ref=f20e89]: "1"
+          - generic [ref=f20e90]: Issue
+        - button "Collapse issues badge" [ref=f20e91]
+  - alert [ref=f20e94]

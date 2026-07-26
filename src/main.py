@@ -14,6 +14,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from src.agent.beagle_take import beagle_take
 from src.agent.memory_chat import chat_about_memory
 from src.agent.sparks import SparkWorker
 from src.wiring import REPO_ROOT, build_orchestrator
@@ -57,6 +58,22 @@ async def memory_chat(req: MemoryChatRequest) -> dict:
         history=req.history,
     )
     return {"reply": reply}
+
+
+class BeagleTakeRequest(BaseModel):
+    handle: str
+    refresh: bool = False
+
+
+@app.post("/api/beagle-take")
+async def beagle_take_endpoint(req: BeagleTakeRequest) -> dict:
+    take = await beagle_take(
+        app.state.orchestrator._llm,
+        os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
+        handle=req.handle,
+        refresh=req.refresh,
+    )
+    return {"take": take}
 
 
 @app.get("/health")

@@ -22,20 +22,34 @@ function datePhrase(iso: string): string {
 
 export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
   const [card, setCard] = useState<CardState | null>(null);
+  const [closing, setClosing] = useState(false);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const strip = memories.length ? [...memories, ...memories] : [];
 
-  function show(e: React.MouseEvent, memory: PhotoMemory) {
+  function clearTimers() {
     if (hideTimer.current) clearTimeout(hideTimer.current);
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  }
+  function show(e: React.MouseEvent, memory: PhotoMemory) {
+    clearTimers();
+    setClosing(false);
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     setCard({ memory, x: rect.left + rect.width / 2, y: rect.top });
   }
   function scheduleHide() {
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(() => setCard(null), 450);
+    clearTimers();
+    hideTimer.current = setTimeout(() => {
+      setClosing(true);
+      closeTimer.current = setTimeout(() => {
+        setCard(null);
+        setClosing(false);
+      }, 180);
+    }, 450);
   }
   function cancelHide() {
-    if (hideTimer.current) clearTimeout(hideTimer.current);
+    clearTimers();
+    setClosing(false);
   }
 
   if (strip.length === 0) {
@@ -51,7 +65,6 @@ export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
       <div
         className={`string-wrap${card ? " paused" : ""}`}
         aria-label="photos from your past hangouts"
-        onMouseLeave={scheduleHide}
       >
         <div className="string-inner">
         <div className="string-line" />
@@ -63,6 +76,7 @@ export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
               className="string-print"
               style={{ ["--tilt" as string]: `${(i % 5) - 2}deg` }}
               onMouseEnter={(e) => show(e, m)}
+              onMouseLeave={scheduleHide}
             >
               <img src={m.src} alt={`memory from ${m.place}`} />
             </div>
@@ -73,7 +87,7 @@ export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
 
       {card && (
         <div
-          className="memory-pop"
+          className={`memory-pop${closing ? " closing" : ""}`}
           style={{ left: card.x, top: card.y }}
           onMouseEnter={cancelHide}
           onMouseLeave={scheduleHide}

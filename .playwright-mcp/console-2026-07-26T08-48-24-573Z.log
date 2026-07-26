@@ -1,0 +1,87 @@
+[     309ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/:0
+[     447ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom-client.development.js:28004
+[     463ms] Error: Cannot find module './331.js'
+Require stack:
+- /Users/josephbarbosa/Desktop/beagle/web/.next/server/webpack-runtime.js
+- /Users/josephbarbosa/Desktop/beagle/web/.next/server/pages/_document.js
+- /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/require.js
+- /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/load-components.js
+- /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/build/utils.js
+- /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/build/swc/options.js
+- /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/build/swc/index.js
+- /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/build/analysis/parse-module.js
+- /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/build/analysis/get-page-static-info.js
+- /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/lib/router-server.js
+- /Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/lib/start-server.js
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1405:15)
+    at <unknown> (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/require-hook.js:57:36)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1061:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1066:22)
+    at Module._load (node:internal/modules/cjs/loader:1215:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1491:12)
+    at mod.require (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/require-hook.js:68:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (file:///Users/josephbarbosa/Desktop/beagle/web/.next/server/webpack-runtime.js:195:28)
+    at <unknown> (file:///Users/josephbarbosa/Desktop/beagle/web/.next/server/webpack-runtime.js:108:40)
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (file:///Users/josephbarbosa/Desktop/beagle/web/.next/server/webpack-runtime.js:107:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (file:///Users/josephbarbosa/Desktop/beagle/web/.next/server/webpack-runtime.js:159:22)
+    at <unknown> (file:///Users/josephbarbosa/Desktop/beagle/web/.next/server/app/page.js:2:9013)
+    at Object.<anonymous> (file:///Users/josephbarbosa/Desktop/beagle/web/.next/server/app/page.js:2:9070)
+    at Module._compile (node:internal/modules/cjs/loader:1734:14)
+    at Object..js (node:internal/modules/cjs/loader:1899:10)
+    at Module.load (node:internal/modules/cjs/loader:1469:32)
+    at Module._load (node:internal/modules/cjs/loader:1286:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1491:12)
+    at mod.require (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/require-hook.js:68:28)
+    at require (node:internal/modules/helpers:135:16)
+    at requirePage (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/require.js:99:80)
+    at loadComponentsImpl (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/load-components.js:132:57)
+    at async DevServer.findPageComponentsImpl (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/next-server.js:900:36)
+    at async DevServer.findPageComponents (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/dev/next-dev-server.js:706:16)
+    at async DevServer.renderPageComponent (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/base-server.js:1468:24)
+    at async DevServer.renderToResponseImpl (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/base-server.js:1522:32)
+    at async DevServer.pipeImpl (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/base-server.js:1026:25)
+    at async NextNodeServer.handleCatchallRenderRequest (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/next-server.js:394:17)
+    at async DevServer.handleRequestImpl (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/base-server.js:917:17)
+    at async (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/dev/next-dev-server.js:400:20)
+    at async Span.traceAsyncFn (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/dev/next-dev-server.js:396:24)
+    at async invokeRender (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/lib/router-server.js:240:21)
+    at async handleRequest (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/lib/router-server.js:437:24)
+    at async requestHandlerImpl (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/lib/router-server.js:485:13)
+    at async Server.requestListener (file:///Users/josephbarbosa/Desktop/beagle/web/node_modules/next/dist/server/lib/start-server.js:226:13)
+[     460ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:45
+[   11366ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed:  @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   12378ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   13380ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   14383ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   15391ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   16400ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   21408ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   26422ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   31438ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   36480ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   41501ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   46586ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   51805ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   57424ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   63618ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:88
+[   84893ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:45
+[   84928ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/webpack/cef08ac5c551f93a.webpack.hot-update.json:0
+[   84929ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:347
+[   85605ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:206
+[   89855ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/webpack/cef08ac5c551f93a.webpack.hot-update.json:0
+[   89856ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:347
+[   91428ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:206
+[   91604ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/webpack/cef08ac5c551f93a.webpack.hot-update.json:0
+[   91604ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:347
+[   92556ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[   95335ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[   95457ms] [LOG] [Fast Refresh] done in 122ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/report-hmr-latency.js:13

@@ -527,6 +527,16 @@ table.data { font-size: 12.5px; }
    page-load fade (whose opacity:0 was re-applying after pop-in finished) */
 .page-anim > .memory-pop { opacity: 1; animation: pop-in 0.18s ease-out; }
 
+/* unhover: fade + settle back down before unmount */
+@keyframes pop-out {
+  from { opacity: 1; transform: translate(-50%, calc(-100% - 12px)); }
+  to { opacity: 0; transform: translate(-50%, calc(-100% - 4px)); }
+}
+.page-anim > .memory-pop.closing {
+  animation: pop-out 0.18s ease-in forwards;
+  pointer-events: none;
+}
+
 /* ---- spark button phases ---- */
 .spark { display: inline-flex; align-items: center; gap: 7px; }
 .spark.sent { color: var(--fern); border-color: var(--fern); }
@@ -576,3 +586,36 @@ table.data { font-size: 12.5px; }
 .string-inner { position: relative; padding-top: 26px; }
 .string-inner .string-line { top: 20px; }
 .string-print img { width: clamp(150px, 12vw, 230px); height: auto; aspect-ratio: 75 / 59; }
+
+/* ---- home widgets: the take bar + 3-box row ---- */
+.take-bar {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+.take-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.take-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.take-refresh {
+  font: inherit; font-size: 14px; line-height: 1; cursor: pointer;
+  border: none; background: none; color: var(--muted); padding: 2px 4px; border-radius: 4px;
+}
+.take-refresh:hover:not(:disabled) { color: var(--ink); background: var(--rail); }
+.take-refresh:disabled { cursor: default; }
+.take-text { font-family: var(--serif); font-style: italic; font-size: 16.5px; line-height: 1.55; color: var(--ink); margin: 0; }
+.widget-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+@media (max-width: 900px) { .widget-row { grid-template-columns: 1fr; } }
+.widget h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; color: var(--muted); }
+.widget-big { font-weight: 600; font-size: 17px; margin: 0; }
+.widget a { color: var(--blue); text-decoration: none; font-size: 13.5px; }
+.widget a:hover { text-decoration: underline; }
+.otd { display: flex; gap: 14px; align-items: flex-start; }
+.otd-photo img {
+  width: 92px; height: auto; aspect-ratio: 75 / 59; object-fit: cover;
+  border: 1px solid var(--line); border-radius: 4px; display: block;
+  background: #fff; padding: 4px 4px 12px;
+  transform: rotate(-2deg); transition: transform 0.15s ease-in-out;
+}
+.otd-photo:hover img { transform: rotate(0deg) scale(1.04); }
+.otd-body { min-width: 0; }

@@ -208,6 +208,88 @@ export function photoMemories(handle: string): PhotoMemory[] {
     });
 }
 
+// ------------------------------------------------------------- home widgets
+
+export interface UpcomingHangout {
+  plan_id: string;
+  place: string;
+  time: string;
+  others: string[];
+}
+
+function nameMap(conn: Database.Database): Map<string, string> {
+  return new Map(
+    (conn.prepare("SELECT handle, name FROM profiles").all() as { handle: string; name: string }[])
+      .map((r) => [r.handle, r.name])
+  );
+}
+
+export function upcomingFor(handle: string): UpcomingHangout | null {
+  const conn = db();
+  const rows = conn
+    .prepare("SELECT plan_id, place, time, attendees FROM artifacts WHERE time > datetime('now') ORDER BY time ASC")
+    .all() as { plan_id: string; place: string; time: string; attendees: string }[];
+  const mine = rows.find((r) => (JSON.parse(r.attendees) as string[]).includes(handle));
+  if (!mine) return null;
+  const names = nameMap(conn);
+  return {
+    plan_id: mine.plan_id,
+    place: (JSON.parse(mine.place) as { name: string }).name,
+    time: mine.time,
+    others: (JSON.parse(mine.attendees) as string[]).filter((h) => h !== handle).map((h) => names.get(h) ?? h),
+  };
+}
+
+export interface PeopleStats {
+  mostSeen: { name: string; count: number } | null;
+  longestUnseen: { name: string; lastTime: string } | null;
+}
+
+export function peopleStats(handle: string): PeopleStats {
+  const conn = db();
+  const rows = conn
+    .prepare("SELECT time, attendees FROM artifacts WHERE time <= datetime('now') ORDER BY time ASC")
+    .all() as { time: string; attendees: string }[];
+  const counts = new Map<string, { count: number; lastTime: string }>();
+  for (const r of rows) {
+    const attendees = JSON.parse(r.attendees) as string[];
+    if (!attendees.includes(handle)) continue;
+    for (const h of attendees) {
+      if (h === handle) continue;
+      const entry = counts.get(h) ?? { count: 0, lastTime: r.time };
+      entry.count += 1;
+      entry.lastTime = r.time; // rows are time-ascending
+      counts.set(h, entry);
+    }
+  }
+  if (counts.size === 0) return { mostSeen: null, longestUnseen: null };
+  const names = nameMap(conn);
+  const entries = [...counts.entries()];
+  const most = entries.reduce((a, b) => (b[1].count > a[1].count ? b : a));
+  const unseen = entries.reduce((a, b) => (b[1].lastTime < a[1].lastTime ? b : a));
+  return {
+    mostSeen: { name: names.get(most[0]) ?? most[0], count: most[1].count },
+    longestUnseen: { name: names.get(unseen[0]) ?? unseen[0], lastTime: unseen[1].lastTime },
+  };
+}
+
+/** Distance in days between two dates on the calendar wheel (ignoring year). */
+function anniversaryDistance(a: Date, b: Date): number {
+  const dayMs = 24 * 3600 * 1000;
+  const doy = (d: Date) => Math.floor((d.getTime() - new Date(d.getFullYear(), 0, 0).getTime()) / dayMs);
+  const diff = Math.abs(doy(a) - doy(b));
+  return Math.min(diff, 365 - diff);
+}
+
+export function onThisDay(handle: string): PhotoMemory | null {
+  const now = new Date();
+  const candidates = photoMemories(handle).filter((m) => new Date(m.time) <= now);
+  if (candidates.length === 0) return null;
+  return candidates.reduce((a, b) =>
+    anniversaryDistance(new Date(b.time), now) < anniversaryDistance(new Date(a.time), now) ? b : a
+  );
+}
+
 export function createSpark(planId: string, requestedBy: string, photo?: string): void {
   db()
     .prepare("INSERT INTO sparks (plan_id, requested_by, photo) VALUES (?, ?, ?)")
