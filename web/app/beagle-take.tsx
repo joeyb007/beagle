@@ -1,7 +1,9 @@
 "use client";
 // The long bar: Beagle's written read on you. Cached in the profile row;
-// fetched from the agent on first view, refreshable on demand.
+// fetched from the agent on first view, refreshable on demand. Opens into a
+// chat pane for asking about your own analytics.
 import { useEffect, useState } from "react";
+import { MemoryChat } from "@/app/memory-chat";
 
 export function BeagleTake({ handle, initial }: { handle: string; initial: string | null }) {
   const [take, setTake] = useState(initial);
@@ -44,6 +46,14 @@ export function BeagleTake({ handle, initial }: { handle: string; initial: strin
       <p className="take-text">
         {take ?? (busy ? "reading back through everything…" : "beagle's brain is napping — start the agent to hear its take 🐶")}
       </p>
+      <div className="take-chat">
+        <MemoryChat
+          compact
+          endpoint="/api/profile-chat"
+          body={{ handle }}
+          placeholder="ask beagle anything about you — who you see most, where you always end up…"
+        />
+      </div>
     </div>
   );
 }

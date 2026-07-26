@@ -1,0 +1,103 @@
+- generic [ref=f7e2]:
+  - navigation [ref=f7e3]:
+    - button [ref=f7e4] [cursor=pointer]
+    - link [ref=f7e12] [cursor=pointer]:
+      - /url: /
+    - link [ref=f7e17] [cursor=pointer]:
+      - /url: /matches
+    - link [ref=f7e24] [cursor=pointer]:
+      - /url: /chats
+    - link [ref=f7e28] [cursor=pointer]:
+      - /url: /hangouts
+    - generic [ref=f7e34]:
+      - generic: Joseph
+      - button "sign out" [ref=f7e40] [cursor=pointer]
+  - main [ref=f7e41]:
+    - generic [ref=f7e42]:
+      - paragraph [ref=f7e43]: beagle's read on you
+      - heading "Joseph — the planner" [level=1] [ref=f7e44]:
+        - text: Joseph
+        - generic [ref=f7e45]: — the planner
+      - paragraph [ref=f7e46]:
+        - text: Earned from your messages · keeps the thread alive; will drive if someone else picks the playlist —
+        - link "correct anything" [ref=f7e47] [cursor=pointer]:
+          - /url: /profiles
+        - text: .
+      - generic [ref=f7e48]:
+        - generic [ref=f7e49]:
+          - generic [ref=f7e50]: beagle's take
+          - button "refresh beagle's take" [ref=f7e51] [cursor=pointer]: ↻
+        - paragraph [ref=f7e52]: you're the one keeping the thread alive fr, always down for sushi or tacos and somehow always driving if someone else picks the playlist. low-key outdoors energy, no clubs ever — picnics, hikes, road trips with no plan, that's your speed. weekend evenings work best and honestly your solo omakase night says a lot, you're good just doing your own thing too 🐕
+        - button "ask beagle about your year →" [ref=f7e53] [cursor=pointer]
+      - generic [ref=f7e54]:
+        - generic [ref=f7e55]:
+          - heading "Up next" [level=2] [ref=f7e56]
+          - paragraph [ref=f7e57]: Golden Gate Park picnic
+          - paragraph [ref=f7e58]: in 8 days · with Madhav & Anthony & Max
+          - link "see the plan →" [ref=f7e59] [cursor=pointer]:
+            - /url: /hangouts/plan-ggp-picnic
+        - generic [ref=f7e60]:
+          - heading "Your people" [level=2] [ref=f7e61]
+          - paragraph [ref=f7e62]: Madhav
+          - paragraph [ref=f7e63]: most-seen face · 5 hangouts
+        - generic [ref=f7e64]:
+          - heading "On this day-ish" [level=2] [ref=f7e65]
+          - generic [ref=f7e66]:
+            - link [ref=f7e67] [cursor=pointer]:
+              - /url: /hangouts/plan-twin-peaks
+              - img "memory from Twin Peaks sunset" [ref=f7e68]
+            - generic [ref=f7e69]:
+              - paragraph [ref=f7e70]: Twin Peaks sunset
+              - paragraph [ref=f7e71]: July 2025
+              - button "✨ remind the group" [ref=f7e72] [cursor=pointer]
+      - generic [ref=f7e73]:
+        - generic [ref=f7e74]:
+          - heading "Taste" [level=2] [ref=f7e75]
+          - generic [ref=f7e76]:
+            - generic [ref=f7e77]: sushi
+            - generic [ref=f7e78]: tacos
+            - generic [ref=f7e79]: low-key
+            - generic [ref=f7e80]: outdoors
+            - generic [ref=f7e81]: no clubs
+        - generic [ref=f7e82]:
+          - heading "When you're around" [level=2] [ref=f7e83]
+          - generic [ref=f7e84]:
+            - generic [ref=f7e85]: M
+            - generic [ref=f7e86]: T
+            - generic [ref=f7e87]: W
+            - generic [ref=f7e88]: T
+            - generic [ref=f7e89]: F
+            - generic [ref=f7e90]: S
+            - generic [ref=f7e91]: S
+          - paragraph [ref=f7e92]: weekend evenings
+        - generic [ref=f7e93]:
+          - heading "Pickiness" [level=2] [ref=f7e94]
+          - paragraph [ref=f7e97]: somewhere in the middle
+      - generic "photos from your past hangouts" [ref=f7e98]:
+        - generic [ref=f7e101]:
+          - img "memory from Harbor night walk" [ref=f7e103]
+          - img "memory from Cascade Falls hike" [ref=f7e105]
+          - img "memory from Cascade Falls hike" [ref=f7e107]
+          - img "memory from Cascade Falls hike" [ref=f7e109]
+          - img "memory from Canyon road trip" [ref=f7e111]
+          - img "memory from Canyon road trip" [ref=f7e113]
+          - img "memory from Canyon road trip" [ref=f7e115]
+          - img "memory from Aurora watch" [ref=f7e117]
+          - img "memory from Aurora watch" [ref=f7e119]
+          - img "memory from Tahoe snow day" [ref=f7e121]
+          - img "memory from Tahoe snow day" [ref=f7e123]
+          - img "memory from Twin Peaks sunset" [ref=f7e125]
+          - img "memory from Twin Peaks sunset" [ref=f7e127]
+          - img "memory from Harbor night walk" [ref=f7e129]
+          - img "memory from Cascade Falls hike" [ref=f7e131]
+          - img "memory from Cascade Falls hike" [ref=f7e133]
+          - img "memory from Cascade Falls hike" [ref=f7e135]
+          - img "memory from Canyon road trip" [ref=f7e137]
+          - img "memory from Canyon road trip" [ref=f7e139]
+          - img "memory from Canyon road trip" [ref=f7e141]
+          - img "memory from Aurora watch" [ref=f7e143]
+          - img "memory from Aurora watch" [ref=f7e145]
+          - img "memory from Tahoe snow day" [ref=f7e147]
+          - img "memory from Tahoe snow day" [ref=f7e149]
+          - img "memory from Twin Peaks sunset" [ref=f7e151]
+          - img "memory from Twin Peaks sunset" [ref=f7e153]

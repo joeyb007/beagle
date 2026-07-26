@@ -3,18 +3,22 @@
 import { redirect } from "next/navigation";
 import { nearbyMatches } from "@/lib/similarity";
 import { currentUser } from "@/lib/session";
-import { SwipeCard, SwipeDeck } from "./swipe-deck";
+import { MatchStage } from "./match-stage";
+import { SwipeCard } from "./swipe-deck";
 
 export default async function Matches() {
   const user = await currentUser();
   if (!user) redirect("/login");
 
-  const cards: SwipeCard[] = nearbyMatches(user.handle).map((m) => ({
+  const matches = nearbyMatches(user.handle);
+  const cards: SwipeCard[] = matches.map((m) => ({
     match_name: m.name,
     score: m.score,
     reasons: m.reasons,
     days: m.days,
     km: m.km,
+    persona: m.persona,
+    tastes: m.tastes,
   }));
 
   return (
@@ -22,9 +26,10 @@ export default async function Matches() {
       <p className="eyebrow">people nearby</p>
       <h1>You&apos;d actually click</h1>
       <p className="sub">
-        Ranked by cosine similarity over earned taste — not a signup form. Drag, or use the buttons.
+        {matches.length} people within range, ranked by cosine similarity over earned taste — not a
+        signup form. Drag, or use the buttons.
       </p>
-      <SwipeDeck cards={cards} />
+      <MatchStage cards={cards} />
     </>
   );
 }

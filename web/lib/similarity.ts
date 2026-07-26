@@ -40,6 +40,8 @@ export interface NearbyMatch {
   km: number | null;
   days: number[]; // their real availability
   reasons: string[];
+  persona: string | null;
+  tastes: string[]; // their cuisines + vibes, for chips
 }
 
 function sharedReasons(mine: Taste, theirs: Taste): string[] {
@@ -73,6 +75,8 @@ export function nearbyMatches(handle: string): NearbyMatch[] {
       km: typeof p.data.km === "number" ? (p.data.km as number) : null,
       days: availableDays(p.data.typical_availability ?? null),
       reasons: sharedReasons(mine.data, p.data),
+      persona: p.data.persona_label ?? null,
+      tastes: [...(p.data.cuisines ?? []), ...(p.data.vibe ?? [])],
     }))
     .sort((a, b) => b.score - a.score);
 }

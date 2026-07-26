@@ -10,9 +10,17 @@ export interface SwipeCard {
   reasons: string[];
   days: number[];
   km: number | null;
+  persona: string | null;
+  tastes: string[];
 }
 
-export function SwipeDeck({ cards }: { cards: SwipeCard[] }) {
+export function SwipeDeck({
+  cards,
+  onAdvance,
+}: {
+  cards: SwipeCard[];
+  onAdvance?: (nextIndex: number) => void;
+}) {
   const [top, setTop] = useState(0);
   const [drag, setDrag] = useState<{ dx: number; dy: number } | null>(null);
   const [leaving, setLeaving] = useState<"left" | "right" | null>(null);
@@ -26,7 +34,10 @@ export function SwipeDeck({ cards }: { cards: SwipeCard[] }) {
   function fling(dir: "left" | "right") {
     setLeaving(dir);
     setTimeout(() => {
-      setTop((t) => t + 1);
+      setTop((t) => {
+        onAdvance?.(t + 1);
+        return t + 1;
+      });
       setLeaving(null);
       setDrag(null);
     }, 260);
@@ -74,11 +85,17 @@ export function SwipeDeck({ cards }: { cards: SwipeCard[] }) {
               <span className="avatar lg">{c.match_name[0]}</span>
               <div>
                 <div className="swipe-name">{c.match_name}</div>
+                {c.persona && <div className="swipe-persona">{c.persona}</div>}
                 <div className="muted">
                   {Math.round(c.score * 100)}% similar{c.km != null && <> · {c.km} km away</>}
                 </div>
               </div>
             </div>
+            {c.tastes.length > 0 && (
+              <div className="chips">
+                {c.tastes.map((t, j) => (<span key={j} className="chip chip-likes">{t}</span>))}
+              </div>
+            )}
             <div className="swipe-days">
               <span className="muted" style={{ fontSize: 12 }}>free this week</span>
               <div className="day-pills">
