@@ -113,17 +113,13 @@ export class PollBySpace {
 }
 
 export function mapSpectrumInbound(space: any, message: any, polls: PollBySpace): OutEvent | null {
-  if (message?.direction !== "inbound") return null;
-  const content = message.content;
-  if (content?.type === "text") {
-    return {
-      type: "message",
-      handle: message.sender?.id ?? "",
-      chatId: space.id,
-      text: content.text ?? "",
-    };
-  }
+  const content = message?.content;
+
+  // Votes are NOT direction-gated (per docs, poll_option is narrowed by content
+  // type only — the platform may stamp votes on our own poll as non-inbound).
+  // Guard against the agent's own actions via sender.kind instead.
   if (content?.type === "poll_option" && content.selected) {
+    if (message.sender?.kind === "agent") return null;
     const optionIndex = (content.poll?.options ?? []).findIndex(
       (o: any) => o.title === content.option?.title
     );
@@ -133,6 +129,16 @@ export function mapSpectrumInbound(space: any, message: any, polls: PollBySpace)
       handle: message.sender?.id ?? "",
       pollId: polls.idFor(space.id) ?? space.id,
       optionIndex,
+    };
+  }
+
+  if (message?.direction !== "inbound") return null;
+  if (content?.type === "text") {
+    return {
+      type: "message",
+      handle: message.sender?.id ?? "",
+      chatId: space.id,
+      text: content.text ?? "",
     };
   }
   return null;

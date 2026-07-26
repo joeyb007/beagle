@@ -126,3 +126,37 @@ test("spectrum unselect (retracted vote) is dropped", () => {
   };
   assert.equal(mapSpectrumInbound({ id: "group-1" } as any, message as any, polls), null);
 });
+
+test("poll_option maps regardless of direction (docs don't gate votes on it)", () => {
+  const polls = new PollBySpace();
+  polls.remember("group-1", "poll-msg-9");
+  for (const direction of ["outbound", undefined]) {
+    const message = {
+      direction,
+      sender: { id: "+15550000002" },
+      content: {
+        type: "poll_option",
+        selected: true,
+        option: { title: "works" },
+        poll: { options: [{ title: "works" }, { title: "nope" }] },
+      },
+    };
+    assert.deepEqual(mapSpectrumInbound({ id: "group-1" } as any, message as any, polls), {
+      type: "pollVote",
+      handle: "+15550000002",
+      pollId: "poll-msg-9",
+      optionIndex: 0,
+    }, `direction=${direction}`);
+  }
+});
+
+test("agent's own poll_option (sender.kind=agent) is dropped", () => {
+  const polls = new PollBySpace();
+  polls.remember("g", "p");
+  const message = {
+    direction: "outbound",
+    sender: { id: "+16282649335", kind: "agent" },
+    content: { type: "poll_option", selected: true, option: { title: "a" }, poll: { options: [{ title: "a" }] } },
+  };
+  assert.equal(mapSpectrumInbound({ id: "g" } as any, message as any, polls), null);
+});
