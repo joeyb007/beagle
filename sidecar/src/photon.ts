@@ -59,54 +59,68 @@ export class FakePhoton implements PhotonLayer {
   }
 }
 
+// ------------------------------------------------- event mapping (pure, tested)
+// Shapes verified against the installed SDK v2 .d.ts:
+//   MessageEvent "message.received": { chatGuid, isFromMe, actor?, message }
+//     with text at message.content.text
+//   PollEvent "poll.changed": { chatGuid, isFromMe, actor?, pollMessageGuid,
+//     delta: { type: "voted", optionIdentifier } | ... }
+
+export class PollOptionIndex {
+  private byPoll = new Map<string, string[]>();
+  remember(pollGuid: string, optionIdentifiers: string[]) {
+    this.byPoll.set(pollGuid, optionIdentifiers);
+  }
+  indexOf(pollGuid: string, optionIdentifier: string): number {
+    return (this.byPoll.get(pollGuid) ?? []).indexOf(optionIdentifier);
+  }
+}
+
+export function mapMessageEvent(e: any): OutEvent | null {
+  if (e?.type !== "message.received" || e.isFromMe) return null;
+  return {
+    type: "message",
+    handle: e.actor?.address ?? e.message?.sender?.address ?? "",
+    chatId: e.chatGuid ?? "",
+    text: e.message?.content?.text ?? "",
+  };
+}
+
+export function mapPollEvent(e: any, index: PollOptionIndex): OutEvent | null {
+  if (e?.type !== "poll.changed" || e.delta?.type !== "voted") return null;
+  const optionIndex = index.indexOf(e.pollMessageGuid, e.delta.optionIdentifier);
+  if (optionIndex < 0) return null; // unknown poll/option — not one of ours
+  return {
+    type: "pollVote",
+    handle: e.actor?.address ?? "",
+    pollId: e.pollMessageGuid,
+    optionIndex,
+  };
+}
+
 // ---------------------------------------------------------------- real layer
 
 export async function createRealPhoton(): Promise<PhotonLayer> {
-  const { createGrpcClient, parseMessageChangeEvent, parsePollChangeEvent } = await import(
-    "@photon-ai/advanced-imessage"
-  );
+  const { createGrpcClient } = await import("@photon-ai/advanced-imessage");
   const client: any = createGrpcClient({
-    address: process.env.IMESSAGE_ADDRESS!,
+    address: process.env.IMESSAGE_ADDRESS!, // "host:port", no scheme
     token: process.env.IMESSAGE_TOKEN!,
   } as any);
 
   const handlers: ((e: OutEvent) => void)[] = [];
-  const emit = (e: OutEvent) => handlers.forEach((h) => h(e));
+  const emit = (e: OutEvent | null) => e && handlers.forEach((h) => h(e));
+  const pollIndex = new PollOptionIndex();
 
-  // Live streams: chat events carry inbound messages, poll events carry votes.
-  // Field mapping is best-effort against SDK v1 — verify at hour 0 with the line.
   (async () => {
     try {
-      for await (const raw of client.chats.subscribeEvents()) {
-        const e: any = parseMessageChangeEvent(raw as any);
-        const msg = e?.message;
-        if (msg && !msg.isFromMe) {
-          emit({
-            type: "message",
-            handle: msg.sender ?? msg.handle ?? "",
-            chatId: msg.chatGuid ?? msg.chatId ?? "",
-            text: msg.text ?? msg.attributedBody?.text ?? "",
-          });
-        }
-      }
+      for await (const e of client.messages.subscribeEvents()) emit(mapMessageEvent(e));
     } catch (err) {
-      console.error("[sidecar] chat event stream ended:", err);
+      console.error("[sidecar] message event stream ended:", err);
     }
   })();
   (async () => {
     try {
-      for await (const raw of client.polls.subscribeEvents()) {
-        const e: any = parsePollChangeEvent(raw as any);
-        const vote = e?.vote ?? e;
-        if (vote?.pollId != null && vote?.optionIndex != null) {
-          emit({
-            type: "pollVote",
-            handle: vote.voter ?? vote.handle ?? "",
-            pollId: String(vote.pollId),
-            optionIndex: Number(vote.optionIndex),
-          });
-        }
-      }
+      for await (const e of client.polls.subscribeEvents()) emit(mapPollEvent(e, pollIndex));
     } catch (err) {
       console.error("[sidecar] poll event stream ended:", err);
     }
@@ -114,8 +128,8 @@ export async function createRealPhoton(): Promise<PhotonLayer> {
 
   return {
     async createChat(handles) {
-      const chat: any = await client.chats.create(handles);
-      return { id: chat.guid ?? chat.id };
+      const res: any = await client.chats.create(handles);
+      return { id: res.chat?.guid ?? res.guid ?? res.id };
     },
     async sendText(chatId, text) {
       await client.messages.sendText(chatId, text);
@@ -124,12 +138,18 @@ export async function createRealPhoton(): Promise<PhotonLayer> {
       await client.chats.setTyping(chatId, on);
     },
     async createPoll(chatId, question, options) {
-      const poll: any = await client.polls.create(chatId, { question, options });
-      return { id: poll.guid ?? poll.id };
+      // Poll.title + PollOption.optionIdentifier per the .d.ts
+      const poll: any = await client.polls.create(chatId, { title: question, options });
+      const guid = poll.pollMessageGuid ?? poll.guid ?? poll.id;
+      pollIndex.remember(
+        guid,
+        (poll.options ?? []).map((o: any) => o.optionIdentifier)
+      );
+      return { id: guid };
     },
     async isIMessageAvailable(handle) {
       const res: any = await client.addresses.isIMessageAvailable(handle);
-      return Boolean(res?.available ?? res);
+      return Boolean(res?.available ?? res?.imessage ?? res);
     },
     onEvent(handler) {
       handlers.push(handler);

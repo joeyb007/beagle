@@ -13,8 +13,11 @@ from openai import AsyncOpenAI
 
 from src.contracts import LLMTier
 
-DEFAULT_CHEAP = os.environ.get("MERGE_CHEAP_MODEL", "openai/gpt-4o-mini")
-DEFAULT_FRONTIER = os.environ.get("MERGE_FRONTIER_MODEL", "anthropic/claude-sonnet-4-5")
+# Defaults verified against gateway.merge.dev docs: OpenAI-compatible surface,
+# provider-prefixed model ids, base URL gateway.merge.dev/v1.
+DEFAULT_BASE_URL = "https://gateway.merge.dev/v1"
+DEFAULT_CHEAP = os.environ.get("MERGE_CHEAP_MODEL", "google/gemini-2.0-flash")
+DEFAULT_FRONTIER = os.environ.get("MERGE_FRONTIER_MODEL", "anthropic/claude-sonnet-4-20250514")
 
 
 class MergeRouter:
@@ -28,7 +31,7 @@ class MergeRouter:
     ):
         self._client = client or AsyncOpenAI(
             api_key=os.environ["MERGE_API_KEY"],
-            base_url=os.environ["MERGE_BASE_URL"],
+            base_url=os.environ.get("MERGE_BASE_URL", DEFAULT_BASE_URL),
         )
         self._db_path = db_path
         self._models: dict[LLMTier, str] = {"cheap": cheap_model, "frontier": frontier_model}
