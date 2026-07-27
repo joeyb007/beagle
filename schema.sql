@@ -62,3 +62,9 @@ CREATE TABLE IF NOT EXISTS routing_log (
   cost_estimate REAL,
   latency_ms    INTEGER
 );
+
+-- Waitlist signups from the public landing page. Web-only; agent never reads it.
+CREATE TABLE IF NOT EXISTS waitlist (
+  email TEXT PRIMARY KEY,
+  ts    TEXT NOT NULL DEFAULT (datetime('now'))
+);
