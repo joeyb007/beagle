@@ -5,9 +5,27 @@ import { useEffect, useRef } from "react";
 
 const CHARS = " .·:;+=xX▒▓";
 
+// Measures the pre's own font metrics to fill whatever box it's placed in —
+// callers size the box via CSS (inset: 0 on a positioned parent); rows/cols
+// props are only a fallback for the very first paint.
+function measureCell(el: HTMLElement) {
+  const probe = document.createElement("span");
+  probe.textContent = "M";
+  probe.style.visibility = "hidden";
+  probe.style.position = "absolute";
+  probe.style.whiteSpace = "pre";
+  const cs = getComputedStyle(el);
+  probe.style.font = cs.font;
+  el.appendChild(probe);
+  const width = probe.getBoundingClientRect().width || 6.6;
+  el.removeChild(probe);
+  const lineHeight = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.05 || 12;
+  return { width, height: lineHeight };
+}
+
 export function AsciiField({
-  rows = 26,
-  cols = 120,
+  rows: rowsProp = 26,
+  cols: colsProp = 120,
   className,
 }: {
   rows?: number;
@@ -20,6 +38,17 @@ export function AsciiField({
     const el = ref.current;
     if (!el) return;
     let t = Math.random() * 100;
+    let rows = rowsProp;
+    let cols = colsProp;
+
+    const fit = () => {
+      const rect = el.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const cell = measureCell(el);
+      cols = Math.max(20, Math.ceil(rect.width / cell.width));
+      rows = Math.max(10, Math.ceil(rect.height / cell.height));
+    };
+    fit();
 
     const frame = () => {
       let out = "";
@@ -41,7 +70,16 @@ export function AsciiField({
     };
 
     frame(); // static first paint — the only paint under reduced motion
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const ro = new ResizeObserver(() => {
+      fit();
+      frame();
+    });
+    ro.observe(el);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return () => ro.disconnect();
+    }
 
     let visible = true;
     const io = new IntersectionObserver(([e]) => {
@@ -62,8 +100,9 @@ export function AsciiField({
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
+      ro.disconnect();
     };
-  }, [rows, cols]);
+  }, [rowsProp, colsProp]);
 
   return <pre ref={ref} className={className} aria-hidden="true" />;
 }
