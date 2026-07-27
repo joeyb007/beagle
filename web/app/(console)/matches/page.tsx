@@ -17,7 +17,7 @@ export default function Matches() {
             <div className="name">{m.match_name}</div>
             <div className="for">
               for {names.get(m.handle) ?? m.handle} · {Math.round(m.score * 100)}% fit{" "}
-              {m.is_sample && <span className="chip">sample</span>}
+              {m.is_sample && <span className="chip chip-fern">sample</span>}
             </div>
             <ul>
               {m.reasons.map((r, j) => (<li key={j}>{r}</li>))}

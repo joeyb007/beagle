@@ -120,8 +120,20 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--fern) 14%, white);
-  color: var(--fern);
+  margin: 0 4px 4px 0;
+}
+.chip-fern { background: color-mix(in srgb, var(--fern) 14%, white); color: var(--fern); }
+.chip-copper { background: color-mix(in srgb, var(--copper) 14%, white); color: var(--copper); }
+.chip-muted { background: var(--line); color: var(--muted); }
+
+.meter { font-family: var(--mono); font-size: 12px; letter-spacing: 1px; color: var(--copper); }
+
+.kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 .stat-row { display: flex; gap: 16px; margin-bottom: 20px; }
 .stat { flex: 1; }
