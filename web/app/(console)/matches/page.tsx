@@ -1,5 +1,7 @@
 // T7: matching UI — nearby people you'd actually click with. Samples labeled.
 import { listMatches, listProfiles } from "@/lib/db";
+import { Chip } from "@/components/chip";
+import { Meter } from "@/components/meter";
 
 export default function Matches() {
   const matches = listMatches();
@@ -16,8 +18,12 @@ export default function Matches() {
           <div key={i} className="card match">
             <div className="name">{m.match_name}</div>
             <div className="for">
-              for {names.get(m.handle) ?? m.handle} · {Math.round(m.score * 100)}% fit{" "}
-              {m.is_sample && <span className="chip chip-fern">sample</span>}
+              for {names.get(m.handle) ?? m.handle}{" "}
+              {m.is_sample && <Chip tone="muted">sample</Chip>}
+            </div>
+            <div className="fit">
+              <Meter value={m.score} label={`${Math.round(m.score * 100)}% fit`} />{" "}
+              <span className="num">{Math.round(m.score * 100)}% fit</span>
             </div>
             <ul>
               {m.reasons.map((r, j) => (<li key={j}>{r}</li>))}
