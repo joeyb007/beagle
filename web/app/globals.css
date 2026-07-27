@@ -325,3 +325,22 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
 }
 .stepbody { flex: 1; }
 .stepbody h2 { margin-top: 0; }
+
+/* ---- profiles ---- */
+.profile-head { display: flex; justify-content: space-between; align-items: baseline; }
+.pname { font-family: var(--serif); font-size: 19px; font-weight: 600; }
+.phandle { font-family: var(--mono); color: var(--muted); font-weight: 400; font-size: 12px; margin-left: 6px; }
+.editlink {
+  font: inherit;
+  font-size: 13px;
+  color: var(--blue);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+.profile-read .chips { margin: 10px 0 12px; }
+.facts { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; margin: 0; font-size: 14px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; }
+.facts .num { font-family: var(--mono); font-size: 12px; color: var(--muted); }
