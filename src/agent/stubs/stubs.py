@@ -26,6 +26,9 @@ class StubMessaging:
         self.images: list[tuple[str, str]] = []  # (chat_id, path)
         self.polls: list[tuple[str, PollSpec]] = []
         self.typing: list[tuple[str, bool]] = []
+        self.groups: dict[str, list[str]] = {
+            "g1": ["+15550000001", "+15550000002"]
+        }  # chat_id -> member handles (as the sidecar would report)
         self._inbound_handlers: list[Callable[[InboundMessage], None]] = []
         self._vote_handlers: list[Callable[[PollVote], None]] = []
         self._poll_seq = 0
@@ -68,6 +71,9 @@ class StubMessaging:
         ref = PollRef(id=f"poll-{self._poll_seq}")
         self.polls.append((chat.id, poll))
         return ref
+
+    async def get_participants(self, chat: ChatRef) -> list[str]:
+        return self.groups.get(chat.id, [])
 
     def on_inbound(self, handler: Callable[[InboundMessage], None]) -> None:
         self._inbound_handlers.append(handler)
@@ -162,6 +168,24 @@ class StubRefresher:
 
     async def refresh(self, replies: list[Reply]) -> None:
         self.refreshed_with.append(replies)
+
+
+class StubContextUpdater:
+    """Records snapshot calls; the real one distills windows into profiles."""
+
+    def __init__(self):
+        self.snapshots: list[tuple[str, tuple[str, ...]]] = []
+
+    async def snapshot(self, chat_id: str, participants: list[str]) -> None:
+        self.snapshots.append((chat_id, tuple(participants)))
+
+
+class StubMessageLog:
+    def __init__(self):
+        self.rows: list[tuple[str, str, str, str]] = []
+
+    async def append(self, chat_id: str, handle: str, direction: str, text: str) -> None:
+        self.rows.append((chat_id, handle, direction, text))
 
 
 class StubArtifactStore:

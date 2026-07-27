@@ -14,10 +14,13 @@ from src.contracts import InboundMessage, PollVote
 def den_orchestrator():
     llm = ScriptedLLM(
         rules=[
+            # reply needles first: turn prompts embed member names, so the
+            # name-keyed ask rules below would shadow them
+            ("free after 7", MAYA_STATE),
+            ("only do saturday evening", RAYHAN_STATE),
+            ("heads-up", 'heads up — does that work for you?'),
             ("Rayhan", "yo rayhan — sat or sun? still sushi?"),
             ("Maya", "maya! tacos this weekend?"),
-            ("only do saturday evening", RAYHAN_STATE),
-            ("free after 7", MAYA_STATE),
         ]
     )
     return make_orchestrator(llm=llm, venues=FakeVenues(), den_mode=True)

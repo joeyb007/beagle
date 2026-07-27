@@ -1,7 +1,23 @@
-"""T3-T12: the spine — "Hey Beagle" → locked plan (docs/branch-a.md).
+"""The spine — "Hey Beagle" → locked plan (spec:
+docs/superpowers/specs/2026-07-27-imessage-workflow-design.md).
 
-States: intake → fanout → collect → reconcile → vote → lock → confirm.
-Sessions are held in memory keyed by the group chat id they started in.
+States: intake → fanout → collect → {propose | vote} → lock → confirm.
+Hybrid agentic state machine: this class owns every transition, timer, and
+cap; the LLM (via src/agent/turns.py) owns content — slot-filling each
+member's constraint form over multi-turn DMs, judging is_complete,
+classifying group reactions, and drafting the messages.
+
+Two close-out paths:
+  - group mode (dedicated line): conversational proposal in the group chat,
+    reactions classified assent/objection/chatter, one replan round, lock.
+  - den mode (shared line — groups blocked server-side): the group
+    experience broadcast across every member's DM — a poll lands in each DM,
+    votes tally across copies, lock on quorum or vote timeout.
+
+Context accumulation: every inbound message is appended to the message log;
+the trigger chat's window is snapshotted into profiles at trigger time
+(bootstrapping unknown members), and each DM window at session end (lock or
+abort). Sessions are held in memory keyed by the chat they started in.
 Any step failure aborts the session with a friendly message (FR9).
 """
 
@@ -13,29 +29,40 @@ from datetime import datetime, timedelta
 from uuid import uuid4
 
 from src.agent.ics import build_ics
+from src.agent.turns import (
+    build_classify_prompt,
+    build_proposal_prompt,
+    build_turn_prompt,
+    parse_classification,
+    parse_turn,
+)
 from src.contracts import (
     ArtifactStore,
     CalendarProvider,
+    Card,
     ChatRef,
+    ContextUpdater,
+    FinalPlan,
     InboundMessage,
     Interval,
-    PollSpec,
     LLMRouter,
     MatchingService,
     MemberState,
+    MessageLog,
     MessagingPort,
     MusicProvider,
+    PollSpec,
+    PollVote,
     Profile,
-    ProfileRefresher,
     ProfileStore,
-    Reply,
     Session,
     VenueSearch,
     VoiceProvider,
 )
-from src.contracts import Card, FinalPlan, PollVote
 
 INVOKE_RE = re.compile(r"hey\s+beagle|@beagle", re.IGNORECASE)
+
+DM_MAX_TURNS = 4  # opening ask counts as turn 1; cap ⇒ plan with what we have
 
 ASK_PROMPT = (
     "You are Beagle, the group's hangout dog, DMing {name} to collect their "
@@ -45,25 +72,18 @@ ASK_PROMPT = (
     "end with a question about when they're free and what they're feeling."
 )
 
-CONVERSE_PROMPT = (
-    "You are collecting one friend's constraints for a hangout. Their DM "
-    "conversation so far (their messages only, oldest first):\n{transcript}\n\n"
-    "Derive their CURRENT overall answer from the WHOLE conversation and reply "
-    "with JSON, exactly these keys: "
-    '{{"availability": [{{"start": ISO8601, "end": ISO8601}}], '
-    '"prefs": [str], "hard_nos": [str], '
-    '"complete": bool, "follow_up": str|null}}. '
-    "Resolve relative days within {window_start} .. {window_end}. "
-    "complete=true when you know when they're free AND roughly what they'd "
-    "enjoy; if not complete, follow_up is ONE short friendly question to get "
-    "what's missing. JSON only."
+NUDGE_PROMPT = (
+    "Draft a short heads-up nudge for {recipient}: {replier} just said "
+    '"{text}" about the plan. One casual sentence asking {recipient} if that '
+    "works for them too."
 )
 
 TIGHTEN_TEMPLATE = 'heads up — {name} said "{text}". does that work for you?'
 
-
-def _strip_fences(raw: str) -> str:
-    return re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip())
+ABORT_TEXT = "hmm, something went sideways on my end — let's try again in a bit 🐶"
+ALREADY_ON_IT = "already on it 🐶"
+NOT_A_GROUP = "add me to a group chat and say hey beagle there 🐶"
+OBJECTION_ACK_FALLBACK = "heard — locking what works for most 🐶"
 
 
 def _overlap(a: Interval, b: Interval) -> Interval | None:
@@ -90,7 +110,17 @@ def _subtract(slots: list[Interval], busy: list[Interval]) -> list[Interval]:
     return slots
 
 
-ABORT_TEXT = "hmm, something went sideways on my end — let's try again in a bit 🐶"
+def _merge_unique(base: list[str], extra: list[str]) -> list[str]:
+    return base + [x for x in extra if x not in base]
+
+
+@dataclass
+class DMConversation:
+    chat_id: str
+    handle: str
+    history: list[tuple[str, str]] = field(default_factory=list)  # ("beagle"|"them", text)
+    turns: int = 0
+    complete: bool = False
 
 
 @dataclass
@@ -98,15 +128,19 @@ class ActiveSession:
     session: Session
     state: str = "intake"
     profiles: dict[str, Profile] = field(default_factory=dict)
-    dm_chats: dict[str, str] = field(default_factory=dict)  # dm chat_id -> handle
+    dms: dict[str, DMConversation] = field(default_factory=dict)  # dm chat_id -> conv
     chosen_slot: Interval | None = None
     initiator: str = ""
-    replies: list[Reply] = field(default_factory=list)
-    threads: dict[str, list[str]] = field(default_factory=dict)  # handle -> their msgs
-    follow_ups: dict[str, int] = field(default_factory=dict)  # handle -> asks sent
+    style: str = ""
+    proposal_text: str = ""
+    assents: set[str] = field(default_factory=set)
+    replan_rounds: int = 0
     votes: dict[str, int] = field(default_factory=dict)  # handle -> option_index
     poll_ids: set[str] = field(default_factory=set)  # den mode: one poll per member DM
     timers: list[asyncio.Task] = field(default_factory=list)
+
+    def complete_handles(self) -> list[str]:
+        return [c.handle for c in self.dms.values() if c.complete]
 
 
 class Orchestrator:
@@ -116,7 +150,8 @@ class Orchestrator:
         messaging: MessagingPort,
         llm: LLMRouter,
         profiles: ProfileStore,
-        refresher: ProfileRefresher,
+        context: ContextUpdater,
+        message_log: MessageLog,
         voice: VoiceProvider,
         calendar: CalendarProvider,
         music: MusicProvider,
@@ -125,20 +160,21 @@ class Orchestrator:
         artifacts: ArtifactStore,
         near: str = "San Francisco",
         reply_timeout_s: float | None = None,  # None = wait for full quorum
-        vote_timeout_s: float | None = None,  # armed at first vote when set
-        max_follow_ups: int = 5,  # agentic clarification, runaway-capped
+        propose_timeout_s: float | None = None,  # group mode: armed at proposal
+        vote_timeout_s: float | None = None,  # den mode: armed at first vote
         voice_notes=None,  # optional VoiceNotes — spoken confirm when enabled
         den_mode: bool = False,  # shared-line groups blocked -> broadcast to member DMs
     ):
-        self._voice_notes = voice_notes
-        self.den_mode = den_mode
         self.reply_timeout_s = reply_timeout_s
+        self.propose_timeout_s = propose_timeout_s
         self.vote_timeout_s = vote_timeout_s
-        self.max_follow_ups = max_follow_ups
+        self.den_mode = den_mode
+        self._voice_notes = voice_notes
         self._messaging = messaging
         self._llm = llm
         self._profiles = profiles
-        self._refresher = refresher
+        self._context = context
+        self._log = message_log
         self._voice = voice
         self._calendar = calendar
         self._music = music
@@ -148,10 +184,10 @@ class Orchestrator:
         self._near = near
         self.sessions: dict[str, ActiveSession] = {}
 
-    # ------------------------------------------------- entry points (T4, T8)
+    # ------------------------------------------------------------ entry point
 
     def start(self) -> None:
-        """Wire live event streams (consolidation); tests await handlers directly."""
+        """Wire the live event streams (consolidation); tests await handlers."""
         loop = asyncio.get_event_loop()
         self._messaging.on_inbound(
             lambda m: loop.create_task(self.handle_inbound(m))
@@ -161,14 +197,23 @@ class Orchestrator:
         )
 
     async def handle_inbound(self, m: InboundMessage) -> None:
-        active = self._session_for_dm(m.chat_id)
+        await self._log.append(m.chat_id, m.handle, "in", m.text)
+        active_dm = self._session_for_dm(m.chat_id)
+        active_group = self.sessions.get(m.chat_id)
         try:
-            if active is not None and active.state == "collect":
-                await self._collect(active, m)
-            elif m.chat_id not in self.sessions and INVOKE_RE.search(m.text):
+            if active_dm is not None and active_dm.state == "collect":
+                await self._dm_turn(active_dm, m)
+            elif active_group is not None:
+                if active_group.state == "propose":
+                    await self._group_message(active_group, m)
+                elif INVOKE_RE.search(m.text):
+                    await self._messaging.send_text(
+                        ChatRef(id=m.chat_id), ALREADY_ON_IT
+                    )
+            elif INVOKE_RE.search(m.text):
                 await self._start_session(m)
-        except Exception:  # T10: fail closed, never crash the listener
-            await self._abort(active or self.sessions.get(m.chat_id))
+        except Exception:  # fail closed, never crash the listener
+            await self._abort(active_dm or active_group or self.sessions.get(m.chat_id))
 
     async def handle_poll_vote(self, v: PollVote) -> None:
         active = next(
@@ -186,6 +231,9 @@ class Orchestrator:
         except Exception:
             await self._abort(active)
 
+    def _session_for_dm(self, chat_id: str) -> "ActiveSession | None":
+        return next((a for a in self.sessions.values() if chat_id in a.dms), None)
+
     async def _group_chats(self, active: "ActiveSession") -> list[ChatRef]:
         """Where 'group' messages go: the group chat, or (den mode) every
         member's DM — the group experience without a group thread."""
@@ -195,42 +243,53 @@ class Orchestrator:
             await self._messaging.open_direct(h) for h in active.session.members
         ]
 
-    def _session_for_dm(self, chat_id: str) -> "ActiveSession | None":
-        return next(
-            (a for a in self.sessions.values() if chat_id in a.dm_chats), None
-        )
+    # ------------------------------------------------- intake: snapshot first
 
     async def _start_session(self, m: InboundMessage) -> None:
+        chat = ChatRef(id=m.chat_id)
+        participants = await self._messaging.get_participants(chat)
+        if len(participants) < 2:
+            if not self.den_mode:
+                await self._messaging.send_text(chat, NOT_A_GROUP)
+                return
+            # den mode: no group thread exists anywhere — the whole roster is in
+            participants = [p.handle for p in await self._profiles.list()]
+
+        # trigger-time snapshot: distills the chat window since the last
+        # bookmark and bootstraps profiles for unknown members
+        await self._context.snapshot(m.chat_id, participants)
+
+        profiles: dict[str, Profile] = {}
+        for handle in participants:
+            profiles[handle] = (
+                await self._profiles.get(handle) or Profile(handle=handle, name=handle)
+            )
+
         now = datetime.now()
-        members = await self._profiles.list()
         session = Session(
             session_id=str(uuid4()),
             occasion=INVOKE_RE.sub("", m.text).strip(" ,.!-") or "a hangout",
             date_window=Interval(start=now, end=now + timedelta(days=7)),
             group_chat_id=m.chat_id,
-            members=[p.handle for p in members],
-            member_states={p.handle: MemberState() for p in members},
+            members=participants,
+            member_states={h: MemberState() for h in participants},
         )
-        active = ActiveSession(
-            session=session,
-            profiles={p.handle: p for p in members},
-            initiator=m.handle,
-        )
+        active = ActiveSession(session=session, profiles=profiles, initiator=m.handle)
         self.sessions[m.chat_id] = active
         await self._fan_out(active)
 
-    # -------------------------------------------- T5: ordered hybrid fan-out
+    # ------------------------------------------------ ordered hybrid fan-out
 
     async def _fan_out(self, active: ActiveSession) -> None:
         active.state = "fanout"
-        style = await self._voice.style()
+        active.style = await self._voice.style()
         ordered = sorted(
             active.profiles.values(), key=lambda p: p.constraint_score, reverse=True
         )
         for profile in ordered:  # most-constrained first; never blocks on replies
             ask = await self._llm.complete(
                 tier="frontier",
-                system=style,
+                system=active.style,
                 input=ASK_PROMPT.format(
                     name=profile.name,
                     occasion=active.session.occasion,
@@ -240,77 +299,105 @@ class Orchestrator:
                 ),
             )
             dm = await self._messaging.open_direct(profile.handle)
-            active.dm_chats[dm.id] = profile.handle
-            await self._messaging.set_typing(dm, True)
-            await self._messaging.send_text(dm, ask)
-            await self._messaging.set_typing(dm, False)
+            active.dms[dm.id] = DMConversation(
+                chat_id=dm.id,
+                handle=profile.handle,
+                history=[("beagle", ask)],
+                turns=1,
+            )
+            await self._send_typed(dm, ask)
         active.state = "collect"
         if self.reply_timeout_s is not None:
             active.timers.append(asyncio.create_task(self._reply_timer(active)))
 
+    async def _send_typed(self, chat: ChatRef, text: str) -> None:
+        await self._messaging.set_typing(chat, True)
+        await self._messaging.send_text(chat, text)
+        await self._messaging.set_typing(chat, False)
+
     async def _reply_timer(self, active: ActiveSession) -> None:
         await asyncio.sleep(self.reply_timeout_s)
-        if active.state == "collect" and any(
-            s.replied for s in active.session.member_states.values()
-        ):
+        if active.state == "collect" and active.complete_handles():
             try:
-                await self._reconcile(active)  # quorum-by-timeout (FR4)
+                await self._close_collect(active)  # quorum-by-timeout (FR4)
             except Exception:
                 await self._abort(active)
 
-    # ------------------- T6: agentic collect — Beagle decides when it's done
+    # ------------------------------------------- collect: multi-turn DM legs
 
-    async def _collect(self, active: ActiveSession, m: InboundMessage) -> None:
-        import json as _json
-
-        handle = active.dm_chats[m.chat_id]
-        active.threads.setdefault(handle, []).append(m.text)
-        active.replies.append(Reply(handle=handle, text=m.text))
+    async def _dm_turn(self, active: ActiveSession, m: InboundMessage) -> None:
+        conv = active.dms[m.chat_id]
+        if conv.complete:
+            return
+        conv.history.append(("them", m.text))
         window = active.session.date_window
-
         raw = await self._llm.complete(
-            tier="cheap",
-            input=CONVERSE_PROMPT.format(
-                transcript="\n".join(active.threads[handle]),
+            tier="frontier",
+            system=active.style,
+            input=build_turn_prompt(
+                name=active.profiles[conv.handle].name,
+                occasion=active.session.occasion,
+                form=active.session.member_states[conv.handle],
+                history=conv.history,
                 window_start=window.start.isoformat(),
                 window_end=window.end.isoformat(),
             ),
         )
-        data = _json.loads(_strip_fences(raw))
-        state = MemberState(  # re-derived from the FULL transcript each turn
-            availability=data.get("availability") or [],
-            prefs=data.get("prefs") or [],
-            hard_nos=data.get("hard_nos") or [],
+        turn = parse_turn(raw)
+        active.session.member_states[conv.handle] = MemberState(
+            availability=turn.availability,
+            prefs=turn.prefs,
+            hard_nos=turn.hard_nos,
+            replied=True,  # live reply overrides stale profile (FR13)
         )
-        active.session.member_states[handle] = state
-
-        follow_up = data.get("follow_up")
-        incomplete = data.get("complete") is False
-        under_cap = active.follow_ups.get(handle, 0) < self.max_follow_ups
-        if incomplete and follow_up and under_cap:
-            active.follow_ups[handle] = active.follow_ups.get(handle, 0) + 1
-            await self._messaging.send_text(ChatRef(id=m.chat_id), follow_up)
-            return  # not done with this member — keep the conversation open
-
-        state.replied = True  # complete (or cap hit): take it and move on (FR13)
-        await self._tighten(active, replier=handle, reply_text=m.text)
-        if all(s.replied for s in active.session.member_states.values()):
-            await self._reconcile(active)
+        if turn.is_complete or conv.turns >= DM_MAX_TURNS:
+            conv.complete = True
+            await self._tighten(active, replier=conv.handle, reply_text=m.text)
+            if all(c.complete for c in active.dms.values()):
+                await self._close_collect(active)
+        else:
+            conv.turns += 1
+            await self._send_typed(ChatRef(id=conv.chat_id), turn.reply_text)
+            conv.history.append(("beagle", turn.reply_text))
 
     async def _tighten(self, active: ActiveSession, *, replier: str, reply_text: str) -> None:
-        """Hybrid fan-out: constrained answers sharpen the ask for the rest."""
+        """Hybrid fan-out: constrained answers sharpen the ask for the rest.
+
+        Nudges are LLM-drafted in the group's voice so they read like the
+        conversation, not a template; the template is only the fail-soft.
+        """
         name = active.profiles[replier].name
-        nudge = TIGHTEN_TEMPLATE.format(name=name, text=reply_text)
-        for chat_id, handle in active.dm_chats.items():
-            if handle != replier and not active.session.member_states[handle].replied:
-                await self._messaging.send_text(ChatRef(id=chat_id), nudge)
+        for conv in active.dms.values():
+            if conv.handle == replier or conv.complete:
+                continue
+            try:
+                nudge = await self._llm.complete(
+                    tier="frontier",
+                    system=active.style,
+                    input=NUDGE_PROMPT.format(
+                        recipient=active.profiles[conv.handle].name,
+                        replier=name,
+                        text=reply_text,
+                    ),
+                )
+            except Exception:
+                nudge = TIGHTEN_TEMPLATE.format(name=name, text=reply_text)
+            await self._messaging.send_text(ChatRef(id=conv.chat_id), nudge)
+            conv.history.append(("beagle", nudge))
 
-    # --------------------------------------------------------- T7: reconcile
+    async def _close_collect(self, active: ActiveSession) -> None:
+        """Collect is done — den mode votes with polls, group mode proposes."""
+        if self.den_mode:
+            await self._open_polls(active)
+        else:
+            await self._propose(active)
 
-    async def _reconcile(self, active: ActiveSession) -> None:
+    # ---------------------------------------- reconcile (shared by both paths)
+
+    async def _reconcile_slots(self, active: ActiveSession) -> None:
         active.state = "reconcile"
         session = active.session
-        replied = {h: s for h, s in session.member_states.items() if s.replied}
+        replied = {h: session.member_states[h] for h in active.complete_handles()}
 
         slots: list[Interval] | None = None
         for handle, state in replied.items():
@@ -320,7 +407,7 @@ class Orchestrator:
             )
             slots = avail if slots is None else _intersect(slots, avail)
         if not slots:
-            raise RuntimeError("no overlapping availability")  # happy path only (FR9)
+            raise RuntimeError("no overlapping availability")  # → fail-closed abort
         active.chosen_slot = slots[0]
 
         hard_nos = [n for s in replied.values() for n in s.hard_nos]
@@ -330,6 +417,11 @@ class Orchestrator:
             query += f"; avoid: {', '.join(dict.fromkeys(hard_nos))}"
         session.candidates = await self._venues.find(query, self._near)
 
+    # ------------------------------- den mode: text-emulated polls over DMs
+
+    async def _open_polls(self, active: ActiveSession) -> None:
+        await self._reconcile_slots(active)
+        session = active.session
         spec = PollSpec(
             question="beagle says: where are we going?",
             options=[c.name for c in session.candidates],
@@ -340,8 +432,6 @@ class Orchestrator:
             if session.poll_id is None:
                 session.poll_id = poll.id
         active.state = "vote"  # only after poll_ids are set — votes match on them
-
-    # -------------------------------------------------------- T8: vote+tally
 
     async def _record_vote(self, active: ActiveSession, v: PollVote) -> None:
         active.votes[v.handle] = v.option_index
@@ -362,14 +452,87 @@ class Orchestrator:
             except Exception:
                 await self._abort(active)
 
-    # --------------------------------- T9 lock+confirm, T11 match, T12 refresh
+    # ------------------------- group mode: reconcile + conversational proposal
+
+    async def _propose(self, active: ActiveSession) -> None:
+        await self._reconcile_slots(active)
+        session = active.session
+        top = session.candidates[0]
+        active.proposal_text = await self._llm.complete(
+            tier="frontier",
+            system=active.style,
+            input=build_proposal_prompt(
+                occasion=session.occasion,
+                venue=top.name,
+                area=top.area,
+                when=active.chosen_slot.start.strftime("%a %b %-d, %-I:%M %p"),
+                names=[active.profiles[h].name for h in active.complete_handles()],
+                revision=active.replan_rounds > 0,
+            ),
+        )
+        await self._messaging.send_text(ChatRef(id=session.group_chat_id), active.proposal_text)
+        active.state = "propose"
+        if self.propose_timeout_s is not None:
+            active.timers.append(asyncio.create_task(self._propose_timer(active)))
+
+    async def _propose_timer(self, active: ActiveSession) -> None:
+        await asyncio.sleep(self.propose_timeout_s)
+        if active.state == "propose":
+            try:
+                await self._lock(active)  # lock on timeout with partial assents
+            except Exception:
+                await self._abort(active)
+
+    async def _group_message(self, active: ActiveSession, m: InboundMessage) -> None:
+        if m.handle not in active.session.member_states:
+            return  # not a member of this hangout
+        window = active.session.date_window
+        raw = await self._llm.complete(
+            tier="cheap",
+            system=active.style,  # objection acks come back in the group's voice
+            input=build_classify_prompt(
+                name=active.profiles[m.handle].name,
+                proposal=active.proposal_text,
+                text=m.text,
+                window_start=window.start.isoformat(),
+                window_end=window.end.isoformat(),
+            ),
+        )
+        reaction = parse_classification(raw)
+
+        if reaction.kind == "assent":
+            active.assents.add(m.handle)
+            if set(active.complete_handles()) <= active.assents:
+                await self._lock(active)
+        elif reaction.kind == "objection":
+            if active.replan_rounds == 0:
+                state = active.session.member_states[m.handle]
+                if reaction.availability:
+                    state.availability = reaction.availability  # new conflict wins
+                state.prefs = _merge_unique(state.prefs, reaction.prefs)
+                state.hard_nos = _merge_unique(state.hard_nos, reaction.hard_nos)
+                state.replied = True
+                active.replan_rounds = 1
+                active.assents.clear()
+                await self._propose(active)
+            else:  # one replan max — acknowledge and let the timer close it out
+                await self._messaging.send_text(
+                    ChatRef(id=active.session.group_chat_id),
+                    reaction.reply_text or OBJECTION_ACK_FALLBACK,
+                )
+        # chatter: no reply, no state change (still in the message log)
+
+    # ------------------------------------------ lock, confirm, snapshot, done
 
     async def _lock(self, active: ActiveSession) -> None:
         active.state = "lock"
         session = active.session
-        (winner_idx, _), = Counter(active.votes.values()).most_common(1)
-        winner = session.candidates[winner_idx]
-        attendees = [h for h, s in session.member_states.items() if s.replied]
+        if active.votes:  # den mode: majority of poll votes
+            (winner_idx, _), = Counter(active.votes.values()).most_common(1)
+            winner = session.candidates[winner_idx]
+        else:  # group mode: the (re)proposed top candidate
+            winner = session.candidates[0]
+        attendees = active.complete_handles()
         plan = FinalPlan(
             plan_id=str(uuid4()),
             place=winner,
@@ -432,11 +595,8 @@ class Orchestrator:
                         await self._messaging.send_voice(gc, audio)
             except Exception as e:
                 print(f"[orchestrator] voice note failed (non-fatal): {e}")
-        await self._send_match_card(active)  # T11 — after confirm
-        try:
-            await self._refresher.refresh(active.replies)  # T12 — never blocks
-        except Exception:
-            pass
+        await self._send_match_card(active)
+        await self._snapshot_dms(active)  # session-end context capture
         self._cleanup(active)
 
     async def _send_match_card(self, active: ActiveSession) -> None:
@@ -453,7 +613,15 @@ class Orchestrator:
         for gc in await self._group_chats(active):
             await self._messaging.send_card(gc, card)
 
-    # ------------------------------------------------------- T10: fail closed
+    async def _snapshot_dms(self, active: ActiveSession) -> None:
+        """DM windows → profiles at session end; learnings survive aborts."""
+        for conv in active.dms.values():
+            try:
+                await self._context.snapshot(conv.chat_id, [conv.handle])
+            except Exception:
+                continue  # context capture never blocks the close-out
+
+    # --------------------------------------------------------- fail closed
 
     async def _abort(self, active: "ActiveSession | None") -> None:
         if active is None:
@@ -462,6 +630,7 @@ class Orchestrator:
             for gc in await self._group_chats(active):
                 await self._messaging.send_text(gc, ABORT_TEXT)
         finally:
+            await self._snapshot_dms(active)
             self._cleanup(active)
 
     def _cleanup(self, active: ActiveSession) -> None:

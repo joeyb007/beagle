@@ -160,3 +160,8 @@ async def test_send_image_crosses_the_bridge(messaging):
     await messaging.send_image(chat, "/tmp/photo.svg")
     images = [r for r in await sent_records() if r["kind"] == "image"]
     assert images and images[-1]["text"] == "/tmp/photo.svg"
+
+async def test_get_participants_crosses_the_bridge(messaging):
+    await inject("group", {"chatId": "ext-g1", "handles": ["+15550000001", "+15550000002"]})
+    handles = await messaging.get_participants(ChatRef(id="ext-g1"))
+    assert handles == ["+15550000001", "+15550000002"]

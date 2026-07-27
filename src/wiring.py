@@ -2,9 +2,9 @@
 
 Constructs the real implementations from all four branches and injects them
 into the Orchestrator. Degrades gracefully so the product runs end-to-end
-tonight with zero external credentials:
+with zero external credentials:
 
-  - no MERGE_API_KEY   → DemoLLM (deterministic local "model", still logs
+  - no ANTHROPIC_API_KEY → DemoLLM (deterministic local "model", still logs
                           routing_log rows so the dashboard renders)
   - no IMESSAGE_TOKEN  → sidecar boots in fake-Photon mode automatically
   - no Spotify/Google  → D's providers fall back to distilled-profile taste
@@ -21,19 +21,20 @@ from dotenv import load_dotenv
 
 load_dotenv()  # .env at repo root — covers main.py and e2e.py via import
 
+from src.agent.anthropic_router import AnthropicRouter
 from src.agent.artifact_store import SqliteArtifactStore
-from src.agent.merge_router import MergeRouter
+from src.agent.logging_messaging import LoggingMessaging
 from src.agent.orchestrator import Orchestrator
 from src.agent.venues import WebVenueSearch
 from src.agent.voice_notes import VoiceNotes
 from src.contracts import LLMTier
 from src.data import (
-    Distiller,
     EmbeddingBuilder,
     GoogleCalendarProvider,
+    SqliteContextUpdater,
     SqliteMatchingService,
+    SqliteMessageLog,
     SqliteMusicProvider,
-    SqliteProfileRefresher,
     SqliteProfileStore,
     SqliteVoiceProvider,
 )
@@ -54,12 +55,13 @@ _FOOD_WORDS = ["sushi", "tacos", "thai", "korean", "pizza", "ramen", "bbq", "dim
 
 
 class DemoLLM:
-    """Deterministic stand-in for MergeRouter when MERGE_API_KEY is absent.
+    """Deterministic stand-in for AnthropicRouter when ANTHROPIC_API_KEY is absent.
 
-    Handles the two structured prompts the orchestrator depends on (reply
-    parsing, venue search) and delegates everything text-shaped (asks, voice,
-    distillation) to D's prompt-aware StubLLMRouter. Logs to routing_log so
-    the Merge dashboard renders during credential-less runs.
+    Handles the structured prompts the orchestrator depends on (DM turns,
+    group classify, proposal/nudge/ask drafts, venue search, Beagle's take)
+    and delegates everything else (voice, context-update distills) to D's
+    prompt-aware StubLLMRouter. Logs to routing_log so the routing dashboard
+    renders during credential-less runs.
     """
 
     def __init__(self, db_path: str):
@@ -68,33 +70,87 @@ class DemoLLM:
 
     async def complete(self, *, tier: LLMTier, input: str, system: str | None = None) -> str:
         start = time.monotonic()
-        if "exactly these keys" in input and '"availability"' in input:
-            out = self._parse_reply(input)
-        elif "JSON array" in input and "venues" in input.lower():
-            out = _DEMO_VENUES
+        if '"is_complete"' in input:  # DM turn (turns.TURN_PROMPT)
+            out = self._turn(input)
+        elif '"kind"' in input:  # group reaction classify (turns.CLASSIFY_PROMPT)
+            out = self._classify(input)
+        elif "proposing" in input:  # group proposal draft (turns.PROPOSAL_PROMPT)
+            out = self._proposal(input)
+        elif "hangout dog, DMing" in input:  # DM opening ask
+            out = self._ask(input)
+        elif "heads-up nudge" in input:  # cross-member tighten
+            out = self._nudge(input)
         elif "Write Beagle's take" in input:
             out = "you're the group's mom and you know it 🐶"
-        else:
+        elif "JSON array" in input and "venues" in input.lower():
+            out = _DEMO_VENUES
+        else:  # voice style + context-update distills land on the prompt-aware stub
             out = await self._delegate.complete(tier=tier, input=input, system=system)
         self._log(tier, int((time.monotonic() - start) * 1000))
         return out
 
-    def _parse_reply(self, prompt: str) -> str:
+    _DAY_RE = re.compile(
+        r"\b(mon|tues|wednes|thurs|fri|satur|sun)day\b|\b(sat|sun|fri)\b"
+        r"|\b(tonight|tomorrow|weekend|free|whenever|anytime)\b"
+    )
+
+    def _turn(self, prompt: str) -> str:
         window = re.search(r"within (\S+) \.\. (\S+)\.", prompt)
-        text_m = re.search(r"oldest first\):\n(.*?)\n\nDerive", prompt, re.DOTALL)
-        text = (text_m.group(1) if text_m else "").lower()
+        them = re.findall(r"^\[them\]: (.*)$", prompt, re.MULTILINE)
+        text = (them[-1] if them else "").lower()
         prefs = [w for w in _FOOD_WORDS if w in text and f"no {w}" not in text]
-        hard_nos = re.findall(r"no (\w+)", text)
-        start, end = (window.group(1), window.group(2)) if window else ("", "")
+        hard_nos = [f"no {n}" for n in re.findall(r"no (\w+)", text)]
+        if self._DAY_RE.search(text) and window:
+            return json.dumps(
+                {
+                    "availability": [{"start": window.group(1), "end": window.group(2)}],
+                    "prefs": prefs,
+                    "hard_nos": hard_nos,
+                    "is_complete": True,
+                    "reply_text": "",
+                }
+            )
         return json.dumps(
             {
-                "availability": [{"start": start, "end": end}],
+                "availability": [],
                 "prefs": prefs,
-                "hard_nos": [n for n in hard_nos if n not in _FOOD_WORDS or f"no {n}" in text],
-                "complete": True,  # deterministic mode never asks follow-ups
-                "follow_up": None,
+                "hard_nos": hard_nos,
+                "is_complete": False,
+                "reply_text": "what day works and what are you feeling food-wise?",
             }
         )
+
+    def _classify(self, prompt: str) -> str:
+        m = re.search(r'replied: "(.*)"', prompt)
+        text = (m.group(1) if m else "").lower()
+        empty = {"availability": [], "prefs": [], "hard_nos": []}
+        if re.search(r"\b(can'?t|cannot|actually|instead)\b", text):
+            return json.dumps(
+                {
+                    "kind": "objection",
+                    **empty,
+                    "hard_nos": [f"no {n}" for n in re.findall(r"no (\w+)", text)],
+                    "reply_text": "got it — adjusting",
+                }
+            )
+        if re.search(r"\b(works|down|in|yes|yep|sure|sounds)\b", text) or "👍" in text:
+            return json.dumps({"kind": "assent", **empty, "reply_text": None})
+        return json.dumps({"kind": "chatter", **empty, "reply_text": None})
+
+    def _proposal(self, prompt: str) -> str:
+        m = re.search(r"proposing (.+?) at (.+?) for ", prompt)
+        venue, when = (m.group(1), m.group(2)) if m else ("the spot", "soon")
+        return f"ok crew — {venue.lower()}, {when.lower()}? say the word and i'll lock it 🐶"
+
+    def _ask(self, prompt: str) -> str:
+        m = re.search(r"DMing (\w+)", prompt)
+        name = (m.group(1) if m else "you").lower()
+        return f"yo {name} — what day works this week and what are you feeling food-wise?"
+
+    def _nudge(self, prompt: str) -> str:
+        m = re.search(r'(\S+) just said "(.*)" about the plan', prompt, re.DOTALL)
+        name, text = (m.group(1), m.group(2)) if m else ("someone", "their plans")
+        return f'heads up — {name} said "{text}". does that work for you?'
 
     def _log(self, tier: str, latency_ms: int) -> None:
         import sqlite3
@@ -110,29 +166,26 @@ def build_orchestrator() -> tuple[Orchestrator, PhotonMessaging]:
     db_path = os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite"))
     init_db(db_path)
 
-    # LLM priority: Anthropic direct → Merge Gateway → offline demo stub.
     if os.environ.get("ANTHROPIC_API_KEY"):
-        from src.agent.anthropic_router import AnthropicRouter
-
-        print("[wiring] using AnthropicRouter (haiku/sonnet)")
+        print("[wiring] using AnthropicRouter (haiku cheap / opus frontier)")
         llm = AnthropicRouter(db_path=db_path)
-    elif os.environ.get("MERGE_API_KEY"):
-        llm = MergeRouter(db_path=db_path)
     else:
-        print("[wiring] no ANTHROPIC_API_KEY / MERGE_API_KEY — using DemoLLM (deterministic, offline)")
+        print("[wiring] ANTHROPIC_API_KEY not set — using DemoLLM (deterministic, offline)")
         llm = DemoLLM(db_path)
 
-    messaging = PhotonMessaging()  # sidecar self-selects real vs fake via IMESSAGE_TOKEN
+    raw_messaging = PhotonMessaging()  # sidecar self-selects real vs fake via IMESSAGE_TOKEN
     store = SqliteProfileStore(db_path)
     music = SqliteMusicProvider(db_path)
     embedder = EmbeddingBuilder(music)
-    distiller = Distiller(llm)
+    log = SqliteMessageLog(db_path)
+    messaging = LoggingMessaging(raw_messaging, log)
 
     orchestrator = Orchestrator(
         messaging=messaging,
         llm=llm,
         profiles=store,
-        refresher=SqliteProfileRefresher(distiller, store, embedder),
+        context=SqliteContextUpdater(llm, store, embedder, log),
+        message_log=log,
         voice=SqliteVoiceProvider(llm, db_path),
         calendar=GoogleCalendarProvider(db_path),
         music=music,
@@ -141,10 +194,12 @@ def build_orchestrator() -> tuple[Orchestrator, PhotonMessaging]:
         artifacts=SqliteArtifactStore(db_path),
         near=os.environ.get("BEAGLE_NEAR", "San Francisco"),
         reply_timeout_s=float(os.environ.get("REPLY_TIMEOUT_S", "180")),
+        propose_timeout_s=float(os.environ.get("PROPOSE_TIMEOUT_S", "90")),
         vote_timeout_s=float(os.environ.get("VOTE_TIMEOUT_S", "90")),
         voice_notes=VoiceNotes(api_key=os.environ.get("ELEVENLABS_API_KEY")),
         # shared-line groups are blocked server-side; den mode broadcasts the
         # group experience across every member's DM instead
         den_mode=os.environ.get("BEAGLE_DEN_MODE") == "1",
     )
-    return orchestrator, messaging
+    # main.py drives sidecar lifecycle on the raw adapter (ensure_running/close)
+    return orchestrator, raw_messaging

@@ -157,7 +157,7 @@ class PollVote(BaseModel):
 # ---------------------------------------------------------------------- ports
 
 
-class LLMRouter(Protocol):  # A — Merge Gateway; logs every call to routing_log
+class LLMRouter(Protocol):  # A — Anthropic API router; logs every call to routing_log
     async def complete(
         self, *, tier: LLMTier, input: str, system: str | None = None
     ) -> str: ...
@@ -180,6 +180,7 @@ class MessagingPort(Protocol):  # B — Photon via Node sidecar
     async def send_voice(self, chat: ChatRef, path: str) -> None: ...
     async def send_file(self, chat: ChatRef, path: str) -> None: ...
     async def create_poll(self, chat: ChatRef, poll: PollSpec) -> PollRef: ...
+    async def get_participants(self, chat: ChatRef) -> list[str]: ...
     def on_inbound(self, handler: Callable[[InboundMessage], None]) -> None: ...
     def on_poll_vote(self, handler: Callable[[PollVote], None]) -> None: ...
 
@@ -208,6 +209,16 @@ class MatchingService(Protocol):  # D — fused vectors, radius prefilter, cosin
 
 class ProfileRefresher(Protocol):  # D — A calls at plan-lock, fire-and-forget (FR13)
     async def refresh(self, replies: list[Reply]) -> None: ...
+
+
+class MessageLog(Protocol):  # D — appender over the messages table
+    async def append(
+        self, chat_id: str, handle: str, direction: Literal["in", "out"], text: str
+    ) -> None: ...
+
+
+class ContextUpdater(Protocol):  # D — windowed context snapshots → profiles
+    async def snapshot(self, chat_id: str, participants: list[str]) -> None: ...
 
 
 class ArtifactStore(Protocol):  # A (agent-side impl) — artifacts table; C reads via DB

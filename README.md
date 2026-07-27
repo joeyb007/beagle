@@ -39,7 +39,7 @@ cp .env.example .env   # fill in tokens as you get them
 
 ```
 IMESSAGE_TOKEN=        IMESSAGE_ADDRESS=      # B — Photon line (hour 0!)
-MERGE_API_KEY=         MERGE_BASE_URL=        # A — Gateway routing
+ANTHROPIC_API_KEY=                            # A — Anthropic API (LLM routing)
 SPOTIFY_CLIENT_ID=     SPOTIFY_CLIENT_SECRET= # C/D
 GOOGLE_CLIENT_ID=      GOOGLE_CLIENT_SECRET=  # C/D
 ```
