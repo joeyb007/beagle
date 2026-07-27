@@ -71,6 +71,10 @@ async function main() {
           if (!FAKE) return notFound(res);
           fake.inject({ type: "message", handle: body.handle, chatId: body.chatId, text: body.text });
           return json(res, { ok: true });
+        case "POST /_fake/groupJoined":
+          if (!FAKE) return notFound(res);
+          fake.inject({ type: "groupJoined", handle: "", chatId: body.chatId, members: body.members ?? [], name: body.name });
+          return json(res, { ok: true });
         case "POST /_fake/pollVote":
           if (!FAKE) return notFound(res);
           fake.inject({ type: "pollVote", handle: body.handle, pollId: body.pollId, optionIndex: body.optionIndex });

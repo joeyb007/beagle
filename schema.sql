@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS groups (
   name       TEXT NOT NULL,
   chat_id    TEXT,                        -- iMessage space id once known
   members    TEXT NOT NULL DEFAULT '[]',  -- JSON array of handles
+  voice      TEXT,                        -- distilled per-group style card (LLM-genned)
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -104,3 +105,13 @@ CREATE TABLE IF NOT EXISTS outreach (
   group_id INTEGER NOT NULL,
   sent_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Raw group-thread messages: fuel for per-group voice cards + agent context.
+CREATE TABLE IF NOT EXISTS group_messages (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  chat_id    TEXT NOT NULL,
+  handle     TEXT NOT NULL,
+  text       TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_groups_chat_id ON groups(chat_id);

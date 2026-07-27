@@ -49,6 +49,7 @@ class PhotonMessaging:
         self._ws_task: asyncio.Task | None = None
         self._inbound_handlers: list[Callable[[InboundMessage], None]] = []
         self._vote_handlers: list[Callable[[PollVote], None]] = []
+        self._group_handlers: list[Callable[[str, list[str], str | None], None]] = []
 
     # ------------------------------------------------------- T9: lifecycle
 
@@ -163,6 +164,10 @@ class PhotonMessaging:
     def on_poll_vote(self, handler: Callable[[PollVote], None]) -> None:
         self._vote_handlers.append(handler)
 
+    def on_group_joined(self, handler: Callable[[str, list[str], str | None], None]) -> None:
+        """handler(chat_id, members, name) — fires when Beagle lands in a group."""
+        self._group_handlers.append(handler)
+
     def _start_ws(self) -> None:
         if self._ws_task is None or self._ws_task.done():
             self._ws_task = asyncio.create_task(self._ws_loop())
@@ -186,6 +191,9 @@ class PhotonMessaging:
                 return  # consumed as a vote — not an inbound message
             for h in self._inbound_handlers:
                 h(m)
+        elif e.get("type") == "groupJoined":
+            for h in self._group_handlers:
+                h(e["chatId"], e.get("members", []), e.get("name"))
         elif e.get("type") == "pollVote":
             v = PollVote(
                 poll_id=e["pollId"], handle=e["handle"], option_index=e["optionIndex"]

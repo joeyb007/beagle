@@ -2,13 +2,17 @@
 // FakePhoton drives dev/tests; RealPhoton lights up when IMESSAGE_TOKEN exists.
 
 export interface OutEvent {
-  type: "message" | "pollVote";
+  type: "message" | "pollVote" | "groupJoined";
   handle: string;
   chatId?: string;
   text?: string;
   pollId?: string;
   optionIndex?: number;
+  members?: string[]; // groupJoined: current roster
+  name?: string; // groupJoined: display name, when known
 }
+
+export const isGroupSpace = (id: string) => id.includes(";+;");
 
 export interface SentRecord {
   kind: "text" | "card" | "poll" | "typing_on" | "typing_off" | "image" | "celebrate" | "voice" | "file";
@@ -196,10 +200,33 @@ export async function createRealPhoton(): Promise<PhotonLayer> {
     return spaces.get(id);
   };
 
+  // Beagle-added-to-group detection: any event from a group space we haven't
+  // seen yet -> persist-worthy join. Roster fetched best-effort.
+  const knownGroups = new Set<string>();
+  const announceGroup = async (space: any) => {
+    try {
+      const users = await space.getMembers();
+      emit({
+        type: "groupJoined",
+        handle: "",
+        chatId: space.id,
+        members: users.map((u: any) => u.id ?? u.address).filter(Boolean),
+        name: space.displayName ?? space.name ?? undefined,
+      });
+    } catch (e) {
+      console.error("[sidecar] getMembers failed (registering group anyway):", e);
+      emit({ type: "groupJoined", handle: "", chatId: space.id, members: [] });
+    }
+  };
+
   (async () => {
     try {
       for await (const [space, message] of app.messages) {
         spaces.set(space.id, space);
+        if (isGroupSpace(space.id) && !knownGroups.has(space.id)) {
+          knownGroups.add(space.id);
+          void announceGroup(space);
+        }
         const mapped = mapSpectrumInbound(space, message, polls);
         if (mapped) {
           emit(mapped);

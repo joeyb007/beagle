@@ -22,6 +22,7 @@ for (const ddl of [
   "ALTER TABLE artifacts ADD COLUMN note TEXT",
   "ALTER TABLE sparks ADD COLUMN photo TEXT",
   "ALTER TABLE artifacts ADD COLUMN photo_notes TEXT NOT NULL DEFAULT '{}'",
+  "ALTER TABLE groups ADD COLUMN voice TEXT",
 ]) {
   try { db.exec(ddl); } catch { /* column exists */ }
 }

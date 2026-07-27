@@ -15,6 +15,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from src.agent.beagle_take import beagle_take
+from src.agent.group_registrar import GroupRegistrar
 from src.agent.intros import IntroWorker
 from src.agent.memory_chat import chat_about_memory
 from src.agent.outreach import OutreachWorker
@@ -49,6 +50,24 @@ async def lifespan(app: FastAPI):
         llm=orchestrator._llm,
     )
     outreach_task = asyncio.create_task(outreach.run_forever())
+    # added-to-group -> persisted group + provisioned members + one hello;
+    # group-thread chatter feeds the per-group voice card
+    registrar = GroupRegistrar(
+        db_path=os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
+        messaging=messaging,
+    )
+    loop = asyncio.get_event_loop()
+    messaging.on_group_joined(
+        lambda chat_id, members, name: loop.create_task(
+            registrar.on_group_joined(chat_id, members, name=name)
+        )
+    )
+    messaging.on_inbound(
+        lambda m: registrar.log_message(m.chat_id, m.handle, m.text)
+        if ";+;" in m.chat_id
+        else None
+    )
+    app.state.registrar = registrar
     app.state.outreach = outreach
     app.state.orchestrator = orchestrator
     app.state.messaging = messaging
