@@ -46,3 +46,9 @@ test("works even against a pre-waitlist database (table created on demand)", () 
   expect(addWaitlistEmail("max@example.com")).toBe(true);
   expect(rows()).toEqual([{ email: "max@example.com" }]);
 });
+
+test("oversized email is rejected (public write path cap)", () => {
+  const huge = "a".repeat(300) + "@example.com";
+  expect(addWaitlistEmail(huge)).toBe(false);
+  expect(rows()).toHaveLength(0);
+});

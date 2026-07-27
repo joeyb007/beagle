@@ -39,6 +39,9 @@ export default async function Landing({
           </>
         )}
         <a className="console-link" href="/dashboard">operator console →</a>
+        <p className="credit">
+          pixel pup by <a href="https://megamicrobats.itch.io/dogpack">bat</a>
+        </p>
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ async function submitImport(formData: FormData) {
   "use server";
   const text = String(formData.get("chat") ?? "").trim();
   if (text) addImport(text);
-  revalidatePath("/");
+  revalidatePath("/onboarding");
 }
 
 function connectedProviders(): Set<string> {

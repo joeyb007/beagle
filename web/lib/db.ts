@@ -128,7 +128,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // pre-existing shared data.sqlite (made before this schema change) still works.
 export function addWaitlistEmail(raw: string): boolean {
   const email = raw.trim().toLowerCase();
-  if (!EMAIL_RE.test(email)) return false;
+  // 254 = RFC 5321 ceiling; caps stored size on a public write path
+  if (email.length > 254 || !EMAIL_RE.test(email)) return false;
   const conn = db();
   conn.exec(
     "CREATE TABLE IF NOT EXISTS waitlist (email TEXT PRIMARY KEY, ts TEXT NOT NULL DEFAULT (datetime('now')))"
