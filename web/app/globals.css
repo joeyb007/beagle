@@ -70,7 +70,7 @@ h2 { font-size: 15px; font-weight: 600; margin: 28px 0 10px; }
   margin-bottom: 16px;
 }
 label.field { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 4px; }
-input[type="text"], textarea, select {
+input[type="text"], input[type="email"], textarea, select {
   width: 100%;
   font: inherit;
   padding: 8px 10px;
@@ -234,4 +234,53 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
   main.content { padding: 24px 20px 60px; }
   .keepsake-bg { margin: -24px -20px -60px; padding: 28px 20px; }
   .stat-row { flex-wrap: wrap; }
+}
+
+/* ---- landing ---- */
+.landing {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+}
+.landing-field {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.05;
+  color: var(--copper);
+  opacity: 0.5;
+  user-select: none;
+  pointer-events: none;
+}
+.landing-inner {
+  position: relative;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 48px 32px;
+  text-align: center;
+  background: radial-gradient(closest-side, var(--paper) 55%, transparent);
+}
+.landing-inner h1 {
+  font-size: clamp(40px, 6vw, 64px);
+  line-height: 1.05;
+  margin: 12px 0 14px;
+}
+.pitch { color: var(--muted); font-size: 17px; margin: 0 0 26px; }
+.waitlist { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.waitlist input { max-width: 280px; background: var(--card); }
+.waitlist .primary { margin-top: 0; }
+.joined { font-family: var(--mono); font-size: 14px; color: var(--fern); margin-top: 12px; }
+.joined.err { color: var(--copper); }
+.console-link {
+  display: inline-block;
+  margin-top: 36px;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
 }
