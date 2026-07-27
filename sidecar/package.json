@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx src/server.ts"
+    "start": "tsx src/server.ts",
+    "test": "node --import tsx --test test/map.test.ts test/participants.test.ts"
   },
   "dependencies": {
     "@photon-ai/advanced-imessage": "^2.0.2",

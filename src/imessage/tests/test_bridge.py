@@ -98,3 +98,9 @@ async def test_poll_vote_normalized_through_ws(messaging):
 
 async def test_availability_preflight(messaging):
     assert await messaging.is_imessage_available("+15550000001") is True
+
+
+async def test_get_participants_crosses_the_bridge(messaging):
+    await inject("group", {"chatId": "ext-g1", "handles": ["+15550000001", "+15550000002"]})
+    handles = await messaging.get_participants(ChatRef(id="ext-g1"))
+    assert handles == ["+15550000001", "+15550000002"]

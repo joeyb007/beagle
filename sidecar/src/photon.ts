@@ -23,6 +23,7 @@ export interface PhotonLayer {
   setTyping(chatId: string, on: boolean): Promise<void>;
   createPoll(chatId: string, question: string, options: string[]): Promise<{ id: string }>;
   isIMessageAvailable(handle: string): Promise<boolean>;
+  getParticipants(chatId: string): Promise<string[]>;
   onEvent(handler: (e: OutEvent) => void): void;
 }
 
@@ -33,9 +34,12 @@ export class FakePhoton implements PhotonLayer {
   private handlers: ((e: OutEvent) => void)[] = [];
   private chatSeq = 0;
   private pollSeq = 0;
+  private chats = new Map<string, string[]>();
 
   async createChat(handles: string[]) {
-    return { id: `fake-chat-${++this.chatSeq}-${handles.length}p` };
+    const id = `fake-chat-${++this.chatSeq}-${handles.length}p`;
+    this.chats.set(id, [...handles]);
+    return { id };
   }
   async sendText(chatId: string, text: string) {
     this.sent.push({ kind: "text", chatId, text });
@@ -50,12 +54,19 @@ export class FakePhoton implements PhotonLayer {
   async isIMessageAvailable() {
     return true;
   }
+  async getParticipants(chatId: string) {
+    return this.chats.get(chatId) ?? [];
+  }
   onEvent(handler: (e: OutEvent) => void) {
     this.handlers.push(handler);
   }
   // test injection (exposed via /_fake routes)
   inject(e: OutEvent) {
     for (const h of this.handlers) h(e);
+  }
+  // externally-created groups (exposed via POST /_fake/group)
+  registerGroup(chatId: string, handles: string[]) {
+    this.chats.set(chatId, [...handles]);
   }
 }
 
@@ -171,10 +182,29 @@ export async function createRealPhoton(): Promise<PhotonLayer> {
     return spaces.get(id);
   };
 
+  // chatId -> accumulated member handles (createChat args ∪ observed senders
+  // ∪ whatever membership the space object exposes).
+  const participants = new Map<string, Set<string>>();
+  const membersOf = (chatId: string) => {
+    if (!participants.has(chatId)) participants.set(chatId, new Set());
+    return participants.get(chatId)!;
+  };
+  const absorbSpaceMembers = (space: any) => {
+    const set = membersOf(space.id);
+    for (const u of space?.users ?? space?.members ?? []) {
+      const handle = u?.id ?? u?.address ?? u;
+      if (typeof handle === "string" && handle) set.add(handle);
+    }
+  };
+
   (async () => {
     try {
       for await (const [space, message] of app.messages) {
         spaces.set(space.id, space);
+        absorbSpaceMembers(space);
+        if (message?.direction === "inbound" && message.sender?.id) {
+          membersOf(space.id).add(message.sender.id);
+        }
         emit(mapSpectrumInbound(space, message, polls));
       }
     } catch (err) {
@@ -187,6 +217,9 @@ export async function createRealPhoton(): Promise<PhotonLayer> {
       const users = await Promise.all(handles.map((h) => im.user(h)));
       const space = await im.space.create(handles.length === 1 ? users[0] : users);
       spaces.set(space.id, space);
+      const set = membersOf(space.id);
+      for (const h of handles) set.add(h);
+      absorbSpaceMembers(space);
       return { id: space.id };
     },
     async sendText(chatId, text) {
@@ -211,6 +244,14 @@ export async function createRealPhoton(): Promise<PhotonLayer> {
         return false;
       }
     },
+    async getParticipants(chatId) {
+      const space = spaces.get(chatId) ?? (await getSpace(chatId).catch(() => null));
+      if (space) absorbSpaceMembers(space);
+      const own = new Set(
+        [process.env.IMESSAGE_PHONE, process.env.IMESSAGE_ADDRESS].filter(Boolean)
+      );
+      return [...membersOf(chatId)].filter((h) => !own.has(h)).sort();
+    },
     onEvent(handler) {
       handlers.push(handler);
     },
@@ -230,9 +271,20 @@ export async function createAdvancedGrpcPhoton(): Promise<PhotonLayer> {
   const emit = (e: OutEvent | null) => e && handlers.forEach((h) => h(e));
   const pollIndex = new PollOptionIndex();
 
+  // chatId -> accumulated member handles (createChat args ∪ observed senders).
+  const participants = new Map<string, Set<string>>();
+  const membersOf = (chatId: string) => {
+    if (!participants.has(chatId)) participants.set(chatId, new Set());
+    return participants.get(chatId)!;
+  };
+
   (async () => {
     try {
-      for await (const e of client.messages.subscribeEvents()) emit(mapMessageEvent(e));
+      for await (const e of client.messages.subscribeEvents()) {
+        const mapped = mapMessageEvent(e);
+        if (mapped?.chatId && mapped.handle) membersOf(mapped.chatId).add(mapped.handle);
+        emit(mapped);
+      }
     } catch (err) {
       console.error("[sidecar] message event stream ended:", err);
     }
@@ -248,7 +300,10 @@ export async function createAdvancedGrpcPhoton(): Promise<PhotonLayer> {
   return {
     async createChat(handles) {
       const res: any = await client.chats.create(handles);
-      return { id: res.chat?.guid ?? res.guid ?? res.id };
+      const id = res.chat?.guid ?? res.guid ?? res.id;
+      const set = membersOf(id);
+      for (const h of handles) set.add(h);
+      return { id };
     },
     async sendText(chatId, text) {
       await client.messages.sendText(chatId, text);
@@ -269,6 +324,9 @@ export async function createAdvancedGrpcPhoton(): Promise<PhotonLayer> {
     async isIMessageAvailable(handle) {
       const res: any = await client.addresses.isIMessageAvailable(handle);
       return Boolean(res?.available ?? res?.imessage ?? res);
+    },
+    async getParticipants(chatId) {
+      return [...membersOf(chatId)].sort();
     },
     onEvent(handler) {
       handlers.push(handler);

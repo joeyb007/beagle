@@ -157,3 +157,8 @@ class PhotonMessaging:
         resp = await self._http.get("/addresses/check", params={"handle": handle})
         resp.raise_for_status()
         return bool(resp.json().get("imessage"))
+
+    async def get_participants(self, chat: ChatRef) -> list[str]:
+        resp = await self._http.get("/chats/participants", params={"chatId": chat.id})
+        resp.raise_for_status()
+        return list(resp.json().get("handles", []))

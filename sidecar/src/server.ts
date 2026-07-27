@@ -52,12 +52,18 @@ async function main() {
           return json(res, await photon.createPoll(body.chatId, body.question, body.options));
         case "GET /addresses/check":
           return json(res, { imessage: await photon.isIMessageAvailable(query.get("handle") ?? "") });
+        case "GET /chats/participants":
+          return json(res, { handles: await photon.getParticipants(query.get("chatId") ?? "") });
         // ---- fake-mode-only test hooks ----
         case "GET /_fake/sent":
           return FAKE ? json(res, fake.sent) : notFound(res);
         case "POST /_fake/inbound":
           if (!FAKE) return notFound(res);
           fake.inject({ type: "message", handle: body.handle, chatId: body.chatId, text: body.text });
+          return json(res, { ok: true });
+        case "POST /_fake/group":
+          if (!FAKE) return notFound(res);
+          fake.registerGroup(body.chatId, body.handles);
           return json(res, { ok: true });
         case "POST /_fake/pollVote":
           if (!FAKE) return notFound(res);
