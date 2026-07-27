@@ -302,7 +302,7 @@ table.data th:nth-last-child(-n + 2) { text-align: right; }
   line-height: 1.05;
   margin: 12px 0 14px;
 }
-.pitch { color: var(--muted); font-size: 17px; margin: 0 0 26px; }
+.pitch { color: var(--muted); font-size: 17px; margin: 0 0 58px; } /* runway for the beagle above the form */
 .waitlist { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .waitlist input { max-width: 280px; background: var(--card); }
 .waitlist .primary { margin-top: 0; }

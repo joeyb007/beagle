@@ -8,7 +8,7 @@ import { useEffect, useRef } from "react";
 
 const FW = 48;
 const FH = 32;
-const SCALE = 2;
+const SCALE = 1.5;
 
 type AnimName = "walk" | "wag" | "idle" | "sit";
 const ANIMS: Record<AnimName, { src: string; frames: number; ms: number }> = {
@@ -77,7 +77,7 @@ export function PixelBeagle({ targetIds }: { targetIds: string[] }) {
       const lr = host.getBoundingClientRect();
       minX = hr.left - lr.left + 6;
       maxX = hr.right - lr.left - FW * SCALE - 6;
-      perchY = hr.top - lr.top - FH * SCALE + 10; // paws overlap the text top
+      perchY = hr.top - lr.top - FH * SCALE + 2; // paws rest on the target's top edge
       if (!placed) {
         x = minX + (maxX - minX) * 0.7;
         targetX = x;
