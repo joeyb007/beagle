@@ -62,3 +62,21 @@ CREATE TABLE IF NOT EXISTS routing_log (
   cost_estimate REAL,
   latency_ms    INTEGER
 );
+
+-- Agent writes every observed message (in + out); D's ContextUpdater reads windows.
+CREATE TABLE IF NOT EXISTS messages (
+  id        INTEGER PRIMARY KEY AUTOINCREMENT,
+  chat_id   TEXT NOT NULL,
+  handle    TEXT NOT NULL,               -- sender handle; 'beagle' for outbound
+  direction TEXT NOT NULL,               -- 'in' | 'out'
+  text      TEXT NOT NULL,
+  ts        TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_messages_chat ON messages(chat_id, id);
+
+-- Per-chat context bookmark: everything <= last_message_id has been distilled.
+CREATE TABLE IF NOT EXISTS context_snapshots (
+  chat_id         TEXT PRIMARY KEY,
+  last_message_id INTEGER NOT NULL,
+  updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
