@@ -4,10 +4,12 @@
 # constructs these with the real MergeRouter injected and points them at the
 # shared data.sqlite — no code changes at consolidation, just real deps.
 
+from .context import SqliteContextUpdater
 from .distiller import Distiller
 from .embeddings import EmbeddingBuilder
 from .gcal import GoogleCalendarProvider
 from .matching import SqliteMatchingService
+from .message_log import SqliteMessageLog
 from .music import SqliteMusicProvider
 from .refresh import SqliteProfileRefresher
 from .store import SqliteProfileStore
@@ -17,7 +19,9 @@ __all__ = [
     "Distiller",
     "EmbeddingBuilder",
     "GoogleCalendarProvider",
+    "SqliteContextUpdater",
     "SqliteMatchingService",
+    "SqliteMessageLog",
     "SqliteMusicProvider",
     "SqliteProfileRefresher",
     "SqliteProfileStore",
