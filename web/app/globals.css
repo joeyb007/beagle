@@ -284,3 +284,44 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
   text-decoration: none;
   border-bottom: 1px solid var(--line);
 }
+
+/* ---- onboarding hero + steps ---- */
+.hero-band {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-bottom: 32px;
+  background: var(--card);
+}
+.hero-field {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.05;
+  color: var(--copper);
+  opacity: 0.35;
+  user-select: none;
+  pointer-events: none;
+}
+.hero-copy { position: relative; padding: 36px 32px; }
+.hero-copy .sub { margin-bottom: 0; max-width: 480px; }
+
+.steps { list-style: none; margin: 0; padding: 0; }
+.step {
+  display: flex;
+  gap: 20px;
+  padding: 24px 0;
+  border-top: 1px solid var(--line);
+}
+.stepnum {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--copper);
+  padding-top: 3px;
+  min-width: 34px;
+}
+.stepbody { flex: 1; }
+.stepbody h2 { margin-top: 0; }
