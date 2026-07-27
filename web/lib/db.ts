@@ -356,3 +356,19 @@ export function listRoutingLog(): RoutingRow[] {
     .prepare("SELECT ts, model, tier, cost_estimate, latency_ms FROM routing_log ORDER BY id DESC LIMIT 200")
     .all() as RoutingRow[];
 }
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Landing-page waitlist. Idempotent; creates the table on demand so a
+// pre-existing shared data.sqlite (made before this schema change) still works.
+export function addWaitlistEmail(raw: string): boolean {
+  const email = raw.trim().toLowerCase();
+  // 254 = RFC 5321 ceiling; caps stored size on a public write path
+  if (email.length > 254 || !EMAIL_RE.test(email)) return false;
+  const conn = db();
+  conn.exec(
+    "CREATE TABLE IF NOT EXISTS waitlist (email TEXT PRIMARY KEY, ts TEXT NOT NULL DEFAULT (datetime('now')))"
+  );
+  conn.prepare("INSERT OR IGNORE INTO waitlist (email) VALUES (?)").run(email);
+  return true;
+}

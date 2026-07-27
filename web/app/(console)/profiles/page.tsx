@@ -1,9 +1,10 @@
-"use server";
-// Shared profile-save action — used by per-chat member editors (and /profiles).
+// T4: profile editor — the trust/safety surface. D writes these; humans correct them.
 import { revalidatePath } from "next/cache";
-import { updateProfile } from "@/lib/db";
+import { listProfiles, updateProfile } from "@/lib/db";
+import { ProfileCard } from "./profile-card";
 
-export async function saveProfile(formData: FormData) {
+async function save(formData: FormData) {
+  "use server";
   const handle = String(formData.get("handle"));
   const csv = (k: string) =>
     String(formData.get(k) ?? "")
@@ -23,6 +24,21 @@ export async function saveProfile(formData: FormData) {
     },
   });
   revalidatePath("/profiles");
-  revalidatePath("/chats");
-  revalidatePath("/");
 }
+
+export default function Profiles() {
+  const profiles = listProfiles();
+  return (
+    <>
+      <h1>Profiles</h1>
+      <p className="sub">
+        What Beagle believes about each person. It never invents — but it can be wrong. Fix it here.
+      </p>
+      {profiles.map((p) => (
+        <ProfileCard key={p.handle} profile={p} action={save} />
+      ))}
+    </>
+  );
+}
+
+export const dynamic = "force-dynamic";

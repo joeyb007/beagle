@@ -1,147 +1,46 @@
-// Home: Beagle's read on YOU — the persona it earned, plus the polaroid string
-// of every hangout you were part of.
-import Link from "next/link";
+// Public landing + waitlist. Full-bleed, no console rail — root layout is bare.
 import { redirect } from "next/navigation";
-import { BeagleTake } from "@/app/beagle-take";
-import { SparkButton } from "@/app/spark-button";
-import { StringStrip } from "@/app/string-strip";
-import { DAY_LABELS, availableDays } from "@/lib/availability";
-import { onThisDay, peopleStats, photoMemories, upcomingFor } from "@/lib/db";
-import { currentUser } from "@/lib/session";
+import { AsciiField } from "@/components/ascii-field";
+import { PixelBeagle } from "@/components/pixel-beagle";
+import { addWaitlistEmail } from "@/lib/db";
 
-function daysUntil(iso: string): string {
-  const days = Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000);
-  return days <= 0 ? "today" : days === 1 ? "tomorrow" : `in ${days} days`;
+async function join(formData: FormData) {
+  "use server";
+  const ok = addWaitlistEmail(String(formData.get("email") ?? ""));
+  redirect(ok ? "/?joined=1" : "/?joined=0");
 }
 
-function monthOf(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, { month: "long", year: "numeric" });
-}
-
-export default async function Home() {
-  const user = await currentUser();
-  if (!user) redirect("/login");
-
-  const memories = photoMemories(user.handle);
-  const days = availableDays(user.data.typical_availability);
-  const upNext = upcomingFor(user.handle);
-  const people = peopleStats(user.handle);
-  const flashback = onThisDay(user.handle);
-  const chips = [
-    ...(user.data.cuisines ?? []).map((c) => ({ kind: "likes", text: c })),
-    ...(user.data.vibe ?? []).map((v) => ({ kind: "vibe", text: v })),
-    ...(user.data.hard_nos ?? []).map((n) => ({ kind: "no", text: `no ${n}` })),
-  ];
-
+export default async function Landing({
+  searchParams,
+}: {
+  searchParams: Promise<{ joined?: string }>;
+}) {
+  const { joined } = await searchParams;
   return (
-    <>
-      <p className="eyebrow">beagle&apos;s read on you</p>
-      <h1 className="persona-headline">
-        {user.name} <span className="persona-label">— {user.data.persona_label ?? "still figuring you out"}</span>
-      </h1>
-      <p className="sub">
-        Earned from your messages{user.data.notes ? ` · ${user.data.notes}` : ""} —{" "}
-        <Link href="/profiles">correct anything</Link>.
-      </p>
-
-      <BeagleTake handle={user.handle} initial={(user.data.beagle_take as string | undefined) ?? null} />
-
-      <div className="widget-row">
-        <div className="card widget">
-          <h2 style={{ marginTop: 0 }}>Up next</h2>
-          {upNext ? (
-            <>
-              <p className="widget-big">{upNext.place}</p>
-              <p className="muted" style={{ margin: "2px 0 8px" }}>
-                {daysUntil(upNext.time)}
-                {upNext.others.length > 0 && <> · with {upNext.others.join(" & ")}</>}
-              </p>
-              <Link href={`/hangouts/${upNext.plan_id}`}>see the plan →</Link>
-            </>
-          ) : (
-            <p className="muted" style={{ marginBottom: 0 }}>
-              nothing on the calendar — say “hey beagle” in a group chat
-            </p>
-          )}
-        </div>
-
-        <div className="card widget">
-          <h2 style={{ marginTop: 0 }}>Your people</h2>
-          {people.mostSeen ? (
-            <>
-              <p className="widget-big">{people.mostSeen.name}</p>
-              <p className="muted" style={{ margin: "2px 0 8px" }}>
-                most-seen face · {people.mostSeen.count} hangout{people.mostSeen.count === 1 ? "" : "s"}
-              </p>
-              {people.longestUnseen && people.longestUnseen.name !== people.mostSeen.name && (
-                <p className="muted" style={{ marginBottom: 0 }}>
-                  haven’t seen <strong>{people.longestUnseen.name}</strong> since {monthOf(people.longestUnseen.lastTime)}
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="muted" style={{ marginBottom: 0 }}>no shared hangouts yet</p>
-          )}
-        </div>
-
-        <div className="card widget">
-          <h2 style={{ marginTop: 0 }}>On this day-ish</h2>
-          {flashback ? (
-            <div className="otd">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <Link href={`/hangouts/${flashback.plan_id}`} className="otd-photo">
-                <img src={flashback.src} alt={`memory from ${flashback.place}`} />
-              </Link>
-              <div className="otd-body">
-                <p className="widget-big">{flashback.place}</p>
-                <p className="muted" style={{ margin: "2px 0 8px" }}>{monthOf(flashback.time)}</p>
-                <SparkButton planId={flashback.plan_id} photo={flashback.src} />
-              </div>
-            </div>
-          ) : (
-            <p className="muted" style={{ marginBottom: 0 }}>no photographed memories yet</p>
-          )}
-        </div>
+    <div className="landing">
+      <AsciiField className="landing-field" rows={44} cols={160} />
+      <PixelBeagle targetIds={["waitlist-email", "hero-title"]} />
+      <div className="landing-inner">
+        <div className="kicker">Beagle</div>
+        <h1 id="hero-title">The friend who knows your group</h1>
+        <p className="pitch">
+          Paste your group chat. Beagle learns who everyone really is — then plans your hangouts
+          right in iMessage.
+        </p>
+        {joined === "1" ? (
+          <p className="joined">✓ you're on the list — we'll bark when it's your turn.</p>
+        ) : (
+          <>
+            <form action={join} className="waitlist">
+              <input id="waitlist-email" type="email" name="email" required placeholder="you@example.com" aria-label="Email address" />
+              <button className="primary" type="submit">Join the waitlist</button>
+            </form>
+            {joined === "0" && <p className="joined err">that email didn't look right — try again?</p>}
+          </>
+        )}
+        <a className="console-link" href="/dashboard">operator console →</a>
       </div>
-
-      <div className="persona-grid">
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>Taste</h2>
-          <div className="chips">
-            {chips.length === 0 && <span className="muted">nothing learned yet — go text your group</span>}
-            {chips.map((c, i) => (
-              <span key={i} className={`chip chip-${c.kind}`}>{c.text}</span>
-            ))}
-          </div>
-        </div>
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>When you&apos;re around</h2>
-          <div className="day-pills">
-            {DAY_LABELS.map((label, i) => (
-              <span key={i} className={`day-pill${days.includes(i) ? " on" : ""}`}>{label}</span>
-            ))}
-          </div>
-          <p className="muted" style={{ marginBottom: 0 }}>
-            {user.data.typical_availability ?? "no pattern yet"}
-          </p>
-        </div>
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>Pickiness</h2>
-          <div className="meter">
-            <div className="meter-fill" style={{ width: `${Math.round(user.constraint_score * 100)}%` }} />
-          </div>
-          <p className="muted" style={{ marginBottom: 0 }}>
-            {user.constraint_score >= 0.7
-              ? "beagle asks you first — your answers prune the plan"
-              : user.constraint_score >= 0.4
-                ? "somewhere in the middle"
-                : "down for almost anything"}
-          </p>
-        </div>
-      </div>
-
-      <StringStrip memories={memories} />
-    </>
+    </div>
   );
 }
 

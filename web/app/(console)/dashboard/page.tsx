@@ -1,5 +1,7 @@
 // T6: Merge Gateway dashboard — the routing_log A's MergeRouter writes.
 import { listRoutingLog } from "@/lib/db";
+import { Meter } from "@/components/meter";
+import { Sparkline } from "@/components/sparkline";
 
 export default function Dashboard() {
   const rows = listRoutingLog();
@@ -10,6 +12,8 @@ export default function Dashboard() {
   const frontierShare = rows.length
     ? Math.round((rows.filter((r) => r.tier === "frontier").length / rows.length) * 100)
     : 0;
+  // rows come newest-first from listRoutingLog; chart oldest→newest:
+  const costSeries = [...rows].reverse().map((r) => r.cost_estimate ?? 0);
 
   return (
     <>
@@ -22,8 +26,17 @@ export default function Dashboard() {
         <div className="card stat"><div className="n">{rows.length}</div><div className="l">calls</div></div>
         <div className="card stat"><div className="n">${cost.toFixed(4)}</div><div className="l">est. cost</div></div>
         <div className="card stat"><div className="n">{avgLatency} ms</div><div className="l">avg latency</div></div>
-        <div className="card stat"><div className="n">{frontierShare}%</div><div className="l">frontier calls</div></div>
+        <div className="card stat">
+          <div className="n">{frontierShare}%</div>
+          <div className="l">frontier calls <Meter value={frontierShare / 100} label={`${frontierShare}% frontier`} /></div>
+        </div>
       </div>
+      {costSeries.length >= 2 && (
+        <div className="card">
+          <div className="kicker">Cost per call</div>
+          <Sparkline values={costSeries} width={720} height={56} />
+        </div>
+      )}
       <div className="card">
         <table className="data">
           <thead>
@@ -34,9 +47,9 @@ export default function Dashboard() {
               <tr key={i}>
                 <td>{r.ts}</td>
                 <td>{r.model}</td>
-                <td className={`tier-${r.tier}`}>{r.tier}</td>
-                <td>{r.cost_estimate == null ? "—" : `$${r.cost_estimate.toFixed(4)}`}</td>
-                <td>{r.latency_ms == null ? "—" : `${r.latency_ms} ms`}</td>
+                <td className={`tier-${r.tier}`}>{r.tier === "frontier" ? "◆" : "◇"} {r.tier}</td>
+                <td className="num">{r.cost_estimate == null ? "—" : `$${r.cost_estimate.toFixed(4)}`}</td>
+                <td className="num">{r.latency_ms == null ? "—" : `${r.latency_ms} ms`}</td>
               </tr>
             ))}
           </tbody>
