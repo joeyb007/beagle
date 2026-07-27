@@ -327,13 +327,6 @@ table.data th:nth-last-child(-n + 2) { text-align: right; }
   z-index: 3;
   will-change: transform;
 }
-.credit {
-  margin-top: 10px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-}
-.credit a { color: inherit; }
 
 /* ---- onboarding hero + steps ---- */
 .hero-band {

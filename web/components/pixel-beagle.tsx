@@ -18,12 +18,16 @@ const ANIMS: Record<AnimName, { src: string; frames: number; ms: number }> = {
   sit: { src: "/dog/sit.png", frames: 1, ms: 400 },
 };
 
-export function PixelBeagle({ targetId }: { targetId: string }) {
+export function PixelBeagle({ targetIds }: { targetIds: string[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const el = ref.current;
-    const hero = document.getElementById(targetId);
+    // first existing target wins (e.g. email input, falling back to the
+    // headline once the post-join state removes the form)
+    const hero = targetIds
+      .map((id) => document.getElementById(id))
+      .find((n): n is HTMLElement => n != null);
     const host = el?.closest(".landing") as HTMLElement | null;
     if (!el || !hero || !host) return;
     const ctx = el.getContext("2d");
@@ -140,7 +144,8 @@ export function PixelBeagle({ targetId }: { targetId: string }) {
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, [targetId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetIds.join(",")]);
 
   return (
     <canvas

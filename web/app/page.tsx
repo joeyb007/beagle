@@ -19,7 +19,7 @@ export default async function Landing({
   return (
     <div className="landing">
       <AsciiField className="landing-field" rows={44} cols={160} />
-      <PixelBeagle targetId="hero-title" />
+      <PixelBeagle targetIds={["waitlist-email", "hero-title"]} />
       <div className="landing-inner">
         <div className="kicker">Beagle</div>
         <h1 id="hero-title">The friend who knows your group</h1>
@@ -32,16 +32,13 @@ export default async function Landing({
         ) : (
           <>
             <form action={join} className="waitlist">
-              <input type="email" name="email" required placeholder="you@example.com" aria-label="Email address" />
+              <input id="waitlist-email" type="email" name="email" required placeholder="you@example.com" aria-label="Email address" />
               <button className="primary" type="submit">Join the waitlist</button>
             </form>
             {joined === "0" && <p className="joined err">that email didn't look right — try again?</p>}
           </>
         )}
         <a className="console-link" href="/dashboard">operator console →</a>
-        <p className="credit">
-          pixel pup by <a href="https://megamicrobats.itch.io/dogpack">bat</a>
-        </p>
       </div>
     </div>
   );
