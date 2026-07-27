@@ -10,7 +10,7 @@ dependencies = [
     "pydantic>=2",
     "httpx",
     "websockets",
-    "openai",             # Merge Gateway = OpenAI-compatible base-URL swap
+    "anthropic",          # official SDK — AnthropicRouter (tier→model routing)
     "python-dotenv",
     # data & intelligence (D) — seeded now so pyproject is frozen after hour 0
     "numpy",

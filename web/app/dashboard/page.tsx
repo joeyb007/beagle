@@ -1,4 +1,4 @@
-// T6: Merge Gateway dashboard — the routing_log A's MergeRouter writes.
+// T6: model-routing dashboard — the routing_log A's AnthropicRouter writes.
 import { listRoutingLog } from "@/lib/db";
 
 export default function Dashboard() {
@@ -15,8 +15,8 @@ export default function Dashboard() {
     <>
       <h1>Model routing</h1>
       <p className="sub">
-        Every LLM call Beagle makes, routed through Merge Gateway — cheap models for parsing,
-        frontier for the human moments.
+        Every LLM call Beagle makes, routed through the Anthropic API — Haiku for parsing,
+        Opus for the human moments.
       </p>
       <div className="stat-row">
         <div className="card stat"><div className="n">{rows.length}</div><div className="l">calls</div></div>

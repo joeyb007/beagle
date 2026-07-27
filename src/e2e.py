@@ -1,7 +1,8 @@
 """Consolidated end-to-end run — the whole product, no external credentials.
 
 Real wiring (wiring.py), real Node sidecar process (fake-Photon mode), real
-D providers over the shared SQLite, DemoLLM standing in for Merge. Drives the
+D providers over the shared SQLite, DemoLLM standing in for the Anthropic
+API. Drives the
 group-first conversational flow from a cold DB: group chatter accumulates in
 the message log → "hey beagle" trigger snapshots the window and bootstraps
 every member's profile → multi-turn DM collection → group proposal → assents

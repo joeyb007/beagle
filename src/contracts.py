@@ -157,7 +157,7 @@ class PollVote(BaseModel):
 # ---------------------------------------------------------------------- ports
 
 
-class LLMRouter(Protocol):  # A — Merge Gateway; logs every call to routing_log
+class LLMRouter(Protocol):  # A — Anthropic API router; logs every call to routing_log
     async def complete(
         self, *, tier: LLMTier, input: str, system: str | None = None
     ) -> str: ...

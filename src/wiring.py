@@ -4,7 +4,7 @@ Constructs the real implementations from all four branches and injects them
 into the Orchestrator. Degrades gracefully so the product runs end-to-end
 tonight with zero external credentials:
 
-  - no MERGE_API_KEY   → DemoLLM (deterministic local "model", still logs
+  - no ANTHROPIC_API_KEY → DemoLLM (deterministic local "model", still logs
                           routing_log rows so the dashboard renders)
   - no IMESSAGE_TOKEN  → sidecar boots in fake-Photon mode automatically
   - no Spotify/Google  → D's providers fall back to distilled-profile taste
@@ -17,9 +17,9 @@ import re
 import time
 from pathlib import Path
 
+from src.agent.anthropic_router import AnthropicRouter
 from src.agent.artifact_store import SqliteArtifactStore
 from src.agent.logging_messaging import LoggingMessaging
-from src.agent.merge_router import MergeRouter
 from src.agent.orchestrator import Orchestrator
 from src.agent.venues import WebVenueSearch
 from src.contracts import LLMTier
@@ -50,12 +50,12 @@ _FOOD_WORDS = ["sushi", "tacos", "thai", "korean", "pizza", "ramen", "bbq", "dim
 
 
 class DemoLLM:
-    """Deterministic stand-in for MergeRouter when MERGE_API_KEY is absent.
+    """Deterministic stand-in for AnthropicRouter when ANTHROPIC_API_KEY is absent.
 
     Handles the two structured prompts the orchestrator depends on (reply
     parsing, venue search) and delegates everything text-shaped (asks, voice,
     distillation) to D's prompt-aware StubLLMRouter. Logs to routing_log so
-    the Merge dashboard renders during credential-less runs.
+    the routing dashboard renders during credential-less runs.
     """
 
     def __init__(self, db_path: str):
@@ -158,10 +158,10 @@ def build_orchestrator() -> tuple[Orchestrator, PhotonMessaging]:
     db_path = os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite"))
     init_db(db_path)
 
-    if os.environ.get("MERGE_API_KEY"):
-        llm = MergeRouter(db_path=db_path)
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        llm = AnthropicRouter(db_path=db_path)
     else:
-        print("[wiring] MERGE_API_KEY not set — using DemoLLM (deterministic, offline)")
+        print("[wiring] ANTHROPIC_API_KEY not set — using DemoLLM (deterministic, offline)")
         llm = DemoLLM(db_path)
 
     raw_messaging = PhotonMessaging()  # sidecar self-selects real vs fake via IMESSAGE_TOKEN
