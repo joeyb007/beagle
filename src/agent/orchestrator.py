@@ -59,6 +59,12 @@ ASK_PROMPT = (
     "One or two sentences, sound like a friend, end with a question."
 )
 
+NUDGE_PROMPT = (
+    "Draft a short heads-up nudge for {recipient}: {replier} just said "
+    '"{text}" about the plan. One casual sentence asking {recipient} if that '
+    "works for them too."
+)
+
 TIGHTEN_TEMPLATE = 'heads up — {name} said "{text}". does that work for you?'
 
 ABORT_TEXT = "hmm, something went sideways on my end — let's try again in a bit 🐶"
@@ -303,13 +309,29 @@ class Orchestrator:
             conv.history.append(("beagle", turn.reply_text))
 
     async def _tighten(self, active: ActiveSession, *, replier: str, reply_text: str) -> None:
-        """Hybrid fan-out: constrained answers sharpen the ask for the rest."""
+        """Hybrid fan-out: constrained answers sharpen the ask for the rest.
+
+        Nudges are LLM-drafted in the group's voice so they read like the
+        conversation, not a template; the template is only the fail-soft.
+        """
         name = active.profiles[replier].name
-        nudge = TIGHTEN_TEMPLATE.format(name=name, text=reply_text)
         for conv in active.dms.values():
-            if conv.handle != replier and not conv.complete:
-                await self._messaging.send_text(ChatRef(id=conv.chat_id), nudge)
-                conv.history.append(("beagle", nudge))
+            if conv.handle == replier or conv.complete:
+                continue
+            try:
+                nudge = await self._llm.complete(
+                    tier="frontier",
+                    system=active.style,
+                    input=NUDGE_PROMPT.format(
+                        recipient=active.profiles[conv.handle].name,
+                        replier=name,
+                        text=reply_text,
+                    ),
+                )
+            except Exception:
+                nudge = TIGHTEN_TEMPLATE.format(name=name, text=reply_text)
+            await self._messaging.send_text(ChatRef(id=conv.chat_id), nudge)
+            conv.history.append(("beagle", nudge))
 
     # ------------------------------------- propose: reconcile + drafted plan
 
@@ -370,6 +392,7 @@ class Orchestrator:
         window = active.session.date_window
         raw = await self._llm.complete(
             tier="cheap",
+            system=active.style,  # objection acks come back in the group's voice
             input=build_classify_prompt(
                 name=active.profiles[m.handle].name,
                 proposal=active.proposal_text,

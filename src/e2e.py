@@ -1,24 +1,30 @@
 """Consolidated end-to-end run — the whole product, no external credentials.
 
 Real wiring (wiring.py), real Node sidecar process (fake-Photon mode), real
-D providers over the shared SQLite, DemoLLM standing in for Merge. Drives:
-invoke → fan-out DMs → replies → reconcile → poll → votes → lock → confirm
-card + match card → artifact row that the web app renders.
+D providers over the shared SQLite, DemoLLM standing in for Merge. Drives the
+group-first conversational flow from a cold DB: group chatter accumulates in
+the message log → "hey beagle" trigger snapshots the window and bootstraps
+every member's profile → multi-turn DM collection → group proposal → assents
+→ lock → confirm card + match card → artifact row + context bookmarks.
 
 Run: .venv/bin/python -m src.e2e
 """
 
 import asyncio
 import json
+import re
 import sqlite3
 import sys
 
 import httpx
 
+from src.data.seed import SAMPLE_CHAT
 from src.wiring import REPO_ROOT, build_orchestrator
 
 SIDECAR = "http://127.0.0.1:8787"
 GROUP = "e2e-group-chat"
+
+CHAT_LINE = re.compile(r"^(\w+) \((\+\d+)\): (.*)$", re.MULTILINE)
 
 REPLIES = [
     "i can only do saturday evening, sushi pls, no clubs",
@@ -45,23 +51,34 @@ async def main() -> None:
         async def inject(path: str, payload: dict):
             (await c.post(f"/_fake/{path}", json=payload)).raise_for_status()
 
-        profiles = await orchestrator._profiles.list()
-        print(f"1. profiles in shared DB: {[p.name for p in profiles]}")
+        # cold start: the group's past chatter lands in the message log
+        # (no trigger word — Beagle just listens)
+        lines = CHAT_LINE.findall(SAMPLE_CHAT)
+        handles = list(dict.fromkeys(h for _, h, _ in lines))
+        for _, handle, text in lines:
+            await inject("inbound", {"handle": handle, "chatId": GROUP, "text": text})
+        # the group exists out in the world; the sidecar knows its members
+        await inject("group", {"chatId": GROUP, "handles": handles})
+        print(f"1. {len(lines)} chat lines observed from {len(handles)} members (cold DB)")
 
-        await inject("inbound", {"handle": profiles[0].handle, "chatId": GROUP,
+        await inject("inbound", {"handle": handles[0], "chatId": GROUP,
                                  "text": "Hey Beagle, let's hang this weekend"})
         active = await wait_for(lambda: orchestrator.sessions.get(GROUP), "session")
         await wait_for(lambda: active.state == "collect", "fan-out to finish")
-        print(f"2. fan-out done — DMs to {len(active.dm_chats)} members (constrained first)")
+        dm_ids = list(active.dms.keys())
+        boot = await orchestrator._profiles.list()
+        print(f"2. trigger snapshot bootstrapped {len(boot)} profiles; "
+              f"DMs to {len(dm_ids)} members (constrained first)")
 
-        for (chat_id, handle), text in zip(list(active.dm_chats.items()), REPLIES * 3):
-            await inject("inbound", {"handle": handle, "chatId": chat_id, "text": text})
-        poll_id = await wait_for(lambda: active.session.poll_id, "reconcile + poll")
-        options = [c_.name for c_ in active.session.candidates]
-        print(f"3. poll {poll_id} in group: {options}")
+        for conv, text in zip(list(active.dms.values()), REPLIES * 3):
+            await inject("inbound", {"handle": conv.handle, "chatId": conv.chat_id,
+                                     "text": text})
+        await wait_for(lambda: active.state == "propose", "reconcile + proposal")
+        print(f"3. proposal in group: {active.proposal_text!r}")
 
-        for handle in list(active.dm_chats.values()):
-            await inject("pollVote", {"pollId": poll_id, "handle": handle, "optionIndex": 1})
+        for handle in [conv.handle for conv in active.dms.values()]:
+            await inject("inbound", {"handle": handle, "chatId": GROUP,
+                                     "text": "works for me"})
         await wait_for(lambda: GROUP not in orchestrator.sessions, "lock + confirm")
 
         sent = (await c.get("/_fake/sent")).json()
@@ -73,10 +90,16 @@ async def main() -> None:
         "SELECT plan_id, place, playlist FROM artifacts ORDER BY created_at DESC, rowid DESC"
     ).fetchone()
     routing = db.execute("SELECT COUNT(*) FROM routing_log").fetchone()[0]
+    logged = db.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
+    marks = {r[0] for r in db.execute("SELECT chat_id FROM context_snapshots")}
+    missing = {GROUP, *dm_ids} - marks
+    if not logged or missing:
+        sys.exit(f"E2E FAILED: messages logged={logged}, missing bookmarks={missing}")
     print(f"5. artifact row: {plan_id} at {json.loads(place)['name']}, "
           f"{len(json.loads(playlist))} tracks · routing_log rows: {routing}")
+    print(f"6. context: {logged} messages logged, bookmarks for group + {len(dm_ids)} DMs")
     print(f"\n   web page: http://localhost:3000/hangouts/{plan_id}")
-    print("\nE2E GREEN — full product loop ran across all four branches.")
+    print("\nE2E GREEN — full conversational loop + context subsystem across the bridge.")
 
     await messaging.close()
 

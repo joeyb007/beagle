@@ -18,17 +18,18 @@ import time
 from pathlib import Path
 
 from src.agent.artifact_store import SqliteArtifactStore
+from src.agent.logging_messaging import LoggingMessaging
 from src.agent.merge_router import MergeRouter
 from src.agent.orchestrator import Orchestrator
 from src.agent.venues import WebVenueSearch
 from src.contracts import LLMTier
 from src.data import (
-    Distiller,
     EmbeddingBuilder,
     GoogleCalendarProvider,
+    SqliteContextUpdater,
     SqliteMatchingService,
+    SqliteMessageLog,
     SqliteMusicProvider,
-    SqliteProfileRefresher,
     SqliteProfileStore,
     SqliteVoiceProvider,
 )
@@ -63,29 +64,85 @@ class DemoLLM:
 
     async def complete(self, *, tier: LLMTier, input: str, system: str | None = None) -> str:
         start = time.monotonic()
-        if "exactly these keys" in input and '"availability"' in input:
-            out = self._parse_reply(input)
+        if '"is_complete"' in input:  # DM turn (turns.TURN_PROMPT)
+            out = self._turn(input)
+        elif '"kind"' in input:  # group reaction classify (turns.CLASSIFY_PROMPT)
+            out = self._classify(input)
+        elif "proposing" in input:  # group proposal draft (turns.PROPOSAL_PROMPT)
+            out = self._proposal(input)
+        elif "friendly 1-on-1 iMessage" in input:  # DM opening ask
+            out = self._ask(input)
+        elif "heads-up nudge" in input:  # cross-member tighten
+            out = self._nudge(input)
         elif "JSON array" in input and "venues" in input.lower():
             out = _DEMO_VENUES
-        else:
+        else:  # voice style + context-update distills land on the prompt-aware stub
             out = await self._delegate.complete(tier=tier, input=input, system=system)
         self._log(tier, int((time.monotonic() - start) * 1000))
         return out
 
-    def _parse_reply(self, prompt: str) -> str:
+    _DAY_RE = re.compile(
+        r"\b(mon|tues|wednes|thurs|fri|satur|sun)day\b|\b(sat|sun|fri)\b"
+        r"|\b(tonight|tomorrow|weekend|free|whenever|anytime)\b"
+    )
+
+    def _turn(self, prompt: str) -> str:
         window = re.search(r"within (\S+) \.\. (\S+)\.", prompt)
-        text_m = re.search(r'Reply text: "(.*)"\. JSON only', prompt, re.DOTALL)
-        text = (text_m.group(1) if text_m else "").lower()
+        them = re.findall(r"^\[them\]: (.*)$", prompt, re.MULTILINE)
+        text = (them[-1] if them else "").lower()
         prefs = [w for w in _FOOD_WORDS if w in text and f"no {w}" not in text]
-        hard_nos = re.findall(r"no (\w+)", text)
-        start, end = (window.group(1), window.group(2)) if window else ("", "")
+        hard_nos = [f"no {n}" for n in re.findall(r"no (\w+)", text)]
+        if self._DAY_RE.search(text) and window:
+            return json.dumps(
+                {
+                    "availability": [{"start": window.group(1), "end": window.group(2)}],
+                    "prefs": prefs,
+                    "hard_nos": hard_nos,
+                    "is_complete": True,
+                    "reply_text": "",
+                }
+            )
         return json.dumps(
             {
-                "availability": [{"start": start, "end": end}],
+                "availability": [],
                 "prefs": prefs,
-                "hard_nos": [n for n in hard_nos if n not in _FOOD_WORDS or f"no {n}" in text],
+                "hard_nos": hard_nos,
+                "is_complete": False,
+                "reply_text": "what day works and what are you feeling food-wise?",
             }
         )
+
+    def _classify(self, prompt: str) -> str:
+        m = re.search(r'replied: "(.*)"', prompt)
+        text = (m.group(1) if m else "").lower()
+        empty = {"availability": [], "prefs": [], "hard_nos": []}
+        if re.search(r"\b(can'?t|cannot|actually|instead)\b", text):
+            return json.dumps(
+                {
+                    "kind": "objection",
+                    **empty,
+                    "hard_nos": [f"no {n}" for n in re.findall(r"no (\w+)", text)],
+                    "reply_text": "got it — adjusting",
+                }
+            )
+        if re.search(r"\b(works|down|in|yes|yep|sure|sounds)\b", text) or "👍" in text:
+            return json.dumps({"kind": "assent", **empty, "reply_text": None})
+        return json.dumps({"kind": "chatter", **empty, "reply_text": None})
+
+    def _proposal(self, prompt: str) -> str:
+        m = re.search(r"proposing (.+?) at (.+?) for ", prompt)
+        venue, when = (m.group(1), m.group(2)) if m else ("the spot", "soon")
+        return f"ok crew — {venue.lower()}, {when.lower()}? say the word and i'll lock it 🐶"
+
+    def _ask(self, prompt: str) -> str:
+        m = re.search(r"asking (\w+)", prompt)
+        name = (m.group(1) if m else "you").lower()
+        return f"yo {name} — what day works this week and what are you feeling food-wise?"
+
+    def _nudge(self, prompt: str) -> str:
+        m = re.search(r'(\S+) just said "(.*)" about the plan', prompt, re.DOTALL)
+        name, text = (m.group(1), m.group(2)) if m else ("someone", "their plans")
+        return f'heads up — {name} said "{text}". does that work for you?'
 
     def _log(self, tier: str, latency_ms: int) -> None:
         import sqlite3
@@ -107,17 +164,19 @@ def build_orchestrator() -> tuple[Orchestrator, PhotonMessaging]:
         print("[wiring] MERGE_API_KEY not set — using DemoLLM (deterministic, offline)")
         llm = DemoLLM(db_path)
 
-    messaging = PhotonMessaging()  # sidecar self-selects real vs fake via IMESSAGE_TOKEN
+    raw_messaging = PhotonMessaging()  # sidecar self-selects real vs fake via IMESSAGE_TOKEN
     store = SqliteProfileStore(db_path)
     music = SqliteMusicProvider(db_path)
     embedder = EmbeddingBuilder(music)
-    distiller = Distiller(llm)
+    log = SqliteMessageLog(db_path)
+    messaging = LoggingMessaging(raw_messaging, log)
 
     orchestrator = Orchestrator(
         messaging=messaging,
         llm=llm,
         profiles=store,
-        refresher=SqliteProfileRefresher(distiller, store, embedder),
+        context=SqliteContextUpdater(llm, store, embedder, log),
+        message_log=log,
         voice=SqliteVoiceProvider(llm, db_path),
         calendar=GoogleCalendarProvider(db_path),
         music=music,
@@ -126,6 +185,7 @@ def build_orchestrator() -> tuple[Orchestrator, PhotonMessaging]:
         artifacts=SqliteArtifactStore(db_path),
         near=os.environ.get("BEAGLE_NEAR", "San Francisco"),
         reply_timeout_s=float(os.environ.get("REPLY_TIMEOUT_S", "180")),
-        vote_timeout_s=float(os.environ.get("VOTE_TIMEOUT_S", "90")),
+        propose_timeout_s=float(os.environ.get("PROPOSE_TIMEOUT_S", "90")),
     )
-    return orchestrator, messaging
+    # main.py drives sidecar lifecycle on the raw adapter (ensure_running/close)
+    return orchestrator, raw_messaging

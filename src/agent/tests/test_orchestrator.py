@@ -53,6 +53,7 @@ OBJECTION = (
 )
 
 PROPOSAL_TEXT = "tacos el rey sat 7pm — that work for everyone?"
+NUDGE_TEXT = 'heads up — Rayhan said "only do saturday evening". does that work for you?'
 
 
 class FakeVenues:
@@ -72,8 +73,11 @@ def scripted_llm():
     classify prompts), then name-keyed opening asks, then the proposal draft."""
     return ScriptedLLM(
         rules=[
-            # "free after 7" first: Maya's turn prompt may also contain Rayhan's
-            # words via the tighten nudge quoted into her history
+            # nudge prompt first: it quotes the replier's words, which would
+            # otherwise match the turn rules below
+            ("heads-up", NUDGE_TEXT),
+            # "free after 7" before Rayhan's needle: Maya's turn prompt may also
+            # contain Rayhan's words via the tighten nudge quoted into her history
             ("free after 7", MAYA_DONE),
             ("only do saturday evening", RAYHAN_DONE),
             ("idk whenever", VAGUE_TURN),
