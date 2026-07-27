@@ -316,6 +316,17 @@ table.data th:nth-last-child(-n + 2) { text-align: right; }
   text-decoration: none;
   border-bottom: 1px solid var(--line);
 }
+.pixel-beagle {
+  position: fixed;
+  left: 0;
+  top: 0;
+  image-rendering: pixelated;
+  pointer-events: none;
+  user-select: none;
+  z-index: 3;
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
 
 /* ---- onboarding hero + steps ---- */
 .hero-band {
