@@ -684,12 +684,13 @@ html { scroll-behavior: smooth; }
 }
 
 /* ---- matches: sniff-report dossier page + intro cards (page & chat) ---- */
+/* the panes tile the full width: deck 2fr, rail 1fr, equal heights */
 .match-layout {
-  display: grid; grid-template-columns: minmax(0, 620px) 300px;
-  gap: 26px; align-items: start;
+  display: grid; grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  gap: 26px; align-items: stretch;
 }
 @media (max-width: 1080px) { .match-layout { grid-template-columns: 1fr; } }
-.mm-stage { max-width: 620px; margin-top: 18px; }
+.mm-stage { margin-top: 18px; }
 .mm-progress { display: flex; gap: 7px; margin: 0 0 12px 4px; }
 .mm-dot {
   width: 7px; height: 7px; border-radius: 50%;
@@ -704,7 +705,7 @@ html { scroll-behavior: smooth; }
 }
 
 /* the inbox rail: only rows that need you or reward you */
-.match-layout.solo { grid-template-columns: minmax(0, 620px); }
+.match-layout.solo { grid-template-columns: 1fr; }
 .intro-rail { margin-top: 18px; padding: 16px 18px; }
 .rail-head {
   font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
