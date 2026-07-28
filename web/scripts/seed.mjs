@@ -274,6 +274,7 @@ motive.run("+14155550102", "tacos + pool tn", "tonight 8pm-late", 2);
 motive.run("+14155550103", "late night ramen run", "tonight 10pm", 1);
 motive.run("+14155550105", "sunset climb + beers after", "saturday 5pm", 3);
 motive.run("+14155550107", "flea market crawl, coffee after", "tomorrow 11am", 2);
+motive.run(JOSEPH, "pickup volleyball + smash burgers", "this weekend", 3);
 
 db.prepare("DELETE FROM routing_log").run();
 const log = db.prepare(

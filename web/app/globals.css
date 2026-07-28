@@ -863,14 +863,21 @@ html { scroll-behavior: smooth; }
 .motive-state { margin-top: auto; font-size: 12px; color: var(--muted); }
 .motive-state.in { color: #16a34a; font-weight: 600; }
 
-.motive-card.composer { background: var(--hover); border-style: dashed; gap: 7px; }
-.motive-compose-head {
-  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--muted); margin: 0;
+.motive-add {
+  flex: 0 0 96px; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 6px;
+  border: 1.5px dashed var(--line); border-radius: 10px; background: var(--hover);
+  font: inherit; cursor: pointer; padding: 12px 8px;
+  transition: border-color 170ms ease, background-color 170ms ease, transform 170ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.motive-card.composer input { font-size: 13px; padding: 7px 9px; }
-.compose-row { display: flex; gap: 6px; }
-.compose-row select { font-size: 12px; padding: 5px 7px; flex: 1; min-width: 0; }
+.motive-add:hover { border-color: var(--copper); transform: translateY(-2px); }
+.motive-add:active { transform: scale(0.97); }
+.motive-add-plus {
+  font-size: 26px; line-height: 1; color: var(--copper); font-weight: 300;
+  transition: transform 200ms cubic-bezier(0.34, 1.6, 0.5, 1);
+}
+.motive-add:hover .motive-add-plus { transform: scale(1.2) rotate(90deg); }
+.motive-add-label { font-size: 11px; color: var(--muted); text-align: center; }
 
 /* take bar: analytics chat */
 .take-chat-toggle {

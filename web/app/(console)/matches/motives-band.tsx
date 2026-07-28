@@ -2,9 +2,10 @@
 // Motives near you: the live bottom band. Same-day intents from nearby
 // people, scored semantically against YOU ("82% your thing"), filtered by
 // radius. Ask to join -> Beagle pitches you to the host; float your own
-// from the composer card. Polls while an ask is pending so the host's yes
-// lands without a reload.
+// via the + tile, which opens the standard modal. Polls while an ask is
+// pending so the host's yes lands without a reload.
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface Motive {
   id: number;
@@ -29,7 +30,17 @@ export function MotivesBand() {
   const [window_, setWindow] = useState("tonight");
   const [spots, setSpots] = useState(2);
   const [busy, setBusy] = useState(false);
+  const [composing, setComposing] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (!composing) return;
+    function esc(e: KeyboardEvent) {
+      if (e.key === "Escape") setComposing(false);
+    }
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
+  }, [composing]);
 
   const load = useCallback(async (r: number) => {
     try {
@@ -87,6 +98,7 @@ export function MotivesBand() {
     }).catch(() => {});
     setDraft("");
     setBusy(false);
+    setComposing(false);
     void load(radius);
   }
 
@@ -135,31 +147,15 @@ export function MotivesBand() {
       </div>
 
       <div className="motives-row">
-        <form className="motive-card composer" onSubmit={float}>
-          <p className="motive-compose-head">float a motive</p>
-          <input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="tacos + pool tn…"
-            aria-label="What's the motive"
-          />
-          <div className="compose-row">
-            <select value={window_} onChange={(e) => setWindow(e.target.value)} aria-label="When">
-              <option value="tonight">tonight</option>
-              <option value="tonight late">tonight late</option>
-              <option value="tomorrow">tomorrow</option>
-              <option value="this weekend">this weekend</option>
-            </select>
-            <select value={spots} onChange={(e) => setSpots(Number(e.target.value))} aria-label="Spots">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>{n} spot{n > 1 ? "s" : ""}</option>
-              ))}
-            </select>
-          </div>
-          <button className="motive-join" type="submit" disabled={busy || !draft.trim()}>
-            {busy ? "floating…" : "float it"}
-          </button>
-        </form>
+        <button
+          type="button"
+          className="motive-add"
+          onClick={() => setComposing(true)}
+          aria-label="Float a motive"
+        >
+          <span className="motive-add-plus">+</span>
+          <span className="motive-add-label">float a motive</span>
+        </button>
 
         {motives === undefined && <p className="muted motives-note">sniffing around…</p>}
         {motives === null && (
@@ -189,6 +185,61 @@ export function MotivesBand() {
           </div>
         ))}
       </div>
+
+      {/* portal to <body>: same stacking-context escape as the edit modal */}
+      {composing && createPortal(
+        <div
+          className="auth-overlay wl-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Float a motive"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setComposing(false);
+          }}
+        >
+          <div className="card auth-modal you-modal">
+            <button type="button" className="pop-close" onClick={() => setComposing(false)} aria-label="Close">
+              ×
+            </button>
+            <h2>Float a motive</h2>
+            <p className="muted" style={{ margin: "0 0 4px" }}>
+              nearby people who fit it will see it and ask in.
+            </p>
+            <form className="you-form" onSubmit={float}>
+              <label>
+                The motive
+                <input
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder="tacos + pool tn…"
+                  autoFocus
+                />
+              </label>
+              <label>
+                When
+                <select value={window_} onChange={(e) => setWindow(e.target.value)}>
+                  <option value="tonight">tonight</option>
+                  <option value="tonight late">tonight late</option>
+                  <option value="tomorrow">tomorrow</option>
+                  <option value="this weekend">this weekend</option>
+                </select>
+              </label>
+              <label>
+                Open spots
+                <select value={spots} onChange={(e) => setSpots(Number(e.target.value))}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </label>
+              <button className="primary" type="submit" disabled={busy || !draft.trim()}>
+                {busy ? "floating…" : "float it"}
+              </button>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
     </section>
   );
 }
