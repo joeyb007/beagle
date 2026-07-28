@@ -24,6 +24,8 @@ try {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ["better-sqlite3"],
+  // no dev badge in the corner — demo recordings happen on next dev
+  devIndicators: false,
 };
 
 export default nextConfig;
