@@ -38,7 +38,7 @@ const profile = db.prepare(
   "INSERT OR REPLACE INTO profiles (handle, name, json, constraint_score) VALUES (?, ?, ?, ?)"
 );
 const crew = [
-  [JOSEPH, "Joseph", {
+  [JOSEPH, "Joseph Barbosa", {
     cuisines: ["sushi", "tacos"], vibe: ["low-key", "outdoors"], hard_nos: ["clubs"],
     typical_availability: "weekend evenings", persona_label: "the planner",
     notes: "keeps the thread alive; will drive if someone else picks the playlist",

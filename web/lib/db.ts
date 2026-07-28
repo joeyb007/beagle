@@ -374,3 +374,21 @@ export function addWaitlistEmail(raw: string): boolean {
   conn.prepare("INSERT OR IGNORE INTO waitlist (email) VALUES (?)").run(email);
   return true;
 }
+
+// Provision-on-sign-in: the number IS the account. Creates a bare profile the
+// first time a handle appears; upgrades a placeholder name once a real one is
+// given. Never overwrites a name the agent or user already set.
+export function ensureProfile(handle: string, name?: string): void {
+  const existing = getProfile(handle);
+  if (existing) {
+    if (name && existing.name === existing.handle) {
+      updateProfile(handle, { name });
+    }
+    return;
+  }
+  db()
+    .prepare(
+      "INSERT INTO profiles (handle, name, json, constraint_score) VALUES (?, ?, ?, 0)"
+    )
+    .run(handle, name ?? handle, JSON.stringify({ name: name ?? handle }));
+}

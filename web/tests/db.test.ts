@@ -8,6 +8,7 @@ import { beforeEach, expect, test } from "vitest";
 
 import {
   addImport,
+  ensureProfile,
   getProfile,
   listMatches,
   listProfiles,
@@ -87,4 +88,13 @@ test("listMatches and listRoutingLog surface seeded rows", () => {
     reasons: ["also loves tacos"],
   });
   expect(listRoutingLog()[0]).toMatchObject({ model: "small-1", tier: "cheap" });
+});
+
+test("ensureProfile provisions by number and upgrades placeholder names only", () => {
+  ensureProfile("+16475550000");                       // first sign-in, no name
+  expect(getProfile("+16475550000")?.name).toBe("+16475550000");
+  ensureProfile("+16475550000", "Joey");               // placeholder upgraded
+  expect(getProfile("+16475550000")?.name).toBe("Joey");
+  ensureProfile("+16475550000", "Someone Else");       // real name never clobbered
+  expect(getProfile("+16475550000")?.name).toBe("Joey");
 });
