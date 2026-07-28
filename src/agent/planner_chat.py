@@ -98,4 +98,6 @@ async def chat_with_planner(
         f"CONVERSATION SO FAR:\n{convo or '(none)'}\n\n"
         f"{name} says: {question}\n\nReply as Beagle:"
     )
-    return await llm.complete(tier="frontier", system=SYSTEM.format(name=name), input=prompt)
+    reply = await llm.complete(tier="frontier", system=SYSTEM.format(name=name), input=prompt)
+    # style guard: no em dashes reach the UI regardless of model mood
+    return reply.replace(" — ", ", ").replace("—", "-")
