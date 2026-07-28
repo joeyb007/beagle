@@ -31,7 +31,22 @@ export function MotivesBand() {
   const [spots, setSpots] = useState(2);
   const [busy, setBusy] = useState(false);
   const [composing, setComposing] = useState(false);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(true);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  const updateFades = useCallback(() => {
+    const el = rowRef.current;
+    if (!el) return;
+    setAtStart(el.scrollLeft < 8);
+    setAtEnd(el.scrollLeft + el.clientWidth > el.scrollWidth - 8);
+  }, []);
+
+  // fades reflect real overflow once cards render / change
+  useEffect(() => {
+    updateFades();
+  }, [motives, updateFades]);
 
   useEffect(() => {
     if (!composing) return;
@@ -146,7 +161,8 @@ export function MotivesBand() {
         </div>
       </div>
 
-      <div className="motives-row">
+      <div className={`motives-scroll${atStart ? "" : " fade-l"}${atEnd ? "" : " fade-r"}`}>
+      <div className="motives-row" ref={rowRef} onScroll={updateFades}>
         <button
           type="button"
           className="motive-add"
@@ -184,6 +200,7 @@ export function MotivesBand() {
             {action(m)}
           </div>
         ))}
+      </div>
       </div>
 
       {/* portal to <body>: same stacking-context escape as the edit modal */}

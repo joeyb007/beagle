@@ -275,6 +275,16 @@ motive.run("+14155550103", "late night ramen run", "tonight 10pm", 1);
 motive.run("+14155550105", "sunset climb + beers after", "saturday 5pm", 3);
 motive.run("+14155550107", "flea market crawl, coffee after", "tomorrow 11am", 2);
 motive.run(JOSEPH, "pickup volleyball + smash burgers", "this weekend", 3);
+motive.run("+14155550101", "omakase counter, splitting the bill", "tonight 7pm", 1);
+motive.run("+14155550104", "gallery hop then wine bar", "tomorrow 6pm", 2);
+motive.run("+14155550106", "board game cafe, bring your sweats", "tonight 8pm", 4);
+motive.run("+14155550108", "steakhouse happy hour, loud table", "tonight 6pm", 3);
+motive.run("+14155550102", "sunrise hike, coffee on the summit", "tomorrow 6am", 2);
+motive.run("+14155550103", "night market food crawl", "saturday 8pm", 2);
+motive.run("+14155550105", "bouldering intro sesh, newbies welcome", "tomorrow 7pm", 3);
+motive.run("+14155550107", "thrift run + listening party after", "this weekend", 2);
+motive.run("+14155550101", "taco truck tour, three stops minimum", "saturday 1pm", 3);
+motive.run("+14155550106", "karaoke basement, zero judgment", "tonight late", 4);
 
 db.prepare("DELETE FROM routing_log").run();
 const log = db.prepare(
