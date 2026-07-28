@@ -6,6 +6,7 @@ import { nearbyMatches, wouldLove } from "@/lib/similarity";
 import { currentUser } from "@/lib/session";
 import { DossierStack, MatchCard } from "./dossier";
 import { IntroRail } from "./intro-rail";
+import { MotivesBand } from "./motives-band";
 
 const AGENT = process.env.AGENT_URL ?? "http://127.0.0.1:8100";
 
@@ -83,6 +84,7 @@ export default async function Matches() {
         <DossierStack cards={cards} />
         <IntroRail intros={receipts.intros} passed={receipts.passed} />
       </div>
+      <MotivesBand />
     </>
   );
 }

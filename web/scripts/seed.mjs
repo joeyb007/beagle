@@ -264,6 +264,17 @@ match.run(JOSEPH, "Sam K.", 0.96, JSON.stringify(["both crave sushi & tacos", "b
 match.run(JOSEPH, "Kaito S.", 0.83, JSON.stringify(["both crave sushi", "weekend evenings overlap"]), 1);
 match.run(JOSEPH, "Priya N.", 0.74, JSON.stringify(["outdoors energy on both sides"]), 1);
 
+// Motives: same-day intents from the nearby pool for the social page band.
+db.prepare("DELETE FROM motive_joins").run();
+db.prepare("DELETE FROM motives").run();
+const motive = db.prepare(
+  "INSERT INTO motives (host_handle, text, time_window, spots) VALUES (?, ?, ?, ?)"
+);
+motive.run("+14155550102", "tacos + pool tn", "tonight 8pm-late", 2);
+motive.run("+14155550103", "late night ramen run", "tonight 10pm", 1);
+motive.run("+14155550105", "sunset climb + beers after", "saturday 5pm", 3);
+motive.run("+14155550107", "flea market crawl, coffee after", "tomorrow 11am", 2);
+
 db.prepare("DELETE FROM routing_log").run();
 const log = db.prepare(
   "INSERT INTO routing_log (model, tier, cost_estimate, latency_ms) VALUES (?, ?, ?, ?)"

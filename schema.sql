@@ -148,3 +148,23 @@ CREATE TABLE IF NOT EXISTS person_embeddings (
   profile_hash TEXT NOT NULL,
   vec          TEXT NOT NULL
 );
+
+-- Motives: same-day intents from nearby people ("tacos + pool tn, 2 spots").
+CREATE TABLE IF NOT EXISTS motives (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  host_handle TEXT NOT NULL,
+  text        TEXT NOT NULL,
+  time_window TEXT NOT NULL,               -- "tonight 8pm-late"
+  spots       INTEGER NOT NULL DEFAULT 2,  -- open seats beyond the host
+  status      TEXT NOT NULL DEFAULT 'open',   -- open | closed
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS motive_joins (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  motive_id  INTEGER NOT NULL,
+  handle     TEXT NOT NULL,
+  status     TEXT NOT NULL DEFAULT 'pending',  -- pending | in | declined
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(motive_id, handle)
+);

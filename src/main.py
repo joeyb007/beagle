@@ -143,6 +143,65 @@ async def matches(req: MatchesRequest) -> dict:
     }
 
 
+class MotiveListRequest(BaseModel):
+    handle: str
+    radius_km: float | None = None
+
+
+@app.post("/api/motives/list")
+async def motives_list(req: MotiveListRequest) -> dict:
+    from src.agent.motives import list_motives
+
+    return {
+        "motives": list_motives(
+            os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
+            req.handle,
+            radius_km=req.radius_km,
+        )
+    }
+
+
+class MotiveCreateRequest(BaseModel):
+    handle: str
+    text: str
+    time_window: str = "tonight"
+    spots: int = 2
+
+
+@app.post("/api/motives/create")
+async def motives_create(req: MotiveCreateRequest) -> dict:
+    from src.agent.motives import create_motive
+
+    mid = create_motive(
+        os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
+        req.handle,
+        text=req.text,
+        time_window=req.time_window,
+        spots=req.spots,
+    )
+    return {"ok": True, "id": mid}
+
+
+class MotiveJoinRequest(BaseModel):
+    handle: str
+    motive_id: int
+
+
+@app.post("/api/motives/join")
+async def motives_join(req: MotiveJoinRequest) -> dict:
+    from src.agent.motives import request_join
+
+    orch = app.state.orchestrator
+    return await request_join(
+        os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
+        motive_id=req.motive_id,
+        handle=req.handle,
+        messaging=orch._messaging,
+        llm=orch._llm,
+        demo_target=os.environ.get("BEAGLE_INTRO_TARGET"),
+    )
+
+
 class IntroRequest(BaseModel):
     handle: str
     match_handle: str
