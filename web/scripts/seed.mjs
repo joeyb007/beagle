@@ -60,7 +60,7 @@ const crew = [
   }, 0.7],
 ];
 
-// The "lock in" crew — the demo GC. Fictional 555 numbers so nothing ever
+// The "hometown guys" crew — the demo GC. Fictional 555 numbers so nothing ever
 // texts a real stranger; swap in real numbers for the live demo.
 const CAM = "+14165550201";
 const PAUL = "+14165550202";
@@ -159,7 +159,7 @@ const group = db.prepare("INSERT INTO groups (id, name, members, chat_id) VALUES
 group.run(1, "the usual suspects", JSON.stringify([JOSEPH, MADHAV, ANTHONY, MAX]), null);
 group.run(2, "roomies", JSON.stringify([JOSEPH, MAX]), null);
 group.run(3, "ex-coworkers 🫠", JSON.stringify([JOSEPH, MADHAV, ANTHONY]), null);
-group.run(4, "lock in", JSON.stringify([JOSEPH, CAM, PAUL, FORTUNE, CRISTIANO, LEANDRO]), null);
+group.run(4, "hometown guys", JSON.stringify([JOSEPH, CAM, PAUL, FORTUNE, CRISTIANO, LEANDRO]), null);
 
 // ---------------------------------------------------------------- artifacts
 const photo = (id) => `/uploads/${id}.jpg`;
@@ -191,6 +191,13 @@ A("plan-twin-peaks",
     { title: "Show Me How", artist: "Men I Trust" },
     { title: "Myth", artist: "Beach House" },
     { title: "Golden Hour", artist: "Kacey Musgraves" },
+    { title: "Pink + White", artist: "Frank Ocean" },
+    { title: "Apocalypse", artist: "Cigarettes After Sex" },
+    { title: "Cherry Wine", artist: "Hozier" },
+    { title: "Ivy", artist: "Frank Ocean" },
+    { title: "Chateau", artist: "Angus & Julia Stone" },
+    { title: "Sweet", artist: "Cigarettes After Sex" },
+    { title: "For the First Time", artist: "Mac DeMarco" },
   ],
   [photo("golden-hour-bridge"), photo("city-towers")],
   1, "public",
@@ -203,6 +210,13 @@ A("plan-tahoe",
     { title: "Mess Is Mine", artist: "Vance Joy" },
     { title: "Big Sur", artist: "Jack Johnson" },
     { title: "Holocene", artist: "Bon Iver" },
+    { title: "Skinny Love", artist: "Bon Iver" },
+    { title: "Rivers and Roads", artist: "The Head and the Heart" },
+    { title: "The Night We Met", artist: "Lord Huron" },
+    { title: "First Day of My Life", artist: "Bright Eyes" },
+    { title: "Winter Winds", artist: "Mumford & Sons" },
+    { title: "Northern Attitude", artist: "Noah Kahan" },
+    { title: "To Build a Home", artist: "The Cinematic Orchestra" },
   ],
   [photo("snow-summit"), photo("lake-sunset")],
   1, "public",
@@ -215,6 +229,12 @@ A("plan-aurora",
     { title: "Space Song", artist: "Beach House" },
     { title: "Nightcall", artist: "Kavinsky" },
     { title: "Midnight City", artist: "M83" },
+    { title: "Intro", artist: "The xx" },
+    { title: "Wait", artist: "M83" },
+    { title: "Innerbloom", artist: "RÜFÜS DU SOL" },
+    { title: "Open Eye Signal", artist: "Jon Hopkins" },
+    { title: "Genesis", artist: "Grimes" },
+    { title: "Night Owl", artist: "Galimatias" },
   ],
   [photo("northern-lights"), photo("night-moon")],
   3, "public",
@@ -227,6 +247,14 @@ A("plan-canyon",
     { title: "The Less I Know the Better", artist: "Tame Impala" },
     { title: "Electric Feel", artist: "MGMT" },
     { title: "Alright", artist: "Supergrass" },
+    { title: "Borderline", artist: "Tame Impala" },
+    { title: "Kids", artist: "MGMT" },
+    { title: "Dreams", artist: "Fleetwood Mac" },
+    { title: "Go Your Own Way", artist: "Fleetwood Mac" },
+    { title: "Tongue Tied", artist: "Grouplove" },
+    { title: "Pumped Up Kicks", artist: "Foster the People" },
+    { title: "Feels Like We Only Go Backwards", artist: "Tame Impala" },
+    { title: "Take a Walk", artist: "Passion Pit" },
   ],
   [photo("canyon-drive"), photo("river-lookout"), photo("fog-ridge")],
   1, "private",
@@ -238,6 +266,12 @@ A("plan-falls-hike",
   [
     { title: "Harvest Moon", artist: "Neil Young" },
     { title: "Bloom", artist: "The Paper Kites" },
+    { title: "Heartbeats", artist: "Jose Gonzalez" },
+    { title: "Holocene", artist: "Bon Iver" },
+    { title: "Wild Horses", artist: "The Rolling Stones" },
+    { title: "Upward Over the Mountain", artist: "Iron & Wine" },
+    { title: "Landslide", artist: "Fleetwood Mac" },
+    { title: "Chicago", artist: "Sufjan Stevens" },
   ],
   [photo("waterfall-trail"), photo("alpine-lake"), photo("summit-scramble")],
   2, "public",
@@ -250,6 +284,13 @@ A("plan-harbor",
     { title: "Best Part", artist: "Daniel Caesar" },
     { title: "Come Through and Chill", artist: "Miguel" },
     { title: "Get You", artist: "Daniel Caesar" },
+    { title: "Japanese Denim", artist: "Daniel Caesar" },
+    { title: "Adorn", artist: "Miguel" },
+    { title: "Location", artist: "Khalid" },
+    { title: "Redbone", artist: "Childish Gambino" },
+    { title: "The Beach", artist: "The Neighbourhood" },
+    { title: "Often", artist: "The Weeknd" },
+    { title: "Lost", artist: "Frank Ocean" },
   ],
   [photo("harbor-night")],
   1, "private",
@@ -261,17 +302,32 @@ A("plan-ggp-picnic",
   [
     { title: "Sunday Best", artist: "Surfaces" },
     { title: "Put Your Records On", artist: "Corinne Bailey Rae" },
+    { title: "Banana Pancakes", artist: "Jack Johnson" },
+    { title: "Valerie", artist: "Amy Winehouse" },
+    { title: "Three Little Birds", artist: "Bob Marley & The Wailers" },
+    { title: "Lovely Day", artist: "Bill Withers" },
+    { title: "Steal My Sunshine", artist: "Len" },
+    { title: "Island In The Sun", artist: "Weezer" },
   ],
   [], 1, "private", null);
 
-// ---- the "lock in" archive: five months of the demo GC actually using it
+// ---- the "hometown guys" archive: five months of the demo GC actually using it
 A("plan-li-gokarts",
   { name: "Go-kart grand prix", area: "K1 Speed", note: "cristiano called winner before we left the gc" },
   "2026-03-14T19:30:00", [JOSEPH, CAM, PAUL, FORTUNE, CRISTIANO, LEANDRO],
   [
-    { title: "Ride", artist: "Twenty One Pilots" },
-    { title: "Sicko Mode", artist: "Travis Scott" },
-    { title: "Mo Bamba", artist: "Sheck Wes" },
+    { title: "TiK ToK", artist: "Kesha" },
+    { title: "Die Young", artist: "Kesha" },
+    { title: "Starships", artist: "Nicki Minaj" },
+    { title: "I Love It", artist: "Icona Pop ft. Charli XCX" },
+    { title: "We Found Love", artist: "Rihanna ft. Calvin Harris" },
+    { title: "Domino", artist: "Jessie J" },
+    { title: "Timber", artist: "Pitbull ft. Kesha" },
+    { title: "Dark Horse", artist: "Katy Perry" },
+    { title: "Roar", artist: "Katy Perry" },
+    { title: "Firework", artist: "Katy Perry" },
+    { title: "Blow", artist: "Kesha" },
+    { title: "S&M", artist: "Rihanna" },
   ],
   [photo("canyon-drive"), photo("night-moon")],
   4, "public",
@@ -281,8 +337,16 @@ A("plan-li-sunrise",
   { name: "Sunrise mission", area: "Grouse lookout", note: "leandro drove, paul brought a thermos like a legend" },
   "2026-04-26T05:45:00", [JOSEPH, CAM, PAUL, CRISTIANO, LEANDRO],
   [
-    { title: "Sun Comes Up", artist: "Rudimental" },
-    { title: "Wide Awake", artist: "Parcels" },
+    { title: "Wide Awake", artist: "Katy Perry" },
+    { title: "Lights", artist: "Ellie Goulding" },
+    { title: "Burn", artist: "Ellie Goulding" },
+    { title: "Royals", artist: "Lorde" },
+    { title: "Team", artist: "Lorde" },
+    { title: "Summertime Sadness", artist: "Lana Del Rey" },
+    { title: "Video Games", artist: "Lana Del Rey" },
+    { title: "Young and Beautiful", artist: "Lana Del Rey" },
+    { title: "Stay", artist: "Rihanna ft. Mikky Ekko" },
+    { title: "Clarity", artist: "Zedd ft. Foxes" },
   ],
   [photo("fog-ridge"), photo("summit-scramble")],
   4, "private",
@@ -292,10 +356,18 @@ A("plan-li-lake",
   { name: "Lake day reset", area: "Buntzen Lake", note: "one speaker, zero plans, all day" },
   "2026-05-30T13:00:00", [JOSEPH, CAM, PAUL, FORTUNE, CRISTIANO, LEANDRO],
   [
-    { title: "Island In The Sun", artist: "Weezer" },
-    { title: "Doses & Mimosas", artist: "Cherub" },
-    { title: "Location", artist: "Khalid" },
-    { title: "Borderline", artist: "Tame Impala" },
+    { title: "Party in the U.S.A.", artist: "Miley Cyrus" },
+    { title: "California Gurls", artist: "Katy Perry" },
+    { title: "Good Time", artist: "Owl City & Carly Rae Jepsen" },
+    { title: "Call Me Maybe", artist: "Carly Rae Jepsen" },
+    { title: "22", artist: "Taylor Swift" },
+    { title: "Shake It Off", artist: "Taylor Swift" },
+    { title: "I Really Like You", artist: "Carly Rae Jepsen" },
+    { title: "Cool for the Summer", artist: "Demi Lovato" },
+    { title: "Rather Be", artist: "Clean Bandit ft. Jess Glynne" },
+    { title: "Problem", artist: "Ariana Grande ft. Iggy Azalea" },
+    { title: "Fancy", artist: "Iggy Azalea ft. Charli XCX" },
+    { title: "Teenage Dream", artist: "Katy Perry" },
   ],
   [photo("alpine-lake"), photo("lake-sunset"), photo("river-lookout")],
   4, "public",
@@ -305,7 +377,15 @@ A("plan-li-trivia",
   { name: "Trivia night takeover", area: "The Annex", note: "paul's window: wednesday. paul's plan: domination" },
   "2026-06-17T20:00:00", [JOSEPH, CAM, PAUL, CRISTIANO],
   [
-    { title: "The Less I Know The Better", artist: "Tame Impala" },
+    { title: "What Makes You Beautiful", artist: "One Direction" },
+    { title: "Story of My Life", artist: "One Direction" },
+    { title: "Steal My Girl", artist: "One Direction" },
+    { title: "Night Changes", artist: "One Direction" },
+    { title: "Best Song Ever", artist: "One Direction" },
+    { title: "Kiss You", artist: "One Direction" },
+    { title: "Blank Space", artist: "Taylor Swift" },
+    { title: "Style", artist: "Taylor Swift" },
+    { title: "Love Story", artist: "Taylor Swift" },
   ],
   [],
   4, "private",
@@ -315,8 +395,16 @@ A("plan-li-market",
   { name: "Night market sweep", area: "Richmond night market", note: "fortune's 9pm idea that actually worked" },
   "2026-07-11T21:00:00", [JOSEPH, CAM, FORTUNE, CRISTIANO],
   [
-    { title: "Peaches", artist: "Justin Bieber" },
-    { title: "Nights", artist: "Frank Ocean" },
+    { title: "We Can't Stop", artist: "Miley Cyrus" },
+    { title: "Wrecking Ball", artist: "Miley Cyrus" },
+    { title: "Bang Bang", artist: "Jessie J, Ariana Grande, Nicki Minaj" },
+    { title: "Into You", artist: "Ariana Grande" },
+    { title: "Love Me Harder", artist: "Ariana Grande" },
+    { title: "Side To Side", artist: "Ariana Grande ft. Nicki Minaj" },
+    { title: "Super Bass", artist: "Nicki Minaj" },
+    { title: "Boom Clap", artist: "Charli XCX" },
+    { title: "Worth It", artist: "Fifth Harmony" },
+    { title: "7/11", artist: "Beyonce" },
   ],
   [photo("city-towers"), photo("night-moon")],
   4, "private",
@@ -326,8 +414,16 @@ A("plan-li-champ",
   { name: "Championship night: kbbq + fifa", area: "Gen Korean BBQ, then cristiano's", note: "controllers charged, grudges optional" },
   "2026-07-31T20:00:00", [JOSEPH, CAM, PAUL, FORTUNE, CRISTIANO, LEANDRO],
   [
-    { title: "HUMBLE.", artist: "Kendrick Lamar" },
-    { title: "Family Ties", artist: "Baby Keem" },
+    { title: "Last Friday Night (T.G.I.F.)", artist: "Katy Perry" },
+    { title: "Run the World (Girls)", artist: "Beyonce" },
+    { title: "We R Who We R", artist: "Kesha" },
+    { title: "Till the World Ends", artist: "Britney Spears" },
+    { title: "Raise Your Glass", artist: "P!nk" },
+    { title: "On the Floor", artist: "Jennifer Lopez ft. Pitbull" },
+    { title: "Give Me Everything", artist: "Pitbull ft. Ne-Yo" },
+    { title: "Stronger (What Doesn't Kill You)", artist: "Kelly Clarkson" },
+    { title: "Part of Me", artist: "Katy Perry" },
+    { title: "Break Free", artist: "Ariana Grande ft. Zedd" },
   ],
   [], 4, "private", null);
 
@@ -440,11 +536,11 @@ const threads = {
   ],
   // the demo GC: five months of actually using it
   "web:4": [
-    [CAM, "in", "new gc. lock in.", "-137 days"],
-    [PAUL, "in", "locking into what exactly", "-137 days"],
-    [CAM, "in", "greatness", "-137 days"],
+    [CAM, "in", "new gc. hometown guys only.", "-137 days"],
+    [PAUL, "in", "the prodigal gc returns", "-137 days"],
+    [CAM, "in", "we never left", "-137 days"],
     [JOSEPH, "in", "added beagle. it plans so we actually leave the house", "-137 days"],
-    ["beagle", "out", "hey lock in, i'm beagle. i learn what everyone's into, find when you're all free, and set the thing up. say the word when you want a night 🐶", "-137 days"],
+    ["beagle", "out", "hey hometown guys, i'm beagle. i learn what everyone's into, find when you're all free, and set the thing up. say the word when you want a night 🐶", "-137 days"],
     [CRISTIANO, "in", "i need to drive something fast and legal", "-136 days"],
     [JOSEPH, "in", "@beagle handle that", "-136 days"],
     ["beagle", "out", "on it. dming everyone for schedules, brb 🐶", "-136 days"],
@@ -516,3 +612,106 @@ for (const c of [
 ]) log.run(...c);
 
 console.log(`seeded ${dbPath}: ${crew.length + lockInCrew.length} crew + ${nearby.length} nearby, 4 groups, 13 hangouts, real photos`);
+
+// ---------------------------------------------------------------- the wider world
+// 30 more friends + 10 background GCs with their own hangouts and photos, so
+// the app reads like months of real use. Fictional 555 numbers throughout.
+const FRIEND_NAMES = [
+  "Ava Chen", "Marcus Reid", "Sofia Marino", "Dev Patel", "Ella Brooks",
+  "Jonas Weber", "Nia Thompson", "Liam Doyle", "Grace Park", "Theo Laurent",
+  "Zoe Ferreira", "Owen Marsh", "Amara Diallo", "Felix Tan", "Ruby Castillo",
+  "Nate Kowalski", "Ines Duarte", "Cole Barrett", "Yuki Tanaka", "Hana Ali",
+  "Marco Silva", "Tessa Wright", "Andre Gomes", "Lily Zhao", "Sasha Petrov",
+  "Maya Iyer", "Jack Whitfield", "Bianca Rossi", "Kofi Mensah", "Erin Walsh",
+];
+const personaPool = [
+  "the early bird", "the foodie", "the gym rat", "the aux gremlin", "the photographer",
+  "the debater", "the snack dealer", "the trip planner", "the couch anchor",
+  "the birthday rememberer", "the group historian", "the last to leave",
+];
+const cuisinePool = ["ramen", "tacos", "dim sum", "pizza", "pho", "shawarma", "jerk chicken", "pasta", "bibimbap", "falafel", "poke", "birria"];
+const vibePool = ["low-key", "loud", "outdoors", "casual", "spontaneous", "competitive", "late night"];
+const noPool = ["clubs", "karaoke", "early mornings", "hiking", "museums", "spicy food", null, null];
+const availPool = [
+  "weekend evenings", "weeknights after 9", "weekends only", "most evenings",
+  "friday and saturday nights", "weekend afternoons", "after 8pm", "wednesday and sunday nights",
+];
+const friendHandles = FRIEND_NAMES.map((name, i) => {
+  const handle = `+1604555${String(300 + i).padStart(4, "0")}`;
+  const data = {
+    cuisines: [cuisinePool[i % cuisinePool.length], cuisinePool[(i + 5) % cuisinePool.length]],
+    vibe: [vibePool[i % vibePool.length], vibePool[(i + 3) % vibePool.length]],
+    hard_nos: noPool[i % noPool.length] ? [noPool[i % noPool.length]] : [],
+    typical_availability: availPool[i % availPool.length],
+    persona_label: personaPool[i % personaPool.length],
+  };
+  profile.run(handle, name, JSON.stringify({ handle, name, ...data }), (i % 8) / 10);
+  return handle;
+});
+
+const PHOTO_POOL = [
+  "golden-hour-bridge", "city-towers", "waterfall-trail", "alpine-lake",
+  "summit-scramble", "northern-lights", "night-moon", "canyon-drive",
+  "river-lookout", "fog-ridge", "harbor-night", "snow-summit", "lake-sunset",
+];
+const TRACK_POOL = [
+  ["Dog Days Are Over", "Florence + The Machine"], ["Electric Feel", "MGMT"],
+  ["Midnight City", "M83"], ["Tongue Tied", "Grouplove"], ["Riptide", "Vance Joy"],
+  ["Feel It Still", "Portugal. The Man"], ["Take a Walk", "Passion Pit"],
+  ["Safe and Sound", "Capital Cities"], ["Ho Hey", "The Lumineers"],
+  ["On Top of the World", "Imagine Dragons"], ["Pompeii", "Bastille"],
+  ["Shut Up and Dance", "WALK THE MOON"], ["Sweater Weather", "The Neighbourhood"],
+  ["Young Folks", "Peter Bjorn and John"], ["Cool Kids", "Echosmith"],
+  ["Budapest", "George Ezra"], ["Stolen Dance", "Milky Chance"],
+  ["Are You Bored Yet?", "Wallows"], ["Heat Waves", "Glass Animals"],
+];
+const tracks = (start, n) =>
+  Array.from({ length: n }, (_, k) => {
+    const [title, artist] = TRACK_POOL[(start + k) % TRACK_POOL.length];
+    return { title, artist };
+  });
+const daysAgoISO = (d, hour) =>
+  new Date(Date.now() - d * 864e5).toISOString().slice(0, 11) + `${String(hour).padStart(2, "0")}:00:00`;
+
+const bgGroups = [
+  { id: 5, name: "sunday league", size: 6, events: [["Season opener", 148, 11], ["Playoff scare", 32, 10]] },
+  { id: 6, name: "cottage szn", size: 5, events: [["Cottage weekend vol. 3", 55, 14]] },
+  { id: 7, name: "brunch cabinet", size: 4, events: [["Benny summit", 96, 11], ["Patio quarterly", 12, 11]] },
+  { id: 8, name: "poker night", size: 5, events: [["March bloodbath", 130, 20], ["The rebuy incident", 47, 20]] },
+  { id: 9, name: "climbing crew", size: 4, events: [["Outdoor lead day", 71, 9]] },
+  { id: 10, name: "intramural legends", size: 6, events: [["Championship loss (again)", 102, 19]] },
+  { id: 11, name: "book club (real)", size: 4, events: [["We actually read it", 26, 19]] },
+  { id: 12, name: "concert buddies", size: 3, events: [["Amphitheater field trip", 83, 18]] },
+  { id: 13, name: "the cousins", size: 6, events: [["Backyard cookout", 62, 15], ["Aunties' anniversary", 20, 17]] },
+  { id: 14, name: "ski szn", size: 5, events: [["First chair mission", 160, 7]] },
+];
+const bgNotes = [
+  "nobody remembers the score, everybody remembers the wings",
+  "we said one hour. it was five",
+  "attendance was perfect. punctuality was not",
+  "the photo doesn't cover the sound of that laugh",
+  null,
+];
+let photoCursor = 0;
+bgGroups.forEach((g, gi) => {
+  const members = [JOSEPH, ...Array.from({ length: g.size - 1 }, (_, k) => friendHandles[(gi * 3 + k) % friendHandles.length])];
+  group.run(g.id, g.name, JSON.stringify(members), null);
+  g.events.forEach(([title, daysAgo, hour], ei) => {
+    const nPhotos = (gi + ei) % 3; // 0..2 photos; some stay photoless
+    const photos = Array.from({ length: nPhotos }, () => photo(PHOTO_POOL[photoCursor++ % PHOTO_POOL.length]));
+    A(`plan-bg-${g.id}-${ei}`,
+      { name: title, area: null, note: null },
+      daysAgoISO(daysAgo, hour), members,
+      tracks(gi * 2 + ei, 4 + ((gi + ei) % 4)),
+      photos, g.id, (gi + ei) % 2 ? "public" : "private",
+      bgNotes[(gi + ei) % bgNotes.length]);
+  });
+  const first = (h) => (FRIEND_NAMES[friendHandles.indexOf(h)] ?? "someone").split(" ")[0].toLowerCase();
+  const m1 = members[1], m2 = members[2] ?? members[1];
+  const d = 4 + gi * 2;
+  msg.run(`web:${g.id}`, m1, "in", `who's in for the next one`, `-${d} days`);
+  msg.run(`web:${g.id}`, "beagle", "out", `${first(m2)} and ${members.length - 2} others are free this weekend. want me to set it up?`, `-${d} days`);
+  msg.run(`web:${g.id}`, m2, "in", "say the word and i'm there", `-${d - 1} days`);
+});
+
+console.log(`wider world: ${FRIEND_NAMES.length} friends + ${bgGroups.length} background gcs`);
