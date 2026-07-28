@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MemoryChat } from "@/app/memory-chat";
+import { PixelBeagle } from "@/components/pixel-beagle";
 import { ArtifactStore } from "@/lib/artifact-store";
 import { getPhotoNotes, listProfiles } from "@/lib/db";
 import { PhotoUpload } from "./photo-upload";
@@ -78,7 +79,10 @@ export default async function Hangout({ params }: { params: Promise<{ planId: st
         <PhotoUpload planId={planId} hasPhotos={artifact.isKeepsake} />
 
         <h2>Ask beagle about it</h2>
-        <MemoryChat planId={planId} />
+        <div className="keepsake-chat">
+          <PixelBeagle targetIds={["keepsake-chat-input"]} host=".keepsake-chat" mood="free" />
+          <MemoryChat planId={planId} inputId="keepsake-chat-input" />
+        </div>
       </div>
     </div>
   );

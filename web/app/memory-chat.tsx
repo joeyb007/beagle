@@ -36,12 +36,14 @@ export function MemoryChat({
   endpoint = "/api/memory-chat",
   body = {},
   placeholder,
+  inputId,
 }: {
   planId?: string;
   compact?: boolean;
   endpoint?: string;
   body?: Record<string, unknown>;
   placeholder?: string;
+  inputId?: string; // lets a pixel beagle perch on the input from outside
 }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -90,6 +92,7 @@ export function MemoryChat({
       )}
       <form onSubmit={ask} className="mchat-input">
         <input
+          id={inputId}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}

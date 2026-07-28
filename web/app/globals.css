@@ -167,6 +167,9 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
   border-color: var(--copper); transform: translateY(-1px);
 }
 .keepsake-add:disabled { opacity: 0.6; cursor: default; }
+/* the pixel beagle wanders the top edge of the ask-beagle pane */
+.keepsake-chat { position: relative; }
+.keepsake-chat .pixel-beagle { z-index: 5; pointer-events: none; }
 .keepsake h1 { font-size: 34px; }
 .keepsake .date { color: var(--copper); font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; }
 
