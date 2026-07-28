@@ -11,6 +11,7 @@ import {
   getProfile,
   listMatches,
   listProfiles,
+  listRoutingLog,
   updateProfile,
   upsertToken,
 } from "../lib/db";
@@ -79,10 +80,11 @@ test("upsertToken writes then overwrites a provider token", () => {
   expect(row.access_token).toBe("a2");
 });
 
-test("listMatches surfaces seeded rows", () => {
+test("listMatches and listRoutingLog surface seeded rows", () => {
   expect(listMatches()[0]).toMatchObject({
     match_name: "Sam",
     is_sample: true,
     reasons: ["also loves tacos"],
   });
+  expect(listRoutingLog()[0]).toMatchObject({ model: "small-1", tier: "cheap" });
 });

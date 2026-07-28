@@ -38,7 +38,7 @@ export default async function Landing({
             {joined === "0" && <p className="joined err">that email didn't look right — try again?</p>}
           </>
         )}
-        <a className="console-link" href="/onboarding">operator console →</a>
+        <a className="console-link" href="/home">operator console →</a>
       </div>
     </div>
   );

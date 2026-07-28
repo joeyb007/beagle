@@ -1,39 +1,38 @@
-// T7: matching UI — nearby people you'd actually click with. Samples labeled.
-import { listMatches, listProfiles } from "@/lib/db";
-import { Chip } from "@/components/chip";
-import { Meter } from "@/components/meter";
+// People: swipe through nearby candidates, ranked by cosine similarity over
+// the same earned taste vectors the agent builds — highest similarity on top.
+import { redirect } from "next/navigation";
+import { nearbyMatches } from "@/lib/similarity";
+import { currentUser } from "@/lib/session";
+import { MatchStage } from "./match-stage";
+import { SwipeCard } from "./swipe-deck";
 
-export default function Matches() {
-  const matches = listMatches();
-  const names = new Map(listProfiles().map((p) => [p.handle, p.name]));
+export default async function Matches() {
+  const user = await currentUser();
+  if (!user) redirect("/login");
+
+  const matches = nearbyMatches(user.handle);
+  const cards: SwipeCard[] = matches.map((m) => ({
+    handle: m.handle,
+    match_name: m.name,
+    score: m.score,
+    reasons: m.reasons,
+    days: m.days,
+    km: m.km,
+    persona: m.persona,
+    tastes: m.tastes,
+    says: m.says,
+    hook: m.hook,
+  }));
 
   return (
     <>
-      <h1>People nearby</h1>
+      <p className="eyebrow">beagle&apos;s intros</p>
+      <h1>People your plans would love</h1>
       <p className="sub">
-        Matched on the full picture — taste, music, photos — not a signup form.
+        Beagle matched {matches.length} people nearby against everything it knows about you. Swipe
+        right and it texts the intro for you — that&apos;s the whole point of a dog with a phone.
       </p>
-      <div className="matches">
-        {matches.map((m, i) => (
-          <div key={i} className="card match">
-            <div className="name">{m.match_name}</div>
-            <div className="for">
-              for {names.get(m.handle) ?? m.handle}{" "}
-              {m.is_sample && <Chip tone="muted">sample</Chip>}
-            </div>
-            <div className="fit">
-              <Meter value={m.score} label={`${Math.round(m.score * 100)}% fit`} />{" "}
-              <span className="num">{Math.round(m.score * 100)}% fit</span>
-            </div>
-            <ul>
-              {m.reasons.map((r, j) => (<li key={j}>{r}</li>))}
-            </ul>
-          </div>
-        ))}
-      </div>
-      {matches.length === 0 && (
-        <div className="card">No matches yet — they appear once profiles have vectors.</div>
-      )}
+      <MatchStage cards={cards} />
     </>
   );
 }
