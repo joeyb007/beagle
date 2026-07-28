@@ -39,10 +39,10 @@ def db(tmp_path):
 
 
 def test_stretch_spreads_display_band_stably():
-    assert _stretch(0.70) == pytest.approx(0.5)
-    assert _stretch(0.74) == pytest.approx(0.6)
+    assert _stretch(0.74) == pytest.approx(0.95)  # best fits land in the 90s
+    assert _stretch(0.675) == pytest.approx(0.30)  # weak fits fall to the 20s-30s
     assert _stretch(0.95) == 0.97  # clamped high
-    assert _stretch(0.2) == 0.3  # clamped low
+    assert _stretch(0.3) == 0.2  # clamped low
     assert _stretch(0.75) > _stretch(0.71)  # order preserved
 
 

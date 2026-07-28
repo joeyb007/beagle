@@ -34,10 +34,10 @@ def _rows(conn: sqlite3.Connection, sql: str, args: tuple = ()) -> list[sqlite3.
 
 def _stretch(raw: float) -> float:
     """Display-contrast curve for embedding cosines, which cluster near 0.7:
-    a fixed linear stretch around that center so percents spread out. Fixed
-    (not per-list normalized) so a motive's score is stable across reloads
-    and radius changes. Order-preserving."""
-    return max(0.3, min(0.97, 0.5 + (raw - 0.7) * 2.5))
+    a fixed linear stretch around that center so percents span roughly the
+    20s to the 90s. Fixed (not per-list normalized) so a motive's score is
+    stable across reloads and radius changes. Order-preserving."""
+    return max(0.2, min(0.97, 0.55 + (raw - 0.70) * 10))
 
 
 def _overlap_score(motive_text: str, my_data: dict) -> float:

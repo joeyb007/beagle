@@ -127,8 +127,11 @@ export function MotivesBand() {
     // caption sits to the button's left on the same bottom row
     return (
       <div className="motive-act">
-        {m.my_status === "pending" && <span className="muted motive-wait">waiting on {first}</span>}
-        {m.my_status === "in" && <span className="muted motive-wait">{first} said yes</span>}
+        {/* always mounted: its flex-grow animates 0 -> 1 on ask, gliding the
+            button from its resting left position over to the right */}
+        <span className={`muted motive-wait${asked ? " on" : ""}`} aria-hidden={!asked}>
+          {m.my_status === "in" ? `${first} said yes` : asked ? `waiting on ${first}` : ""}
+        </span>
         <button
           type="button"
           className={`motive-join${asked ? " asked" : ""}`}

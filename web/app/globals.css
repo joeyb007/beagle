@@ -706,7 +706,22 @@ html { scroll-behavior: smooth; }
 
 /* the inbox rail: only rows that need you or reward you */
 .match-layout.solo { grid-template-columns: 1fr; }
-.intro-rail { margin-top: 18px; padding: 16px 18px; }
+/* the deck defines the row height; the rail never raises it (height: 0
+   keeps it out of track sizing) and scrolls its own overflow instead */
+.intro-rail {
+  margin-top: 18px; padding: 16px 18px;
+  height: 0; min-height: calc(100% - 18px);
+  overflow-y: auto;
+}
+.intro-rail::-webkit-scrollbar { width: 7px; }
+.intro-rail::-webkit-scrollbar-track { background: transparent; }
+.intro-rail::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--copper) 35%, var(--line));
+  border-radius: 999px;
+}
+@media (max-width: 1080px) {
+  .intro-rail { height: auto; min-height: 0; max-height: 420px; }
+}
 .rail-head {
   font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--muted); margin: 0 0 10px;
@@ -1626,10 +1641,13 @@ html { scroll-behavior: smooth; }
   display: flex; align-items: center; gap: 8px;
 }
 .motive-act .motive-join { margin-top: 0; flex-shrink: 0; white-space: nowrap; }
+/* the caption is always mounted; growing it 0 -> 1 glides the button right */
 .motive-act .motive-wait {
-  flex: 1; min-width: 0;
+  flex: 0.001 1 0px; min-width: 0; opacity: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  transition: flex-grow 440ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease;
 }
+.motive-act .motive-wait.on { flex-grow: 1; opacity: 1; transition-delay: 0ms, 200ms; }
 .motive-join.asked {
   display: inline-flex; align-items: center; gap: 6px;
   background: #16a34a; border-color: #16a34a; color: #fff;
