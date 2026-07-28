@@ -1333,6 +1333,7 @@ html { scroll-behavior: smooth; }
   transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .upnext-cta:hover::after { transform: scaleX(1); }
+.widget a.upnext-cta:hover { text-decoration: none; } /* the slide replaces the widget-link underline */
 
 .pop-close {
   position: absolute; top: 8px; right: 12px;
