@@ -7,6 +7,12 @@ import { joinWaitlist } from "@/app/waitlist-actions";
 import { normalizePhone } from "@/lib/phone";
 import type { WaitlistResult } from "@/lib/waitlist";
 
+
+// keys other than digits/phone punctuation never land in the box
+function lockToPhoneChars(e: React.ChangeEvent<HTMLInputElement>) {
+  e.target.value = e.target.value.replace(/[^\d()+\-\s]/g, "");
+}
+
 export function WaitlistForm() {
   const [state, formAction, pending] = useActionState<WaitlistResult | null, FormData>(
     joinWaitlist,
@@ -16,12 +22,18 @@ export function WaitlistForm() {
   const [dismissed, setDismissed] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // a fresh submit resets the dismissed flag so the modal can show again
+  // a fresh submit resets the dismissed flag so the modals can show again
   useEffect(() => setDismissed(false), [state]);
 
-  const invalid = clientInvalid || (state === "invalid" && !clientInvalid);
-  const duplicate = !clientInvalid && state === "duplicate";
+  const invalid = (clientInvalid || state === "invalid") && !dismissed;
+  const duplicate = !clientInvalid && state === "duplicate" && !dismissed;
   const success = !clientInvalid && state === "added" && !dismissed;
+
+  function dismiss() {
+    setDismissed(true);
+    setClientInvalid(false);
+    (formRef.current?.elements.namedItem("phone") as HTMLInputElement | null)?.focus();
+  }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     const input = formRef.current?.elements.namedItem("phone") as HTMLInputElement | null;
@@ -46,17 +58,34 @@ export function WaitlistForm() {
           placeholder="(555) 123-4567"
           aria-label="Phone number"
           aria-invalid={invalid || undefined}
-          onChange={() => setClientInvalid(false)}
+          onChange={(e) => {
+            lockToPhoneChars(e);
+            setClientInvalid(false);
+          }}
         />
         <button className="primary" type="submit" disabled={pending}>
           {pending ? "Joining…" : "Join the waitlist"}
         </button>
       </form>
       {invalid && (
-        <p className="joined err notice-in">that doesn&apos;t look like a phone number — try again?</p>
+        <div className="auth-overlay wl-overlay" role="alertdialog" aria-modal="true" aria-label="Invalid number">
+          <div className="card auth-modal modal-err">
+            <div className="wl-woof">🙈</div>
+            <h2>That doesn&apos;t look like a number</h2>
+            <p className="muted">ten digits does it — like (555) 123-4567.</p>
+            <button className="primary auth-cta" onClick={dismiss}>Try again</button>
+          </div>
+        </div>
       )}
       {duplicate && (
-        <p className="joined dup notice-in">this number&apos;s already on the list — you&apos;re good ✓</p>
+        <div className="auth-overlay wl-overlay" role="alertdialog" aria-modal="true" aria-label="Already on the list">
+          <div className="card auth-modal modal-dup">
+            <div className="wl-woof">🐕</div>
+            <h2>Already on the list</h2>
+            <p className="muted">this number&apos;s saved from before — you&apos;re good.</p>
+            <button className="primary auth-cta" onClick={dismiss}>Okay</button>
+          </div>
+        </div>
       )}
       {success && (
         <div className="auth-overlay wl-overlay" role="dialog" aria-modal="true" aria-label="You're on the list">

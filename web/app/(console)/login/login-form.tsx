@@ -6,6 +6,12 @@ import { useActionState, useState } from "react";
 import { normalizePhone } from "@/lib/phone";
 import { profileNameFor, signIn } from "./actions";
 
+
+// keys other than digits/phone punctuation never land in the box
+function lockToPhoneChars(e: React.ChangeEvent<HTMLInputElement>) {
+  e.target.value = e.target.value.replace(/[^\d()+\-\s]/g, "");
+}
+
 type Known = { kind: "unknown" } | { kind: "returning"; name: string } | { kind: "new" };
 
 export function LoginForm() {
@@ -43,7 +49,8 @@ export function LoginForm() {
           autoFocus
           placeholder="(555) 123-4567"
           aria-invalid={invalid || undefined}
-          onChange={() => {
+          onChange={(e) => {
+            lockToPhoneChars(e);
             setClientInvalid(false);
             setKnown({ kind: "unknown" });
           }}
