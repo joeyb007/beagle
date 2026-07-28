@@ -33,7 +33,7 @@ export function AuthGate({
         <div className="card auth-modal">
           <h2>Sign in</h2>
           <p className="muted">This is your crew&apos;s world — Beagle only shows it to people in it.</p>
-          <Link className="primary auth-cta" href="/login">Sign in with your number</Link>
+          <Link className="button auth-cta" href="/login">Sign in with your number</Link>
         </div>
       </div>
     </div>
