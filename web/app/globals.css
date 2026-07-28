@@ -72,7 +72,7 @@ h2 { font-size: 15px; font-weight: 600; margin: 28px 0 10px; }
   margin-bottom: 16px;
 }
 label.field { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 4px; }
-input[type="text"], textarea, select {
+input[type="text"], input[type="tel"], input[type="password"], input[type="email"], textarea, select {
   width: 100%;
   font: inherit;
   padding: 8px 10px;
@@ -395,7 +395,7 @@ button.primary, a.button {
   font-weight: 500;
   margin-top: 12px;
 }
-input[type="text"], textarea, select { background: var(--paper); border-radius: 6px; }
+input[type="text"], input[type="tel"], input[type="password"], input[type="email"], textarea, select { background: var(--paper); border-radius: 6px; }
 table.data { font-size: 12.5px; }
 
 /* the keepsake page stays the one warm, serif "document" surface on purpose */
@@ -831,6 +831,9 @@ table.data { font-size: 12.5px; }
   background: radial-gradient(closest-side, var(--paper) 55%, transparent);
 }
 .landing-inner h1 {
+  font-family: var(--font-serif, var(--serif));
+  font-weight: 600;
+  letter-spacing: -0.01em;
   font-size: clamp(40px, 6vw, 64px);
   line-height: 1.05;
   margin: 12px 0 14px;
@@ -923,4 +926,10 @@ table.data { font-size: 12.5px; }
 @keyframes modal-in {
   from { opacity: 0; transform: translateY(10px) scale(0.97); }
   to { opacity: 1; transform: none; }
+}
+
+/* custom copper focus ring replaces the default blue outline on these forms */
+.waitlist input:focus-visible,
+.login-form input:focus-visible {
+  outline: none;
 }
