@@ -5,142 +5,219 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>hometown guys</title>
 <style>
-  /* throwaway demo prop: a 1:1 scripted replay of the championship-night
-     thread, styled as iMessage, for screen recording. not linked anywhere. */
+  /* throwaway demo prop: scripted replay of the championship-night thread,
+     replicating iMessage light mode 1:1 for screen recording. not linked. */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; }
   body {
-    background: #000;
+    background: #0d0d0f;
     display: flex; align-items: center; justify-content: center;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
   }
   .phone {
     width: 390px; height: 844px; background: #fff;
-    border-radius: 44px; overflow: hidden; position: relative;
-    box-shadow: 0 0 0 12px #1c1c1e, 0 0 0 14px #3a3a3c, 0 30px 80px rgb(0 0 0 / 0.6);
+    border-radius: 54px; overflow: hidden; position: relative;
+    box-shadow: 0 0 0 13px #0f0f10, 0 0 0 15px #4a4a4e, 0 40px 90px rgb(0 0 0 / 0.7);
     display: flex; flex-direction: column;
   }
+  /* side buttons */
+  .phone::before {
+    content: ""; position: absolute; left: -16px; top: 180px; width: 3px; height: 62px;
+    background: #3c3c40; border-radius: 2px; box-shadow: 0 96px 0 #3c3c40, 0 -66px 0 0 #3c3c40;
+  }
+  .phone::after {
+    content: ""; position: absolute; right: -16px; top: 230px; width: 3px; height: 92px;
+    background: #3c3c40; border-radius: 2px;
+  }
+
   .statusbar {
-    height: 54px; flex-shrink: 0; display: flex; align-items: flex-end;
-    justify-content: space-between; padding: 0 28px 6px; font-size: 15px; font-weight: 600;
+    height: 56px; flex-shrink: 0; position: relative;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px 0 40px; background: #f6f6f6;
   }
-  .statusbar .icons { display: flex; gap: 6px; align-items: center; font-size: 13px; letter-spacing: -0.5px; }
+  .statusbar .time { font-size: 16px; font-weight: 600; letter-spacing: 0.2px; }
+  .island {
+    position: absolute; left: 50%; top: 14px; transform: translateX(-50%);
+    width: 122px; height: 34px; background: #000; border-radius: 999px;
+  }
+  .sicons { display: flex; align-items: center; gap: 7px; }
+  .sicons svg { display: block; }
+
   .header {
-    flex-shrink: 0; text-align: center; padding: 2px 14px 8px;
-    background: rgba(249, 249, 249, 0.94); border-bottom: 0.5px solid #c6c6c8;
-    position: relative;
+    flex-shrink: 0; text-align: center; padding: 4px 14px 6px;
+    background: #f6f6f6cc; backdrop-filter: blur(10px);
+    border-bottom: 0.5px solid #c9c9cd; position: relative; z-index: 3;
   }
-  .back { position: absolute; left: 10px; top: 6px; color: #007aff; font-size: 26px; }
-  .back sup { font-size: 12px; font-weight: 600; background: #007aff; color: #fff; border-radius: 999px; padding: 1px 6px; position: relative; top: -8px; left: -4px; }
-  .avatars { display: flex; justify-content: center; margin-bottom: 2px; }
+  .back {
+    position: absolute; left: 14px; top: 16px; width: 12px; height: 12px;
+    border-left: 2.6px solid #007aff; border-bottom: 2.6px solid #007aff;
+    transform: rotate(45deg); border-radius: 1px;
+  }
+  .facetime { position: absolute; right: 18px; top: 16px; }
+  .avatars { display: flex; justify-content: center; margin-bottom: 3px; }
   .av {
-    width: 40px; height: 40px; border-radius: 50%; color: #fff;
+    width: 44px; height: 44px; border-radius: 50%; color: #fff;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 16px; font-weight: 600; margin: 0 -7px;
-    border: 2px solid #f9f9f9;
-    background: linear-gradient(180deg, #9a9fa8, #7d818a);
+    font-size: 17px; font-weight: 500; margin: 0 -8px;
+    border: 2px solid #f6f6f6;
+    background: linear-gradient(180deg, #a4aab3, #848a94);
   }
-  .av.dog { background: linear-gradient(180deg, #c98a4b, #a96a2e); font-size: 20px; }
-  .gname { font-size: 12px; color: #000; }
-  .gname .chev { color: #b0b0b6; font-size: 10px; }
+  .av.dog { background: linear-gradient(180deg, #d09150, #a96a2e); font-size: 22px; z-index: 2; }
+  .gname { font-size: 12px; color: #000; font-weight: 400; }
+  .gname .chev { color: #b6b6bc; font-size: 11px; font-weight: 600; }
+
   .scroll {
-    flex: 1; overflow-y: auto; padding: 10px 14px 6px; background: #fff;
-    display: flex; flex-direction: column; gap: 2px;
+    flex: 1; overflow-y: auto; padding: 8px 16px 4px; background: #fff;
+    display: flex; flex-direction: column; gap: 1.5px;
   }
-  .daystamp {
-    text-align: center; font-size: 11px; color: #8e8e93; margin: 8px 0 10px;
-    font-weight: 500;
-  }
-  .daystamp b { font-weight: 600; }
-  .sender {
-    font-size: 11px; color: #8e8e93; margin: 8px 0 1px 46px;
-  }
-  .row { display: flex; align-items: flex-end; gap: 6px; }
+  .stamp { text-align: center; margin: 10px 0 12px; }
+  .stamp .svc { font-size: 11px; color: #8e8e93; font-weight: 500; }
+  .stamp .when { font-size: 11px; color: #8e8e93; }
+  .stamp .when b { font-weight: 600; }
+
+  .sender { font-size: 11.5px; color: #8e8e93; margin: 9px 0 1px 44px; }
+  .row { display: flex; align-items: flex-end; gap: 7px; }
   .row .avmini {
-    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    width: 27px; height: 27px; border-radius: 50%; flex-shrink: 0;
     color: #fff; display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 600; margin-bottom: 1px;
-    background: linear-gradient(180deg, #9a9fa8, #7d818a);
+    font-size: 12px; font-weight: 500; margin-bottom: 1px;
+    background: linear-gradient(180deg, #a4aab3, #848a94);
     visibility: hidden;
   }
   .row.last .avmini { visibility: visible; }
-  .row .avmini.dog { background: linear-gradient(180deg, #c98a4b, #a96a2e); font-size: 15px; }
+  .row .avmini.dog { background: linear-gradient(180deg, #d09150, #a96a2e); font-size: 14px; }
+
   .bubble {
-    max-width: 268px; padding: 7px 12px; font-size: 16.5px; line-height: 1.28;
-    border-radius: 18px; position: relative;
-    animation: pop 260ms cubic-bezier(0.24, 1.24, 0.4, 1);
-    transform-origin: bottom left;
-    white-space: pre-wrap;
+    max-width: 264px; padding: 7px 12px 8px; font-size: 17px; line-height: 1.25;
+    border-radius: 19px; position: relative; letter-spacing: -0.2px;
+    animation: pop 240ms cubic-bezier(0.24, 1.2, 0.4, 1);
+    transform-origin: bottom left; white-space: pre-wrap;
   }
-  @keyframes pop { from { opacity: 0; transform: scale(0.86) translateY(6px); } to { opacity: 1; transform: none; } }
-  .in .bubble { background: #e9e9eb; color: #000; border-bottom-left-radius: 5px; }
-  .in.last .bubble { border-bottom-left-radius: 18px; }
+  @keyframes pop { from { opacity: 0; transform: scale(0.88) translateY(5px); } to { opacity: 1; transform: none; } }
+  .in .bubble { background: #e9e9eb; color: #000; }
   .in.last .bubble::before {
-    content: ""; position: absolute; left: -5px; bottom: 0; width: 12px; height: 18px;
-    background: radial-gradient(circle at 0 0, transparent 11px, #e9e9eb 11.5px);
+    content: ""; position: absolute; left: -5.5px; bottom: -0.5px; width: 13px; height: 19px;
+    background: radial-gradient(circle at 0 0, transparent 11.5px, #e9e9eb 12px);
   }
   .out { justify-content: flex-end; }
-  .out .bubble { background: #0a84ff; color: #fff; border-bottom-right-radius: 5px; transform-origin: bottom right; }
-  .out.last .bubble { border-bottom-right-radius: 18px; }
+  .out .bubble { background: #007aff; color: #fff; transform-origin: bottom right; }
   .out.last .bubble::before {
-    content: ""; position: absolute; right: -5px; bottom: 0; width: 12px; height: 18px;
-    background: radial-gradient(circle at 12px 0, transparent 11px, #0a84ff 11.5px);
+    content: ""; position: absolute; right: -5.5px; bottom: -0.5px; width: 13px; height: 19px;
+    background: radial-gradient(circle at 13px 0, transparent 11.5px, #007aff 12px);
   }
-  .delivered {
-    text-align: right; font-size: 10.5px; color: #8e8e93; font-weight: 500;
-    margin: 2px 4px 4px 0;
-  }
-  .typing .bubble { display: inline-flex; gap: 4px; padding: 12px 14px; }
+  .delivered { text-align: right; font-size: 11px; color: #8e8e93; font-weight: 500; margin: 3px 3px 3px 0; }
+
+  .typing .bubble { display: inline-flex; gap: 4.5px; padding: 13px 15px; }
   .typing .dot {
-    width: 8px; height: 8px; border-radius: 50%; background: #b6b6bb;
+    width: 8.5px; height: 8.5px; border-radius: 50%; background: #b6b6bb;
     animation: blink 1.2s ease-in-out infinite;
   }
   .typing .dot:nth-child(2) { animation-delay: 0.18s; }
   .typing .dot:nth-child(3) { animation-delay: 0.36s; }
   @keyframes blink { 0%, 60%, 100% { opacity: 0.35; } 30% { opacity: 1; } }
+
   .inputbar {
-    flex-shrink: 0; display: flex; align-items: center; gap: 10px;
-    padding: 6px 12px 8px; background: #fff;
+    flex-shrink: 0; display: flex; align-items: center; gap: 14px;
+    padding: 7px 12px; background: #fff;
   }
-  .plus {
-    width: 32px; height: 32px; border-radius: 50%; background: #e9e9eb;
-    color: #7c7c82; font-size: 22px; display: flex; align-items: center;
-    justify-content: center; flex-shrink: 0; font-weight: 300;
-  }
+  .inputbar svg { flex-shrink: 0; }
   .field {
-    flex: 1; border: 1px solid #d7d7dc; border-radius: 999px;
-    padding: 6px 14px; font-size: 16px; color: #b8b8bf;
-    display: flex; justify-content: space-between; align-items: center;
+    flex: 1; border: 1px solid #d9d9de; border-radius: 999px;
+    padding: 6px 34px 6px 14px; font-size: 17px; min-height: 36px;
+    color: #c1c1c7; position: relative; display: flex; align-items: center;
   }
-  .field .mic { color: #8e8e93; font-size: 15px; }
-  .homebar {
-    height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-    background: #fff;
+  .field .typed { color: #000; }
+  .field .caret {
+    display: inline-block; width: 2px; height: 20px; background: #007aff;
+    margin-left: 1px; animation: caret 1s steps(1) infinite; vertical-align: -4px;
   }
-  .homebar span { width: 140px; height: 5px; border-radius: 999px; background: #1c1c1e; }
-  .hint {
-    position: fixed; bottom: 14px; left: 0; right: 0; text-align: center;
-    color: #4a4a4e; font-size: 13px; user-select: none;
+  @keyframes caret { 50% { opacity: 0; } }
+  .field .mic { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
+  .field .send {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    width: 28px; height: 28px; border-radius: 50%; background: #007aff;
+    display: none; align-items: center; justify-content: center;
   }
+  .field.ready .mic { display: none; }
+  .field.ready .send { display: flex; }
+  .field .send::before {
+    content: ""; width: 9px; height: 9px; margin-top: 3px;
+    border-left: 2.4px solid #fff; border-top: 2.4px solid #fff;
+    transform: rotate(45deg); border-radius: 1px;
+  }
+
+  /* app strip + keyboard, per the reference frame */
+  .appstrip {
+    flex-shrink: 0; display: flex; justify-content: space-around; align-items: center;
+    padding: 4px 10px 6px; background: #fff; font-size: 22px;
+  }
+  .appstrip span { filter: saturate(1.1); }
+  .kb { flex-shrink: 0; background: #d1d3d9; padding: 8px 3px 4px; }
+  .krow { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; }
+  .key {
+    background: #fff; border-radius: 6px; box-shadow: 0 1.5px 0 rgb(0 0 0 / 0.28);
+    width: 33px; height: 42px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 400;
+  }
+  .key.wide { width: 46px; background: #b3b9c4; font-size: 15px; }
+  .key.space { width: 200px; font-size: 15px; }
+  .key.ret { width: 88px; background: #b3b9c4; font-size: 15px; }
+  .krow.bottom .key { height: 42px; }
+  .kfoot { display: flex; justify-content: space-between; padding: 2px 30px 0; font-size: 20px; color: #50555e; }
+  .homebar { height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #d1d3d9; }
+  .homebar span { width: 138px; height: 5px; border-radius: 999px; background: #0f0f10; }
+  .hint { position: fixed; bottom: 12px; left: 0; right: 0; text-align: center; color: #55555a; font-size: 13px; user-select: none; }
 </style>
 </head>
 <body>
 <div class="phone">
-  <div class="statusbar"><span>9:41</span><span class="icons">▪▪▪▪ ᯤ ▮</span></div>
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <div class="island"></div>
+    <span class="sicons">
+      <svg width="19" height="12" viewBox="0 0 19 12" fill="#000"><rect x="0" y="7.5" width="3.4" height="4.5" rx="1"/><rect x="5" y="5" width="3.4" height="7" rx="1"/><rect x="10" y="2.5" width="3.4" height="9.5" rx="1"/><rect x="15" y="0" width="3.4" height="12" rx="1"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#000"><path d="M8.5 12 L11.3 8.6 A4.4 4.4 0 0 0 5.7 8.6 Z"/><path d="M3.4 5.9 A7.8 7.8 0 0 1 13.6 5.9 L15.5 3.6 A10.8 10.8 0 0 0 1.5 3.6 Z" opacity="1"/></svg>
+      <svg width="27" height="13" viewBox="0 0 27 13"><rect x="0.5" y="0.5" width="22" height="12" rx="3.5" fill="none" stroke="#000" stroke-opacity="0.4"/><rect x="2.5" y="2.5" width="18" height="8" rx="2" fill="#000"/><path d="M24.5 4.5 v4 a2.2 2.2 0 0 0 0 -4" fill="#000" fill-opacity="0.4"/></svg>
+    </span>
+  </div>
   <div class="header">
-    <div class="back">‹<sup>7</sup></div>
+    <div class="back"></div>
     <div class="avatars">
       <span class="av">C</span><span class="av dog">🐶</span><span class="av">P</span>
     </div>
     <div class="gname">hometown guys <span class="chev">›</span></div>
+    <svg class="facetime" width="26" height="17" viewBox="0 0 26 17" fill="none" stroke="#007aff" stroke-width="1.7"><rect x="1" y="1.5" width="16" height="14" rx="4"/><path d="M17.5 7 L24 3.5 V13.5 L17.5 10" stroke-linejoin="round"/></svg>
   </div>
   <div class="scroll" id="scroll">
-    <div class="daystamp"><b>Today</b> 5:42 PM</div>
+    <div class="stamp"><div class="svc">iMessage</div><div class="when"><b>Today</b> 5:42 PM</div></div>
   </div>
   <div class="inputbar">
-    <div class="plus">+</div>
-    <div class="field"><span>iMessage</span><span class="mic">🎙︎</span></div>
+    <svg width="27" height="22" viewBox="0 0 27 22" fill="#8e8e93"><path d="M4 4 h4l2-2.5h7L19 4h4a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z" fill="none" stroke="#8e8e93" stroke-width="1.8"/><circle cx="13.5" cy="11.5" r="4.4" fill="none" stroke="#8e8e93" stroke-width="1.8"/></svg>
+    <svg width="23" height="23" viewBox="0 0 23 23"><rect width="23" height="23" rx="6" fill="none" stroke="#8e8e93" stroke-width="1.6" x="0.8" y="0.8" transform="scale(0.93)"/><path d="M7 15.5 L11.5 7 L16 15.5 M9 12.7 h5" stroke="#8e8e93" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+    <div class="field" id="field">
+      <span id="fieldtext">iMessage</span>
+      <svg class="mic" width="12" height="18" viewBox="0 0 12 18" fill="none" stroke="#8e8e93" stroke-width="1.5"><rect x="3.2" y="1" width="5.6" height="10" rx="2.8"/><path d="M1 8.5 a5 5 0 0 0 10 0 M6 13.5 V17 M3.5 17 h5"/></svg>
+      <span class="send"></span>
+    </div>
+  </div>
+  <div class="appstrip">
+    <span>🌈</span><span>🅰️</span><span>🎵</span><span>💰</span><span>👤</span><span>😀</span><span>🔍</span>
+  </div>
+  <div class="kb">
+    <div class="krow">
+      <div class="key">Q</div><div class="key">W</div><div class="key">E</div><div class="key">R</div><div class="key">T</div><div class="key">Y</div><div class="key">U</div><div class="key">I</div><div class="key">O</div><div class="key">P</div>
+    </div>
+    <div class="krow">
+      <div class="key">A</div><div class="key">S</div><div class="key">D</div><div class="key">F</div><div class="key">G</div><div class="key">H</div><div class="key">J</div><div class="key">K</div><div class="key">L</div>
+    </div>
+    <div class="krow">
+      <div class="key wide">⇧</div><div class="key">Z</div><div class="key">X</div><div class="key">C</div><div class="key">V</div><div class="key">B</div><div class="key">N</div><div class="key">M</div><div class="key wide">⌫</div>
+    </div>
+    <div class="krow bottom">
+      <div class="key wide">123</div><div class="key space">space</div><div class="key ret">return</div>
+    </div>
+    <div class="kfoot"><span>😀</span><span>🎙</span></div>
   </div>
   <div class="homebar"><span></span></div>
 </div>
@@ -148,26 +225,29 @@
 
 <script>
   // The championship-night arc, 1:1 with what beagle actually does.
-  // who: "me" = Joseph (blue). Everyone else renders incoming with a name tag.
-  // t = ms pause before this message; typing = show typing dots first (ms).
+  // who: "me" = Joseph (blue; typed out on the keyboard, then sent).
+  // t = ms pause before this message; typing = incoming typing-dots time.
   const SCRIPT = [
-    { who: "me",        text: "boys. friday. thoughts", t: 900 },
-    { who: "Cristiano", text: "kbbq then fifa at mine. non negotiable", t: 2200, typing: 1700 },
-    { who: "Cam",       text: "negotiable if you unplug my controller again", t: 1400, typing: 1900 },
-    { who: "me",        text: "@beagle settle it", t: 2400 },
-    { who: "beagle",    text: "on it. checking all six calendars, brb 🐶", t: 1500, typing: 1400 },
-    { who: "beagle",    text: "verdict: friday 8pm is clean across the board. gen korean bbq first, fifa at cristiano's after. locking in one hour unless someone objects", t: 3600, typing: 2600 },
-    { who: "Paul",      text: "objection withheld strategically", t: 2600, typing: 1800 },
-    { who: "beagle",    text: "locked: championship night, friday 8pm. kbbq then fifa at cristiano's. controllers charged, grudges optional. calendar invites are out 🐶", t: 3400, typing: 2200 },
-    { who: "Cam",       text: "BEST NIGHT OF OUR LIVES INCOMING (again)", t: 1800, typing: 1300 },
-    { who: "Fortune",   text: "there by 8 sharp (8:40)", t: 1600, typing: 1500 },
-    { who: "Leandro",   text: "i'll drive. obviously", t: 1700, typing: 1400 },
+    { who: "me",        text: "yo what are we on friday", t: 900 },
+    { who: "Cristiano", text: "kbbq then fifa at mine", t: 1800, typing: 1700 },
+    { who: "Cam",       text: "im down if cris doesnt rage quit again", t: 1300, typing: 1900 },
+    { who: "me",        text: "@beagle when are we all free", t: 1800 },
+    { who: "beagle",    text: "say less, checking everyone's week 🐶", t: 1400, typing: 1400 },
+    { who: "beagle",    text: "friday 8pm works for all 6 of you. thinking gen korean bbq at 8, fifa at cristiano's after. want me to lock it?", t: 3200, typing: 2600 },
+    { who: "Paul",      text: "yeah lock it", t: 2400, typing: 1500 },
+    { who: "Fortune",   text: "lock it 🔥", t: 1200, typing: 1100 },
+    { who: "beagle",    text: "locked. friday 8pm, gen korean bbq then fifa at cristiano's. calendar invites sent 🔒", t: 2800, typing: 2100 },
+    { who: "Cam",       text: "LETS GOOO", t: 1500, typing: 1000 },
+    { who: "Leandro",   text: "i can drive", t: 1500, typing: 1400 },
+    { who: "Cristiano", text: "charge your controllers. no excuses this time", t: 1600, typing: 1600 },
   ];
 
   const scroll = document.getElementById("scroll");
   const hint = document.getElementById("hint");
+  const field = document.getElementById("field");
+  const fieldtext = document.getElementById("fieldtext");
   let timers = [];
-  let lastRow = null, lastWho = null;
+  let lastRow = null, lastWho = null, deliveredEl = null;
 
   const sleep = (ms) => new Promise((r) => timers.push(setTimeout(r, ms)));
   const down = () => scroll.scrollTo({ top: scroll.scrollHeight, behavior: "smooth" });
@@ -205,15 +285,39 @@
 
   function typingBubble() {
     const b = document.createElement("div");
-    b.className = "bubble";
     b.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+    b.className = "bubble";
     return b;
+  }
+
+  async function typeAndSend(text) {
+    fieldtext.innerHTML = '<span class="typed"></span><span class="caret"></span>';
+    const typed = fieldtext.querySelector(".typed");
+    for (let i = 0; i < text.length; i++) {
+      typed.textContent = text.slice(0, i + 1);
+      if (i === 0) field.classList.add("ready");
+      await sleep(42 + Math.random() * 46);
+    }
+    await sleep(420);
+    field.classList.remove("ready");
+    fieldtext.textContent = "iMessage";
+    if (deliveredEl) { deliveredEl.remove(); deliveredEl = null; }
+    addRow("me", bubble(text), false);
+    deliveredEl = document.createElement("div");
+    deliveredEl.className = "delivered";
+    deliveredEl.textContent = "Delivered";
+    scroll.appendChild(deliveredEl);
+    down();
   }
 
   async function play() {
     for (const m of SCRIPT) {
       await sleep(m.t);
-      if (m.typing && m.who !== "me") {
+      if (m.who === "me") {
+        await typeAndSend(m.text);
+        continue;
+      }
+      if (m.typing) {
         const t = addRow(m.who, typingBubble(), true);
         await sleep(m.typing);
         t.remove();
@@ -221,18 +325,14 @@
       }
       addRow(m.who, bubble(m.text), false);
     }
-    await sleep(600);
-    const d = document.createElement("div");
-    d.className = "delivered";
-    d.textContent = "Delivered";
-    scroll.appendChild(d);
-    down();
   }
 
   function reset() {
     timers.forEach(clearTimeout); timers = [];
-    scroll.innerHTML = '<div class="daystamp"><b>Today</b> 5:42 PM</div>';
-    lastRow = null; lastWho = null;
+    scroll.innerHTML = '<div class="stamp"><div class="svc">iMessage</div><div class="when"><b>Today</b> 5:42 PM</div></div>';
+    lastRow = null; lastWho = null; deliveredEl = null;
+    field.classList.remove("ready");
+    fieldtext.textContent = "iMessage";
   }
 
   let started = false;
