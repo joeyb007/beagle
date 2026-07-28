@@ -140,3 +140,10 @@ CREATE TABLE IF NOT EXISTS context_snapshots (
   last_message_id INTEGER NOT NULL,
   updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- person_embeddings: semantic match vector cache (keyed by person-card hash)
+CREATE TABLE IF NOT EXISTS person_embeddings (
+  handle       TEXT PRIMARY KEY,
+  profile_hash TEXT NOT NULL,
+  vec          TEXT NOT NULL
+);
