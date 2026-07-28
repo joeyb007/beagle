@@ -958,3 +958,10 @@ table.data { font-size: 12.5px; }
   from { transform: scale(0.4) rotate(-12deg); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
+
+/* signed-out ghost skeleton — same backdrop on every gated page */
+.ghost-page { padding: 8px 4px; }
+.ghost-line { height: 22px; border-radius: 6px; background: var(--hover); margin: 0 0 12px; }
+.ghost-line.w40 { width: 40%; } .ghost-line.w70 { width: 70%; height: 14px; margin-bottom: 22px; }
+.ghost-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 14px; }
+.ghost-card { height: 120px; } .ghost-card.tall { height: 220px; }

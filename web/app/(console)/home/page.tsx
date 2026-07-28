@@ -1,7 +1,6 @@
 // Home: Beagle's read on YOU — the persona it earned, plus the polaroid string
 // of every hangout you were part of.
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { BeagleTake } from "@/app/beagle-take";
 import { SparkButton } from "@/app/spark-button";
 import { StringStrip } from "@/app/string-strip";
@@ -20,7 +19,7 @@ function monthOf(iso: string): string {
 
 export default async function Home() {
   const user = await currentUser();
-  if (!user) redirect("/login");
+  if (!user) return null; // AuthGate shows the sign-in modal
 
   const memories = photoMemories(user.handle);
   const days = availableDays(user.data.typical_availability);

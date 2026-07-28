@@ -16,8 +16,18 @@ export function AuthGate({
   if (signedIn || pathname.startsWith("/login")) return <>{children}</>;
   return (
     <div className="auth-wrap">
-      <div className="auth-blur" aria-hidden inert>
-        {children}
+      <div className="auth-blur ghost-page" aria-hidden inert>
+        <div className="ghost-line w40" />
+        <div className="ghost-line w70" />
+        <div className="ghost-row">
+          <div className="card ghost-card" />
+          <div className="card ghost-card" />
+          <div className="card ghost-card" />
+        </div>
+        <div className="ghost-row">
+          <div className="card ghost-card tall" />
+          <div className="card ghost-card tall" />
+        </div>
       </div>
       <div className="auth-overlay" role="dialog" aria-modal="true" aria-label="Sign in required">
         <div className="card auth-modal">
