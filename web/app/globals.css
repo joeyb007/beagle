@@ -1335,6 +1335,47 @@ html { scroll-behavior: smooth; }
 .upnext-cta:hover::after { transform: scaleX(1); }
 .widget a.upnext-cta:hover { text-decoration: none; } /* the slide replaces the widget-link underline */
 
+/* You-card edit modal: left-aligned form over the page-wide blur */
+.you-modal {
+  position: relative; text-align: left;
+  width: min(400px, 92vw); max-width: 400px;
+}
+.you-modal h2 { margin-bottom: 2px; }
+.you-modal .primary { align-self: flex-end; }
+
+/* tag pills: an input-looking box that holds removable chips */
+.tag-input {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  padding: 7px 9px; min-height: 38px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--paper);
+  cursor: text;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.tag-input:focus-within {
+  border-color: var(--copper);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--copper) 16%, transparent);
+}
+.tag-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  animation: pill-pop 200ms cubic-bezier(0.34, 1.6, 0.5, 1);
+}
+@keyframes pill-pop {
+  from { opacity: 0; transform: scale(0.7); }
+  to { opacity: 1; transform: none; }
+}
+.tag-x {
+  background: none; border: 0; padding: 0; margin-left: 1px;
+  font-size: 13px; line-height: 1; color: inherit; opacity: 0.55;
+  cursor: pointer; transition: opacity 130ms ease, transform 130ms ease;
+}
+.tag-x:hover { opacity: 1; transform: scale(1.2); }
+.you-form input.tag-entry {
+  flex: 1; min-width: 70px; width: auto;
+  border: 0; padding: 2px 0; background: transparent;
+  font-size: 13px; box-shadow: none;
+}
+.you-form input.tag-entry:focus-visible { outline: none; }
+
 .pop-close {
   position: absolute; top: 8px; right: 12px;
   background: none; border: 0; font-size: 18px; line-height: 1;
