@@ -18,7 +18,10 @@ async function toggleVisibility(formData: FormData) {
 }
 
 export default function Memories() {
-  const artifacts = new ArtifactStore().list();
+  // chronological: upcoming first, then the past from newest to oldest
+  const artifacts = new ArtifactStore()
+    .list()
+    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
   const crewName = new Map(listGroupsWithHangouts().map((g) => [g.id, g.name]));
   const fmt = (t: string) =>
     new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });

@@ -40,7 +40,7 @@ const profile = db.prepare(
 const crew = [
   [JOSEPH, "Joseph Barbosa", {
     cuisines: ["sushi", "tacos"], vibe: ["low-key", "outdoors"], hard_nos: ["clubs"],
-    typical_availability: "weekend evenings", persona_label: "the planner",
+    typical_availability: "sunday mornings, coffee first", persona_label: "the planner",
     notes: "keeps the thread alive; will drive if someone else picks the playlist",
   }, 0.5],
   [MADHAV, "Madhav", {
@@ -71,31 +71,31 @@ const LEANDRO = "+14165550205";
 const lockInCrew = [
   [CAM, "Cam Fletcher", {
     cuisines: ["korean fried chicken", "wings"], vibe: ["loud", "competitive"],
-    hard_nos: ["museums"], typical_availability: "weeknights after 9",
+    hard_nos: ["museums"], typical_availability: "sunday mornings (post run club)",
     persona_label: "the hype man",
     notes: "declares every plan 'the best night of our lives' in advance. right about half the time.",
   }, 0.3],
   [PAUL, "Paul Cseke", {
     cuisines: ["pho", "smash burgers"], vibe: ["low-key", "competitive"],
-    hard_nos: ["clubs"], typical_availability: "weekends and wednesday nights",
+    hard_nos: ["clubs"], typical_availability: "sunday mornings, sharp",
     persona_label: "the strategist",
     notes: "shows up with a spreadsheet energy but no spreadsheet. calls dibs on navigator.",
   }, 0.55],
   [FORTUNE, "Fortune", {
     cuisines: ["jollof", "tacos"], vibe: ["spontaneous", "loud"],
-    hard_nos: ["early mornings"], typical_availability: "friday and saturday nights",
+    hard_nos: ["planning ahead"], typical_availability: "sunday mornings allegedly",
     persona_label: "the wildcard",
     notes: "40 minutes late, arrives with two strangers who become everyone's friends",
   }, 0.2],
   [CRISTIANO, "Cristiano", {
     cuisines: ["steak", "espresso"], vibe: ["competitive", "late night"],
-    hard_nos: ["hiking"], typical_availability: "late nights",
+    hard_nos: ["hiking"], typical_availability: "sunday mornings, espresso doubles",
     persona_label: "the closer",
     notes: "will not leave a game unfinished. any game. anyone's game.",
   }, 0.6],
   [LEANDRO, "Leandro", {
     cuisines: ["churrasco", "acai"], vibe: ["casual", "outdoors"],
-    hard_nos: ["karaoke"], typical_availability: "weekend afternoons",
+    hard_nos: ["karaoke"], typical_availability: "sunday mornings, will drive",
     persona_label: "the calm one",
     notes: "brings the speaker, never fights over the aux, somehow always drives",
   }, 0.45],
