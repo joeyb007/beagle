@@ -1,7 +1,9 @@
 // Seed data.sqlite so every screen renders with zero agent dependency.
-// The friend group uses the four REAL allowlisted numbers so the live demo and
-// the web demo are one world. Nearby people carry nearby:true — the agent's
-// profile store excludes them from fan-out; they exist only for the swipe deck.
+// ALL numbers are fictional (555 exchange) so nothing here can ever text a
+// real person. For a live iMessage demo, swap in real allowlisted numbers
+// locally (src/solo_seed.py, or edit the constants below) — never commit them.
+// Nearby people carry nearby:true — the agent's profile store excludes them
+// from fan-out; they exist only for the swipe deck.
 // Photos are real stock scenery (Lorem Picsum), pre-downloaded into
 // public/uploads by this script's sibling step — regenerate with seed-photos.
 import Database from "better-sqlite3";
@@ -28,7 +30,7 @@ for (const ddl of [
 }
 
 // ---------------------------------------------------------------- profiles
-// The real crew (allowlisted numbers — safe to fan out).
+// The core crew (fictional numbers; swap locally for a live run).
 const JOSEPH = "+16475550132";
 const MADHAV = "+19295550252";
 const ANTHONY = "+13475550788";
