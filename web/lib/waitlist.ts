@@ -43,19 +43,24 @@ async function pg() {
 
 // -------------------------------------------------------------- public api
 
-/** Add a number to the waitlist. False = unparseable input. Idempotent. */
-export async function addWaitlistPhone(raw: string): Promise<boolean> {
+export type WaitlistResult = "added" | "duplicate" | "invalid";
+
+/** Add a number to the waitlist. Reports whether it was new, already there,
+ * or unparseable — the landing renders a distinct state for each. */
+export async function addWaitlistPhone(raw: string): Promise<WaitlistResult> {
   const phone = normalizePhone(raw);
-  if (!phone) return false;
+  if (!phone) return "invalid";
   if (PG_URL) {
-    await (await pg()).query(
+    const res = await (await pg()).query(
       "INSERT INTO waitlist (phone) VALUES ($1) ON CONFLICT (phone) DO NOTHING",
       [phone]
     );
-  } else {
-    sqliteEnsure().prepare("INSERT OR IGNORE INTO waitlist (phone) VALUES (?)").run(phone);
+    return res.rowCount === 0 ? "duplicate" : "added";
   }
-  return true;
+  const info = sqliteEnsure()
+    .prepare("INSERT OR IGNORE INTO waitlist (phone) VALUES (?)")
+    .run(phone);
+  return info.changes === 0 ? "duplicate" : "added";
 }
 
 /** How many unique numbers are on the list. */

@@ -933,3 +933,28 @@ table.data { font-size: 12.5px; }
 .login-form input:focus-visible {
   outline: none;
 }
+
+/* ---- waitlist feedback states: red invalid / amber duplicate / success ---- */
+.waitlist.field-invalid input {
+  border-color: #c94f3d;
+  box-shadow: 0 0 0 3px rgba(201, 79, 61, 0.15);
+  animation: field-shake 260ms ease;
+}
+.waitlist.field-dup input {
+  border-color: #c9962f;
+  box-shadow: 0 0 0 3px rgba(201, 150, 47, 0.18);
+}
+.joined.err { color: #c94f3d; }
+.joined.dup { color: #a87d22; }
+@keyframes field-shake {
+  20% { transform: translateX(-4px); }
+  45% { transform: translateX(4px); }
+  70% { transform: translateX(-2px); }
+  100% { transform: none; }
+}
+.wl-overlay { position: fixed; inset: 0; z-index: 60; }
+.wl-woof { font-size: 34px; margin-bottom: 4px; animation: woof-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes woof-pop {
+  from { transform: scale(0.4) rotate(-12deg); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
