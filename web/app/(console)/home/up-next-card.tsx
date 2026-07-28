@@ -5,24 +5,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { UpNextDetail } from "@/lib/db";
 
-function parts(msLeft: number): { label: string; value: string }[] {
-  if (msLeft <= 0) return [{ label: "now", value: "🎉" }];
+function bigUnit(msLeft: number): { value: string; label: string } {
+  if (msLeft <= 0) return { value: "now", label: "have fun" };
   const mins = Math.floor(msLeft / 60000);
   const d = Math.floor(mins / 1440);
-  const h = Math.floor((mins % 1440) / 60);
-  const m = mins % 60;
-  const s = Math.floor((msLeft % 60000) / 1000);
-  if (d > 0)
-    return [
-      { label: "days", value: String(d) },
-      { label: "hrs", value: String(h) },
-      { label: "min", value: String(m) },
-    ];
-  return [
-    { label: "hrs", value: String(h) },
-    { label: "min", value: String(m) },
-    { label: "sec", value: String(s) },
-  ];
+  if (d >= 1) return { value: String(d), label: d === 1 ? "day" : "days" };
+  const h = Math.floor(mins / 60);
+  if (h >= 1) return { value: String(h), label: h === 1 ? "hour" : "hours" };
+  return { value: String(mins), label: "min" };
 }
 
 export function UpNextCard({ plan }: { plan: UpNextDetail }) {
@@ -37,6 +27,7 @@ export function UpNextCard({ plan }: { plan: UpNextDetail }) {
 
   const going = plan.roster.filter((r) => r.going);
   const out = plan.roster.filter((r) => !r.going);
+  const big = bigUnit(target - now);
   const when = new Date(plan.time).toLocaleDateString(undefined, {
     weekday: "short",
     month: "short",
@@ -49,39 +40,31 @@ export function UpNextCard({ plan }: { plan: UpNextDetail }) {
     <div className="card widget upnext">
       <h2 style={{ marginTop: 0 }}>Up next</h2>
       <p className="widget-big">{plan.place}</p>
-      <p className="muted upnext-when">
-        {when}
-        {plan.groupName && <> · from <strong>{plan.groupName}</strong></>}
-      </p>
 
-      <div className="countdown" aria-label="Time until the hangout">
-        {parts(target - now).map((p) => (
-          <div key={p.label} className="count-cell">
-            <span className="count-num">{p.value}</span>
-            <span className="count-label">{p.label}</span>
-          </div>
-        ))}
-      </div>
+      <div className="upnext-body">
+        <div className="count-big" aria-label="Time until the hangout">
+          <span className="count-big-num">{big.value}</span>
+          <span className="count-big-label">{big.label}</span>
+        </div>
 
-      <div className="roster">
-        <div className="roster-col">
-          <span className="roster-head">going</span>
-          <ul>
+        <div className="upnext-info">
+          <p className="upnext-when">
+            {when}
+            {plan.groupName && (
+              <span className="muted"> · from {plan.groupName}</span>
+            )}
+          </p>
+          <ul className="going-list">
             {going.map((r) => (
               <li key={r.name}><span className="status-dot" />{r.name}</li>
             ))}
           </ul>
+          {out.length > 0 && (
+            <p className="muted upnext-out">
+              {out.map((r) => r.name).join(", ")} can&apos;t make it
+            </p>
+          )}
         </div>
-        {out.length > 0 && (
-          <div className="roster-col">
-            <span className="roster-head">out</span>
-            <ul>
-              {out.map((r) => (
-                <li key={r.name} className="is-out"><span className="status-dot off" />{r.name}</li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
 
       <Link href={`/hangouts/${plan.plan_id}`} className="upnext-cta">
