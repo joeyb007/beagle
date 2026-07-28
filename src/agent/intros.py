@@ -55,9 +55,19 @@ class IntroWorker:
                 print(f"[intros] pass failed: {e}")
             await asyncio.sleep(self._interval_s)
 
+    @staticmethod
+    def _ensure_message_column(conn: sqlite3.Connection) -> None:
+        # older DBs predate the stored intro text; the column is additive
+        try:
+            conn.execute("ALTER TABLE intros ADD COLUMN message TEXT")
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # already there
+
     async def process_once(self) -> int:
         conn = sqlite3.connect(self._db_path)
         conn.row_factory = sqlite3.Row
+        self._ensure_message_column(conn)
         rows = conn.execute(
             "SELECT id, handle, match_handle FROM intros"
             " WHERE status = 'pending' AND decision = 'intro'"
@@ -66,8 +76,8 @@ class IntroWorker:
         for row in rows:
             delivered = await self._deliver(conn, row)
             conn.execute(
-                "UPDATE intros SET status = ? WHERE id = ?",
-                ("sent" if delivered else "skipped", row["id"]),
+                "UPDATE intros SET status = ?, message = ? WHERE id = ?",
+                ("sent" if delivered else "skipped", delivered, row["id"]),
             )
             conn.commit()
         conn.close()
@@ -78,6 +88,7 @@ class IntroWorker:
         deliver right away, return the drafted text (None if delivery failed)."""
         conn = sqlite3.connect(self._db_path)
         conn.row_factory = sqlite3.Row
+        self._ensure_message_column(conn)
         conn.execute(
             "INSERT INTO intros (handle, match_handle, decision) VALUES (?, ?, 'intro')"
             " ON CONFLICT(handle, match_handle) DO UPDATE SET decision = 'intro',"
@@ -91,8 +102,8 @@ class IntroWorker:
         ).fetchone()
         text = await self._deliver(conn, row)
         conn.execute(
-            "UPDATE intros SET status = ? WHERE id = ?",
-            ("sent" if text else "skipped", row["id"]),
+            "UPDATE intros SET status = ?, message = ? WHERE id = ?",
+            ("sent" if text else "skipped", text, row["id"]),
         )
         conn.commit()
         conn.close()

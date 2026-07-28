@@ -1,9 +1,11 @@
 // People: Beagle's curated picks, ranked by the agent's semantic matching
 // engine (person-card embeddings + cosine KNN). Falls back to the local
 // taste-vector cosine when the agent is down, so the page always renders.
+import { introOutcomes } from "@/lib/db";
 import { nearbyMatches, wouldLove } from "@/lib/similarity";
 import { currentUser } from "@/lib/session";
 import { DossierStack, MatchCard } from "./dossier";
+import { IntroRail } from "./intro-rail";
 
 const AGENT = process.env.AGENT_URL ?? "http://127.0.0.1:8100";
 
@@ -67,6 +69,8 @@ export default async function Matches() {
       hook: wouldLove(user.handle, m.tastes, seed(m.handle)),
     }));
 
+  const receipts = introOutcomes(user.handle);
+
   return (
     <>
       <p className="eyebrow">beagle&apos;s picks</p>
@@ -75,7 +79,10 @@ export default async function Matches() {
         Beagle sniffed out {cards.length} people near you this week. Say the word and he texts the
         warm intro for you.
       </p>
-      <DossierStack cards={cards} />
+      <div className="match-layout">
+        <DossierStack cards={cards} />
+        <IntroRail intros={receipts.intros} passed={receipts.passed} />
+      </div>
     </>
   );
 }

@@ -1,7 +1,9 @@
 "use client";
 // Beagle's picks as sniff-report dossiers: one at a time, next peeking from
 // behind. Swipe to decide (drag right = intro, left = pass) or use the word
-// buttons. A right swipe persists AND has Beagle text the warm intro now.
+// buttons. A right swipe persists AND has Beagle text the warm intro now;
+// when the text lands, the intros-in-flight rail refreshes with the receipt.
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { DAY_LABELS } from "@/lib/availability";
 
@@ -24,30 +26,41 @@ function whyProse(reasons: string[]): string {
 }
 
 export function DossierStack({ cards }: { cards: MatchCard[] }) {
+  const router = useRouter();
+  // freeze the batch at mount: router.refresh() updates the rail without
+  // reshuffling the deck mid-session
+  const [deck] = useState(cards);
   const [top, setTop] = useState(0);
   const [leaving, setLeaving] = useState<"pass" | "intro" | null>(null);
   const [introd, setIntrod] = useState<string[]>([]);
   const [drag, setDrag] = useState<{ dx: number; dy: number } | null>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
 
-  const remaining = cards.slice(top);
+  const remaining = deck.slice(top);
 
   function decide(d: "pass" | "intro") {
     if (leaving) return;
     const c = remaining[0];
-    void fetch("/api/swipes", {
+    const swiped = fetch("/api/swipes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ match_handle: c.handle, decision: d }),
     });
     if (d === "intro") {
       setIntrod((xs) => [...xs, c.match_name.split(" ")[0]]);
-      // fire-and-forget: beagle drafts + texts the warm intro right away
-      void fetch("/api/intro", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ match_handle: c.handle }),
-      });
+      // beagle drafts + texts the warm intro; refresh puts the receipt in the rail
+      void swiped
+        .then(() =>
+          fetch("/api/intro", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ match_handle: c.handle }),
+          })
+        )
+        .then(() => router.refresh())
+        .catch(() => {});
+    } else {
+      void swiped.then(() => router.refresh()).catch(() => {});
     }
     setLeaving(d);
     setTimeout(() => {
@@ -89,6 +102,11 @@ export function DossierStack({ cards }: { cards: MatchCard[] }) {
 
   return (
     <div className="mm-stage">
+      <div className="mm-progress" aria-label={`pick ${top + 1} of ${deck.length}`}>
+        {deck.map((_, i) => (
+          <span key={i} className={`mm-dot${i < top ? " done" : i === top ? " now" : ""}`} />
+        ))}
+      </div>
       <div className="mm-stack">
         {remaining.slice(0, 2).map((c, i) => {
           const isTop = i === 0;
@@ -109,23 +127,31 @@ export function DossierStack({ cards }: { cards: MatchCard[] }) {
               onPointerMove={isTop ? onPointerMove : undefined}
               onPointerUp={isTop ? onPointerUp : undefined}
             >
-              {c.hook && (
+              {c.hook ? (
                 <div className="string-print mm-photo">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={c.hook.src} alt="" />
                   <span className="mm-photo-cap">{c.hook.place}</span>
                 </div>
+              ) : (
+                <div className="string-print mm-photo">
+                  <div className="mm-mono">{c.match_name[0]}</div>
+                  <span className="mm-photo-cap">no shared shots yet</span>
+                </div>
               )}
 
-              <p className="eyebrow" style={{ marginBottom: 2 }}>
-                pick {top + i + 1} of {cards.length}
-                {c.km != null && <> · {c.km} km away</>}
-              </p>
+              {c.km != null && (
+                <p className="eyebrow" style={{ marginBottom: 2 }}>{c.km} km away</p>
+              )}
               <p className="mm-name">{c.match_name}</p>
               {c.persona && <p className="mm-persona">{c.persona}</p>}
 
-              <p className="mm-why-head">why you two</p>
-              <p className="mm-why">{whyProse(c.reasons)}</p>
+              {c.reasons.length > 0 && (
+                <>
+                  <p className="mm-why-head">why you two</p>
+                  <p className="mm-why">{whyProse(c.reasons)}</p>
+                </>
+              )}
 
               {c.tastes.length > 0 && (
                 <div className="chips" style={{ marginTop: 8 }}>

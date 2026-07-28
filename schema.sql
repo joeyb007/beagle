@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS intros (
   match_handle TEXT NOT NULL,               -- who they swiped on
   decision     TEXT NOT NULL,               -- 'intro' | 'pass'
   status       TEXT NOT NULL DEFAULT 'pending',  -- pending | sent
+  message      TEXT,                        -- the warm intro Beagle actually sent
   created_at   TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(handle, match_handle)
 );

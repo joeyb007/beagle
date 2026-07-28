@@ -96,9 +96,9 @@ async def test_intro_now_upserts_delivers_and_returns_text(db):
     assert chat == "dm-+1415"
     assert sent == text
     row = sqlite3.connect(db).execute(
-        "SELECT decision, status FROM intros WHERE handle='+1647' AND match_handle='+1415'"
+        "SELECT decision, status, message FROM intros WHERE handle='+1647' AND match_handle='+1415'"
     ).fetchone()
-    assert row == ("intro", "sent")
+    assert row == ("intro", "sent", text)  # the receipt: what beagle actually sent
 
 
 async def test_intro_now_failed_send_returns_none_and_marks_skipped(db):

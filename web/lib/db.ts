@@ -335,6 +335,34 @@ export function listSwipes(handle: string): SwipeRow[] {
     .all(handle) as SwipeRow[];
 }
 
+export interface IntroOutcome {
+  match_handle: string;
+  name: string;
+  status: string; // pending | sent | skipped
+  message: string | null; // the warm intro Beagle actually texted
+  created_at: string;
+}
+
+/** The receipts: right-swipes and what Beagle did about them, newest first.
+ *  Also returns how many picks were passed on (for the quiet footer count). */
+export function introOutcomes(handle: string): { intros: IntroOutcome[]; passed: number } {
+  const intros = db()
+    .prepare(
+      `SELECT i.match_handle, COALESCE(p.name, i.match_handle) AS name,
+              i.status, i.message, i.created_at
+       FROM intros i LEFT JOIN profiles p ON p.handle = i.match_handle
+       WHERE i.handle = ? AND i.decision = 'intro'
+       ORDER BY i.created_at DESC, i.id DESC`
+    )
+    .all(handle) as IntroOutcome[];
+  const passed = (
+    db()
+      .prepare("SELECT COUNT(*) AS n FROM intros WHERE handle = ? AND decision = 'pass'")
+      .get(handle) as { n: number }
+  ).n;
+  return { intros, passed };
+}
+
 export function setArtifactVisibility(planId: string, visibility: "private" | "public"): void {
   db().prepare("UPDATE artifacts SET visibility = ? WHERE plan_id = ?").run(visibility, planId);
 }

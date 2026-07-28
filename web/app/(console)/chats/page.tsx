@@ -13,10 +13,9 @@ export default function Chats() {
       <p className="eyebrow">your groups</p>
       <h1>Chats</h1>
       <p className="sub">Every group Beagle knows. Say “Hey Beagle” in any of them to start a plan.</p>
-      <p><Link className="button" href="/chats/new">+ New group chat</Link></p>
 
       {groups.length === 0 && (
-        <div className="card">No groups yet — create one and paste its chat history.</div>
+        <div className="card">No groups yet. Add Beagle to a group chat and they show up here.</div>
       )}
       {groups.map((g) => (
         <Link key={g.id} href={`/chats/${g.id}`} style={{ textDecoration: "none" }}>
