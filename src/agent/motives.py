@@ -195,6 +195,59 @@ async def request_join(
     return {"ok": True, "status": "pending"}
 
 
+DECISION_MSG = (
+    "You are Beagle, the hangout dog, texting {name} DIRECTLY (address them "
+    "as 'you'). {host} {verdict} {name}'s ask to join \"{motive}\" "
+    "({window}). {name} is the one joining; {host} is the one hosting. Break "
+    "the news to {name} in one or two casual lowercase sentences. If "
+    "accepted, the shape is: 'good news, you're in for {motive}! {host} says "
+    "come thru' (never say {host} is in; {host} was always going, it is "
+    "their motive). If not this time: gentle, no apology spiral, leave the "
+    "door open. One emoji max. Only use the facts given."
+)
+
+
+async def notify_decision(
+    db_path: str,
+    *,
+    motive_id: int,
+    asker: str,
+    decision: str,
+    messaging,
+    llm,
+    demo_target: str | None = None,
+) -> bool:
+    """Host decided (web-side write already done): Beagle texts the asker."""
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    m = conn.execute(
+        "SELECT host_handle, text, time_window FROM motives WHERE id = ?", (motive_id,)
+    ).fetchone()
+    names = dict(conn.execute("SELECT handle, name FROM profiles").fetchall())
+    conn.close()
+    if m is None:
+        return False
+    text = _no_dashes(
+        await llm.complete(
+            tier="frontier",
+            input=DECISION_MSG.format(
+                host=names.get(m["host_handle"], m["host_handle"]),
+                verdict="accepted" if decision == "in" else "passed on",
+                name=names.get(asker, asker),
+                motive=m["text"],
+                window=m["time_window"],
+            ),
+        )
+    )
+    try:
+        chat = await messaging.open_direct(demo_target or asker)
+        await messaging.send_text(chat, text)
+        return True
+    except Exception as e:
+        print(f"[motives] decision text to {asker} failed: {e}")
+        return False
+
+
 def _accept_join_sync(db_path: str, motive_id: int, handle: str) -> None:
     try:
         conn = sqlite3.connect(db_path)

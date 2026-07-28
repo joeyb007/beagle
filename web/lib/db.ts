@@ -335,32 +335,92 @@ export function listSwipes(handle: string): SwipeRow[] {
     .all(handle) as SwipeRow[];
 }
 
-export interface IntroOutcome {
-  match_handle: string;
-  name: string;
-  status: string; // pending | sent | skipped
-  message: string | null; // the warm intro Beagle actually texted
+export interface MotiveAsk {
+  motive_id: number;
+  motive_text: string;
+  asker_handle: string;
+  asker_name: string;
   created_at: string;
 }
 
-/** The receipts: right-swipes and what Beagle did about them, newest first.
- *  Also returns how many picks were passed on (for the quiet footer count). */
-export function introOutcomes(handle: string): { intros: IntroOutcome[]; passed: number } {
-  const intros = db()
+export interface IntroReply {
+  handle: string;
+  name: string;
+  last_text: string;
+}
+
+export interface JoinedMotive {
+  motive_text: string;
+  time_window: string;
+  host_name: string;
+}
+
+/** The inbox rail: only rows that need you or reward you.
+ *  asks    — pending join requests on motives YOU host (actionable)
+ *  replies — intros where the match has since texted back (the payoff)
+ *  joined  — open motives you're in (the reminder) */
+export function railItems(handle: string): {
+  asks: MotiveAsk[];
+  replies: IntroReply[];
+  joined: JoinedMotive[];
+} {
+  const asks = db()
     .prepare(
-      `SELECT i.match_handle, COALESCE(p.name, i.match_handle) AS name,
-              i.status, i.message, i.created_at
-       FROM intros i LEFT JOIN profiles p ON p.handle = i.match_handle
-       WHERE i.handle = ? AND i.decision = 'intro'
-       ORDER BY i.created_at DESC, i.id DESC`
+      `SELECT j.motive_id, m.text AS motive_text, j.handle AS asker_handle,
+              COALESCE(p.name, j.handle) AS asker_name, j.created_at
+       FROM motive_joins j
+       JOIN motives m ON m.id = j.motive_id
+       LEFT JOIN profiles p ON p.handle = j.handle
+       WHERE m.host_handle = ? AND j.status = 'pending' AND m.status = 'open'
+       ORDER BY j.created_at DESC`
     )
-    .all(handle) as IntroOutcome[];
-  const passed = (
+    .all(handle) as MotiveAsk[];
+
+  const replies = (
     db()
-      .prepare("SELECT COUNT(*) AS n FROM intros WHERE handle = ? AND decision = 'pass'")
-      .get(handle) as { n: number }
-  ).n;
-  return { intros, passed };
+      .prepare(
+        `SELECT i.match_handle AS handle, COALESCE(p.name, i.match_handle) AS name,
+                (SELECT ms.text FROM messages ms
+                 WHERE ms.handle = i.match_handle AND ms.direction = 'in'
+                   AND ms.ts >= i.created_at
+                 ORDER BY ms.id DESC LIMIT 1) AS last_text
+         FROM intros i LEFT JOIN profiles p ON p.handle = i.match_handle
+         WHERE i.handle = ? AND i.decision = 'intro' AND i.status = 'sent'`
+      )
+      .all(handle) as (IntroReply & { last_text: string | null })[]
+  ).filter((r): r is IntroReply => r.last_text != null);
+
+  const joined = db()
+    .prepare(
+      `SELECT m.text AS motive_text, m.time_window,
+              COALESCE(p.name, m.host_handle) AS host_name
+       FROM motive_joins j
+       JOIN motives m ON m.id = j.motive_id
+       LEFT JOIN profiles p ON p.handle = m.host_handle
+       WHERE j.handle = ? AND j.status = 'in' AND m.status = 'open'
+       ORDER BY j.created_at DESC`
+    )
+    .all(handle) as JoinedMotive[];
+
+  return { asks, replies, joined };
+}
+
+/** Host decides on a pending ask. Ownership-guarded: only the motive's host
+ *  can decide, and only pending rows flip. Returns whether a row changed. */
+export function decideJoin(
+  hostHandle: string,
+  motiveId: number,
+  asker: string,
+  decision: "in" | "declined"
+): boolean {
+  const res = db()
+    .prepare(
+      `UPDATE motive_joins SET status = ?
+       WHERE motive_id = ? AND handle = ? AND status = 'pending'
+         AND motive_id IN (SELECT id FROM motives WHERE host_handle = ?)`
+    )
+    .run(decision, motiveId, asker, hostHandle);
+  return res.changes > 0;
 }
 
 export function setArtifactVisibility(planId: string, visibility: "private" | "public"): void {

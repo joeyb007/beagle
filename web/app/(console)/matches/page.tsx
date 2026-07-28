@@ -1,11 +1,11 @@
 // People: Beagle's curated picks, ranked by the agent's semantic matching
 // engine (person-card embeddings + cosine KNN). Falls back to the local
 // taste-vector cosine when the agent is down, so the page always renders.
-import { introOutcomes } from "@/lib/db";
+import { railItems } from "@/lib/db";
 import { nearbyMatches, wouldLove } from "@/lib/similarity";
 import { currentUser } from "@/lib/session";
+import { ActivityRail } from "./activity-rail";
 import { DossierStack, MatchCard } from "./dossier";
-import { IntroRail } from "./intro-rail";
 import { MotivesBand } from "./motives-band";
 
 const AGENT = process.env.AGENT_URL ?? "http://127.0.0.1:8100";
@@ -70,7 +70,8 @@ export default async function Matches() {
       hook: wouldLove(user.handle, m.tastes, seed(m.handle)),
     }));
 
-  const receipts = introOutcomes(user.handle);
+  const rail = railItems(user.handle);
+  const hasRail = rail.asks.length + rail.replies.length + rail.joined.length > 0;
 
   return (
     <>
@@ -80,9 +81,9 @@ export default async function Matches() {
         Beagle sniffed out {cards.length} people near you this week. Say the word and he texts the
         warm intro for you.
       </p>
-      <div className="match-layout">
+      <div className={`match-layout${hasRail ? "" : " solo"}`}>
         <DossierStack cards={cards} />
-        <IntroRail intros={receipts.intros} passed={receipts.passed} />
+        {hasRail && <ActivityRail asks={rail.asks} replies={rail.replies} joined={rail.joined} />}
       </div>
       <MotivesBand />
     </>

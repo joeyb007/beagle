@@ -202,6 +202,30 @@ async def motives_join(req: MotiveJoinRequest) -> dict:
     )
 
 
+class MotiveDecidedRequest(BaseModel):
+    motive_id: int
+    asker: str
+    decision: str  # 'in' | 'declined'
+    host: str
+
+
+@app.post("/api/motives/decided")
+async def motives_decided(req: MotiveDecidedRequest) -> dict:
+    from src.agent.motives import notify_decision
+
+    orch = app.state.orchestrator
+    ok = await notify_decision(
+        os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
+        motive_id=req.motive_id,
+        asker=req.asker,
+        decision=req.decision,
+        messaging=orch._messaging,
+        llm=orch._llm,
+        demo_target=os.environ.get("BEAGLE_INTRO_TARGET"),
+    )
+    return {"ok": ok}
+
+
 class IntroRequest(BaseModel):
     handle: str
     match_handle: str

@@ -92,6 +92,25 @@ async def test_join_texts_host_pitch_and_auto_accepts_fake_host(db):
     assert list_motives(db, "+1647")[0]["spots_left"] == 1
 
 
+async def test_notify_decision_texts_the_asker(db):
+    from src.agent.motives import notify_decision
+
+    mid = create_motive(db, "+1111", text="tacos tn", time_window="tonight", spots=2)
+    messaging = StubMessaging()
+    llm = ScriptedLLM(default="you're in for tacos tn, ana says come thru 🐶")
+
+    ok = await notify_decision(
+        db, motive_id=mid, asker="+1647", decision="in", messaging=messaging, llm=llm
+    )
+    assert ok
+    chat, text = messaging.texts[0]
+    assert chat == "dm-+1647"  # the asker hears the verdict
+    assert "—" not in text
+    prompt = llm.calls[-1]["input"]
+    for needle in ("accepted", "Joseph", "tacos tn", "Ana R."):
+        assert needle in prompt
+
+
 async def test_join_on_real_host_stays_pending(db):
     mid = create_motive(db, "+1999", text="run club", time_window="tonight", spots=2)
     await request_join(

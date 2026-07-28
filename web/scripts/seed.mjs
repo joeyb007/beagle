@@ -285,6 +285,13 @@ motive.run("+14155550105", "bouldering intro sesh, newbies welcome", "tomorrow 7
 motive.run("+14155550107", "thrift run + listening party after", "this weekend", 2);
 motive.run("+14155550101", "taco truck tour, three stops minimum", "saturday 1pm", 3);
 motive.run("+14155550106", "karaoke basement, zero judgment", "tonight late", 4);
+// Inbox rail: Kaito asks into Joseph's motive; Sam texts back after his intro.
+db.prepare(
+  "INSERT INTO motive_joins (motive_id, handle) SELECT id, '+14155550103' FROM motives WHERE host_handle = ? AND text LIKE 'pickup volleyball%'"
+).run(JOSEPH);
+db.prepare(
+  "INSERT INTO messages (chat_id, handle, direction, text) VALUES ('dm-+14155550101', '+14155550101', 'in', 'yo joseph! beagle told me about you, sounds like we have the same taste in literally everything. tacos saturday?')"
+).run();
 
 db.prepare("DELETE FROM routing_log").run();
 const log = db.prepare(
