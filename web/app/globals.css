@@ -1034,3 +1034,15 @@ table.data { font-size: 12.5px; }
 .feed-rail { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 16px; }
 .action-strip { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
 @media (max-width: 900px) { .feed-layout { grid-template-columns: 1fr; } }
+
+/* summon card internals */
+.action-main { flex: 1; min-width: 0; }
+.group-pick.picked { border-color: var(--copper); background: color-mix(in srgb, var(--copper) 12%, var(--card)); }
+.occasion { margin-top: 10px; max-width: 420px; }
+.summon-out { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 12px; }
+.summon-out p { margin: 0; }
+.summon-trigger {
+  font-family: var(--mono); font-size: 13px; background: var(--hover);
+  border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px;
+}
+.copy-btn { margin-top: 0; padding: 6px 14px; font-size: 13px; }
