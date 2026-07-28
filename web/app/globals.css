@@ -170,6 +170,9 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
 /* the pixel beagle wanders the top edge of the ask-beagle pane */
 .keepsake-chat { position: relative; }
 .keepsake-chat .pixel-beagle { z-index: 5; pointer-events: none; }
+/* pane matches the document width; the thread leaves the dog his runway */
+.keepsake-chat .mchat:not(.compact) { max-width: none; }
+.keepsake-chat .mchat-thread { margin-bottom: 48px; }
 .keepsake h1 { font-size: 34px; }
 .keepsake .date { color: var(--copper); font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; }
 
