@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AuthGate } from "@/app/(console)/auth-gate";
 import { NavLinks } from "@/app/nav-links";
 import { Sidebar } from "@/app/sidebar";
 import { clearUser, currentUser } from "@/lib/session";
@@ -43,7 +44,9 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
       <Sidebar footer={footer}>
         <NavLinks />
       </Sidebar>
-      <main className="content">{children}</main>
+      <main className="content">
+        <AuthGate signedIn={user !== null}>{children}</AuthGate>
+      </main>
     </div>
   );
 }
