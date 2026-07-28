@@ -3,7 +3,7 @@
 // ever hit the server), amber "already on the list", and a success modal once
 // the number is actually persisted.
 import { useActionState, useEffect, useRef, useState } from "react";
-import { checkWaitlist, joinWaitlist } from "@/app/waitlist-actions";
+import { joinWaitlist } from "@/app/waitlist-actions";
 import { normalizePhone } from "@/lib/phone";
 import type { WaitlistResult } from "@/lib/waitlist";
 
@@ -13,7 +13,6 @@ export function WaitlistForm() {
     null
   );
   const [clientInvalid, setClientInvalid] = useState(false);
-  const [knownDup, setKnownDup] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -21,7 +20,7 @@ export function WaitlistForm() {
   useEffect(() => setDismissed(false), [state]);
 
   const invalid = clientInvalid || (state === "invalid" && !clientInvalid);
-  const duplicate = !clientInvalid && (knownDup || state === "duplicate");
+  const duplicate = !clientInvalid && state === "duplicate";
   const success = !clientInvalid && state === "added" && !dismissed;
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -32,14 +31,6 @@ export function WaitlistForm() {
       return;
     }
     setClientInvalid(false);
-  }
-
-  // blur-time check: once you leave the box with a valid number, ask the
-  // server whether it's already on the list and slide the notice in
-  async function onBlur(e: React.FocusEvent<HTMLInputElement>) {
-    const value = e.target.value;
-    if (!normalizePhone(value)) return;
-    setKnownDup(await checkWaitlist(value));
   }
 
   const stateClass = invalid ? " field-invalid" : duplicate ? " field-dup" : "";
@@ -55,11 +46,7 @@ export function WaitlistForm() {
           placeholder="(555) 123-4567"
           aria-label="Phone number"
           aria-invalid={invalid || undefined}
-          onChange={() => {
-            setClientInvalid(false);
-            setKnownDup(false);
-          }}
-          onBlur={onBlur}
+          onChange={() => setClientInvalid(false)}
         />
         <button className="primary" type="submit" disabled={pending}>
           {pending ? "Joining…" : "Join the waitlist"}
