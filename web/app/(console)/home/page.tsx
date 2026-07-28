@@ -9,12 +9,14 @@ import {
   groupsFor,
   listProfiles,
   photoMemories,
+  upcomingDetail,
   upcomingFor,
 } from "@/lib/db";
 import { currentUser } from "@/lib/session";
 import { StringStrip } from "@/app/string-strip";
 import { HeatCrew, HeatPerson, WeekHeat } from "./week-heat";
 import { PlannerChat } from "./planner-chat";
+import { UpNextCard } from "./up-next-card";
 import { YouCard } from "./you-card";
 
 function daysUntil(iso: string): string {
@@ -28,6 +30,7 @@ export default async function Home() {
 
   const groups = groupsFor(user.handle);
   const upNext = upcomingFor(user.handle);
+  const upDetail = upcomingDetail(user.handle);
   const memories = photoMemories(user.handle);
   const byHandle = new Map(listProfiles().map((p) => [p.handle, p]));
   const synced = googleSyncedHandles();
@@ -74,23 +77,16 @@ export default async function Home() {
         <PlannerChat handle={user.handle} brief={brief} chips={chips} />
 
         <div className="home-rail">
-          <div className="card widget">
-            <h2 style={{ marginTop: 0 }}>Up next</h2>
-            {upNext ? (
-              <>
-                <p className="widget-big">{upNext.place}</p>
-                <p className="muted" style={{ margin: "2px 0 8px" }}>
-                  {daysUntil(upNext.time)}
-                  {upNext.others.length > 0 && <> · with {upNext.others.join(" & ")}</>}
-                </p>
-                <Link href={`/hangouts/${upNext.plan_id}`}>see the plan →</Link>
-              </>
-            ) : (
+          {upDetail ? (
+            <UpNextCard plan={upDetail} />
+          ) : (
+            <div className="card widget">
+              <h2 style={{ marginTop: 0 }}>Up next</h2>
               <p className="muted" style={{ marginBottom: 0 }}>
                 nothing locked. ask beagle to get one moving
               </p>
-            )}
-          </div>
+            </div>
+          )}
 
           <YouCard
             you={{

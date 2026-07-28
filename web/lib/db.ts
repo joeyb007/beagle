@@ -420,3 +420,50 @@ export function googleSyncedHandles(): Set<string> {
     return new Set();
   }
 }
+
+// ---------------------------------------------- up-next: full event detail
+
+export interface UpNextDetail {
+  plan_id: string;
+  place: string;
+  time: string;
+  groupName: string | null;
+  roster: { name: string; going: boolean }[];
+}
+
+/** The next locked hangout for a handle, with per-member going/out status
+ * relative to the group chat it came from. */
+export function upcomingDetail(handle: string): UpNextDetail | null {
+  const conn = db();
+  const rows = conn
+    .prepare(
+      "SELECT plan_id, place, time, attendees, group_id FROM artifacts WHERE time > datetime('now') ORDER BY time ASC"
+    )
+    .all() as { plan_id: string; place: string; time: string; attendees: string; group_id: number | null }[];
+  const mine = rows.find((r) => (JSON.parse(r.attendees) as string[]).includes(handle));
+  if (!mine) return null;
+
+  const going = new Set(JSON.parse(mine.attendees) as string[]);
+  const names = nameMap(conn);
+
+  let groupName: string | null = null;
+  let members: string[] = [...going];
+  if (mine.group_id != null) {
+    const g = conn
+      .prepare("SELECT name, members FROM groups WHERE id = ?")
+      .get(mine.group_id) as { name: string; members: string } | undefined;
+    if (g) {
+      groupName = g.name;
+      members = JSON.parse(g.members) as string[];
+      for (const h of going) if (!members.includes(h)) members.push(h);
+    }
+  }
+
+  return {
+    plan_id: mine.plan_id,
+    place: (JSON.parse(mine.place) as { name: string }).name,
+    time: mine.time,
+    groupName,
+    roster: members.map((h) => ({ name: names.get(h) ?? h, going: going.has(h) })),
+  };
+}
