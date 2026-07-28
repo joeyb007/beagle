@@ -115,20 +115,17 @@ export function WeekHeat({ people, crews }: { people: HeatPerson[]; crews: HeatC
     <section className="card avail">
       <div className="avail-head">
         <h2>When everyone&apos;s free</h2>
-        <select
-          className="crew-select"
+        <CrewDropdown
           value={filter === "all" ? "all" : String(filter)}
-          onChange={(e) => {
-            setFilter(e.target.value === "all" ? "all" : Number(e.target.value));
+          options={[
+            { key: "all", label: "everyone" },
+            ...crews.map((c) => ({ key: String(c.id), label: c.name })),
+          ]}
+          onPick={(k) => {
+            setFilter(k === "all" ? "all" : Number(k));
             setPinned(null);
           }}
-          aria-label="Which people"
-        >
-          <option value="all">everyone</option>
-          {crews.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
+        />
       </div>
 
       <div className="week-grid" ref={gridRef} role="grid" aria-label="Friend availability by hour">
@@ -218,5 +215,63 @@ function WeekRow({
         );
       })}
     </>
+  );
+}
+
+function CrewDropdown({
+  value,
+  options,
+  onPick,
+}: {
+  value: string;
+  options: { key: string; label: string }[];
+  onPick: (key: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function away(e: MouseEvent) {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function esc(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", away);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", away);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [open]);
+
+  const current = options.find((o) => o.key === value);
+
+  return (
+    <div className="dd" ref={ref}>
+      <button type="button" className="dd-btn" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        {current?.label ?? "everyone"}
+        <span className={`dd-chev${open ? " up" : ""}`} aria-hidden>▾</span>
+      </button>
+      <div className={`dd-menu${open ? " open" : ""}`} role="listbox">
+        {options.map((o) => (
+          <button
+            key={o.key}
+            type="button"
+            role="option"
+            aria-selected={o.key === value}
+            className={`dd-opt${o.key === value ? " cur" : ""}`}
+            onClick={() => {
+              onPick(o.key);
+              setTimeout(() => setOpen(false), 150); // let the pick animation land
+            }}
+          >
+            <span className="dd-dot" aria-hidden />
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
