@@ -65,12 +65,19 @@ export function LoginForm() {
       {known.kind === "returning" && (
         <p className="login-welcome notice-in">welcome back, {known.name} 🐶</p>
       )}
-      {known.kind === "new" && (
-        <label className="notice-in">
-          Name <span className="muted">(first sign-in only)</span>
-          <input type="text" name="name" placeholder="what your friends call you" />
-        </label>
-      )}
+      <div className={`reveal${known.kind === "new" ? " open" : ""}`} aria-hidden={known.kind !== "new"}>
+        <div className="reveal-inner">
+          <label>
+            Name <span className="muted">(first sign-in only)</span>
+            <input
+              type="text"
+              name="name"
+              placeholder="what your friends call you"
+              tabIndex={known.kind === "new" ? 0 : -1}
+            />
+          </label>
+        </div>
+      </div>
       {invalid && (
         <p className="login-err notice-in">that number doesn&apos;t look right. Try again?</p>
       )}
