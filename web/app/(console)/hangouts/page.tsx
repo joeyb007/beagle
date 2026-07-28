@@ -55,9 +55,12 @@ export default function Memories() {
         <div className="card">No hangouts yet. Say “Hey Beagle” in a group chat to make one.</div>
       )}
       <div className="memory-grid">
-        {artifacts.map((a) => (
+        {artifacts.map((a) => {
+          const isUpcoming = new Date(a.time).getTime() > Date.now();
+          return (
           <div key={a.plan_id} className="memory-card">
             <div className="memory-cover-zone">
+              {isUpcoming && <span className="memory-upcoming">upcoming</span>}
               {a.photos.length > 0 ? (
                 <PolaroidStack photos={a.photos} alt={`photos from ${a.place.name}`} />
               ) : (
@@ -69,14 +72,13 @@ export default function Memories() {
             </div>
             <div className="memory-body">
               <Link href={`/hangouts/${a.plan_id}`} className="memory-title">{a.place.name}</Link>
-              <div className="muted">
-                {fmt(a.time)} · {a.attendees.length} went
+              <div className={isUpcoming ? "upcoming" : "muted"}>
+                {fmt(a.time)} · {isUpcoming ? `${a.attendees.length} going` : `${a.attendees.length} went`}
                 {a.playlist.length > 0 ? ` · ${a.playlist.length} tracks` : ""}
                 {a.group_id != null && crewName.get(a.group_id) && (
                   <> · w/ {crewName.get(a.group_id)}</>
                 )}
               </div>
-              {a.note && <div className="memory-note">“{a.note}”</div>}
               <div className="vis-row">
                 <form action={toggleVisibility}>
                   <input type="hidden" name="plan_id" value={a.plan_id} />
@@ -99,7 +101,8 @@ export default function Memories() {
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </>
   );
