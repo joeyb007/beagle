@@ -1,8 +1,11 @@
-// Memories: every hangout artifact — keepsake gallery with private/public.
+// Memories: every hangout artifact — keepsake gallery in the product's own
+// photo language: flip-through polaroid stacks on paper, crew origin, and
+// visibility as a single toggle chip.
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
+import { PolaroidStack } from "@/components/polaroid-stack";
 import { ArtifactStore } from "@/lib/artifact-store";
-import { setArtifactVisibility } from "@/lib/db";
+import { listGroupsWithHangouts, setArtifactVisibility } from "@/lib/db";
 
 async function toggleVisibility(formData: FormData) {
   "use server";
@@ -15,6 +18,7 @@ async function toggleVisibility(formData: FormData) {
 
 export default function Memories() {
   const artifacts = new ArtifactStore().list();
+  const crewName = new Map(listGroupsWithHangouts().map((g) => [g.id, g.name]));
   const fmt = (t: string) =>
     new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 
@@ -30,31 +34,45 @@ export default function Memories() {
       <div className="memory-grid">
         {artifacts.map((a) => (
           <div key={a.plan_id} className="memory-card">
-            <Link href={`/hangouts/${a.plan_id}`} className="memory-cover-link">
-              {a.photos[0] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img className="memory-cover" src={a.photos[0]} alt="" />
+            <div className="memory-cover-zone">
+              {a.photos.length > 0 ? (
+                <PolaroidStack photos={a.photos} alt={`photos from ${a.place.name}`} />
               ) : (
-                <div className="memory-cover memory-cover-empty">🎟️</div>
+                <span className="memory-noshots string-print">
+                  <span className="mm-mono">{a.place.name[0]}</span>
+                  <span className="mm-photo-cap">no shots yet, just vibes</span>
+                </span>
               )}
-            </Link>
+            </div>
             <div className="memory-body">
               <Link href={`/hangouts/${a.plan_id}`} className="memory-title">{a.place.name}</Link>
               <div className="muted">
                 {fmt(a.time)} · {a.attendees.length} went
                 {a.playlist.length > 0 ? ` · ${a.playlist.length} tracks` : ""}
+                {a.group_id != null && crewName.get(a.group_id) && (
+                  <> · w/ {crewName.get(a.group_id)}</>
+                )}
               </div>
               {a.note && <div className="memory-note">“{a.note}”</div>}
-              <form action={toggleVisibility} className="vis-row">
-                <input type="hidden" name="plan_id" value={a.plan_id} />
-                <input type="hidden" name="to" value={a.visibility === "public" ? "private" : "public"} />
-                <span className={`chip ${a.visibility === "public" ? "chip-public" : "chip-private"}`}>
-                  {a.visibility}
-                </span>
-                <button className="linkish" type="submit">
-                  make {a.visibility === "public" ? "private" : "public"}
-                </button>
-              </form>
+              <div className="vis-row">
+                <form action={toggleVisibility}>
+                  <input type="hidden" name="plan_id" value={a.plan_id} />
+                  <input type="hidden" name="to" value={a.visibility === "public" ? "private" : "public"} />
+                  <button
+                    type="submit"
+                    className={`chip vis-chip ${a.visibility === "public" ? "chip-public" : "chip-private"}`}
+                    title={`make ${a.visibility === "public" ? "private" : "public"}`}
+                  >
+                    <span className="vis-now">{a.visibility}</span>
+                    <span className="vis-swap">
+                      make {a.visibility === "public" ? "private" : "public"}
+                    </span>
+                  </button>
+                </form>
+                <Link href={`/hangouts/${a.plan_id}`} className="memory-open">
+                  open the keepsake →
+                </Link>
+              </div>
             </div>
           </div>
         ))}

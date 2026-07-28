@@ -291,16 +291,49 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
 .thumb { width: 64px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
 
 /* ---- memories ---- */
-.memory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; }
-.memory-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-.memory-cover-link { display: block; }
-.memory-cover { width: 100%; height: 140px; object-fit: cover; display: block; }
-.memory-cover-empty { display: flex; align-items: center; justify-content: center; font-size: 40px; background: var(--keep-paper); }
-.memory-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; }
+.memory-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 18px; grid-auto-rows: 1fr;
+}
+.memory-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+/* the cover is the product's photo language: polaroids on keepsake paper */
+.memory-cover-zone {
+  height: 172px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--keep-paper, #f6f1e7);
+  border-bottom: 1px solid var(--line);
+}
+.memory-cover-zone .pstack { width: 150px; height: 150px; }
+.memory-cover-zone .pstack-card { width: 124px; left: 8px; top: 8px; padding: 6px 6px 18px; }
+.memory-cover-zone .pstack-card img { height: 96px; }
+.memory-cover-zone .pstack-card.out { transform: translateY(-60px) rotate(7deg) !important; }
+.memory-noshots {
+  position: relative; margin: 0; transform: rotate(-2.5deg); display: block;
+}
+.memory-noshots .mm-mono { width: 124px; height: 96px; font-size: 40px; }
+.memory-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .memory-title { font-family: var(--serif); font-size: 18px; font-weight: 600; color: var(--ink); text-decoration: none; }
-.memory-note { font-family: var(--serif); font-style: italic; font-size: 13px; color: var(--copper); }
-.memory-note.big { font-size: 18px; }
-.vis-row { display: flex; align-items: center; gap: 10px; margin-top: 2px; }
+.memory-note {
+  font-family: var(--serif); font-style: italic; font-size: 13px; color: var(--copper);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.memory-note.big { font-size: 18px; display: block; -webkit-line-clamp: unset; }
+.vis-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 8px; }
+/* one chip, two faces: resting shows the state, hover shows the flip */
+.vis-chip { border: 0; cursor: pointer; font: inherit; font-size: 11px; font-weight: 600; padding: 2px 8px; }
+.vis-chip .vis-swap { display: none; }
+.vis-chip:hover .vis-now { display: none; }
+.vis-chip:hover .vis-swap { display: inline; }
+.memory-open { font-size: 12.5px; color: var(--blue); text-decoration: none; position: relative; padding-bottom: 1px; }
+.memory-open::after {
+  content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 1.5px;
+  background: var(--blue); transform: scaleX(0); transform-origin: left center;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.memory-open:hover::after { transform: scaleX(1); }
 
 @media (max-width: 720px) {
   .string-wrap { margin: 8px -20px 0; }

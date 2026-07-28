@@ -191,7 +191,7 @@ A("plan-canyon",
   "four hours of driving, zero plans, best day of the spring"),
 
 A("plan-falls-hike",
-  { name: "Cascade Falls hike", area: "Marin", note: "max's pick — 'easy 5 miler' (it was 9)" },
+  { name: "Cascade Falls hike", area: "Marin", note: "max's pick, 'easy 5 miler' (it was 9)" },
   "2026-06-13T08:30:00", [JOSEPH, MAX],
   [
     { title: "Harvest Moon", artist: "Neil Young" },
@@ -199,7 +199,7 @@ A("plan-falls-hike",
   ],
   [photo("waterfall-trail"), photo("alpine-lake"), photo("summit-scramble")],
   2, "public",
-  "'easy five miles' — max, at mile eight, still lying"),
+  "'easy five miles', max said. at mile eight he was still lying"),
 
 A("plan-harbor",
   { name: "Harbor night walk", area: "Embarcadero", note: "post-dinner drift that became a night" },
@@ -235,7 +235,7 @@ const photoNotes = {
     "note:1": "anthony rated the day 10/10 from the ground",
   },
   "plan-aurora": {
-    "note:1": "'it's just clouds' — madhav, four seconds too early",
+    "note:1": "'it's just clouds', said madhav, four seconds too early",
   },
   "plan-canyon": {
     "/uploads/river-lookout.jpg": "the pull-over that saved the whole day",
