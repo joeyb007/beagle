@@ -357,23 +357,6 @@ export function listRoutingLog(): RoutingRow[] {
     .all() as RoutingRow[];
 }
 
-// ------------------------------------------------------------- waitlist
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// Landing-page waitlist. Idempotent; creates the table on demand so a
-// pre-existing shared data.sqlite (made before this schema change) still works.
-export function addWaitlistEmail(raw: string): boolean {
-  const email = raw.trim().toLowerCase();
-  // 254 = RFC 5321 ceiling; caps stored size on a public write path
-  if (email.length > 254 || !EMAIL_RE.test(email)) return false;
-  const conn = db();
-  conn.exec(
-    "CREATE TABLE IF NOT EXISTS waitlist (email TEXT PRIMARY KEY, ts TEXT NOT NULL DEFAULT (datetime('now')))"
-  );
-  conn.prepare("INSERT OR IGNORE INTO waitlist (email) VALUES (?)").run(email);
-  return true;
-}
 
 // Provision-on-sign-in: the number IS the account. Creates a bare profile the
 // first time a handle appears; upgrades a placeholder name once a real one is

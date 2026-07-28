@@ -116,9 +116,10 @@ CREATE TABLE IF NOT EXISTS group_messages (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_groups_chat_id ON groups(chat_id);
 
--- Waitlist signups from the public landing page. Web-only; agent never reads it.
+-- Waitlist signups from the public landing page (E.164 phone numbers —
+-- the product's primary key). Web-only; agent never reads it.
 CREATE TABLE IF NOT EXISTS waitlist (
-  email TEXT PRIMARY KEY,
+  phone TEXT PRIMARY KEY,
   ts    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

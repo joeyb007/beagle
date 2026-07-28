@@ -868,3 +868,28 @@ table.data { font-size: 12.5px; }
 .login-form input { width: 100%; }
 .login-form .primary { margin-top: 4px; }
 .login-err { color: var(--copper); font-size: 13px; margin: 0; }
+
+/* ---- waitlist input + button motion ---- */
+.waitlist input,
+.waitlist .primary {
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
+  will-change: transform;
+}
+.waitlist input:hover { border-color: var(--copper); }
+.waitlist input:focus {
+  outline: none;
+  border-color: var(--copper);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--copper) 18%, transparent),
+    0 6px 18px rgba(0, 0, 0, 0.06);
+}
+.waitlist .primary:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+.waitlist .primary:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition-duration: 70ms;
+}

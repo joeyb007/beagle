@@ -1,54 +1,55 @@
-// Waitlist writes from the public landing page.
-import { mkdtempSync, readFileSync } from "node:fs";
+// Waitlist writes from the public landing page — phone-keyed, unique, with a
+// count for the operator. Sqlite driver (the default) under test.
+import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import Database from "better-sqlite3";
 import { beforeEach, expect, test } from "vitest";
 
-import { addWaitlistEmail } from "../lib/db";
+import { addWaitlistPhone, waitlistCount } from "../lib/waitlist";
 
 let dbPath: string;
 
 beforeEach(() => {
-  dbPath = join(mkdtempSync(join(tmpdir(), "beagle-")), "data.sqlite");
-  const schema = readFileSync(join(__dirname, "../../schema.sql"), "utf8");
-  const db = new Database(dbPath);
-  db.exec(schema);
-  db.close();
+  dbPath = join(mkdtempSync(join(tmpdir(), "beagle-wl-")), "data.sqlite");
   process.env.DATABASE_PATH = dbPath;
 });
 
-function rows(): { email: string }[] {
-  return new Database(dbPath).prepare("SELECT email FROM waitlist").all() as { email: string }[];
+function rows(): { phone: string }[] {
+  return new Database(dbPath).prepare("SELECT phone FROM waitlist").all() as { phone: string }[];
 }
 
-test("valid email is normalized and inserted", () => {
-  expect(addWaitlistEmail("  Maya@Example.COM ")).toBe(true);
-  expect(rows()).toEqual([{ email: "maya@example.com" }]);
+test("numbers normalize to E.164 and stay unique", async () => {
+  expect(await addWaitlistPhone("6475550132")).toBe(true);
+  expect(await addWaitlistPhone("(647) 555-0132")).toBe(true); // same number, other format
+  expect(await addWaitlistPhone("+1 647 555 0132")).toBe(true);
+  expect(rows()).toEqual([{ phone: "+16475550132" }]);
+  expect(await waitlistCount()).toBe(1);
 });
 
-test("duplicate email is idempotent success", () => {
-  expect(addWaitlistEmail("maya@example.com")).toBe(true);
-  expect(addWaitlistEmail("maya@example.com")).toBe(true);
-  expect(rows()).toHaveLength(1);
+test("garbage input is rejected without writing", async () => {
+  expect(await addWaitlistPhone("not a number")).toBe(false);
+  expect(await addWaitlistPhone("12345")).toBe(false);
+  expect(await waitlistCount()).toBe(0);
 });
 
-test("junk email is rejected and not stored", () => {
-  expect(addWaitlistEmail("not-an-email")).toBe(false);
-  expect(addWaitlistEmail("")).toBe(false);
-  expect(rows()).toHaveLength(0);
+test("counts distinct numbers", async () => {
+  await addWaitlistPhone("6475550132");
+  await addWaitlistPhone("9295550252");
+  await addWaitlistPhone("6475550132");
+  expect(await waitlistCount()).toBe(2);
 });
 
-test("works even against a pre-waitlist database (table created on demand)", () => {
+test("migrates a legacy email-keyed table out of the way", async () => {
   const db = new Database(dbPath);
-  db.exec("DROP TABLE waitlist");
+  db.exec("CREATE TABLE waitlist (email TEXT PRIMARY KEY, ts TEXT)");
+  db.prepare("INSERT INTO waitlist (email) VALUES (?)").run("old@example.com");
   db.close();
-  expect(addWaitlistEmail("max@example.com")).toBe(true);
-  expect(rows()).toEqual([{ email: "max@example.com" }]);
-});
 
-test("oversized email is rejected (public write path cap)", () => {
-  const huge = "a".repeat(300) + "@example.com";
-  expect(addWaitlistEmail(huge)).toBe(false);
-  expect(rows()).toHaveLength(0);
+  expect(await addWaitlistPhone("6475550132")).toBe(true);
+  expect(rows()).toEqual([{ phone: "+16475550132" }]);
+  const legacy = new Database(dbPath)
+    .prepare("SELECT email FROM waitlist_email_legacy")
+    .all() as { email: string }[];
+  expect(legacy).toEqual([{ email: "old@example.com" }]); // nothing lost
 });

@@ -2,11 +2,11 @@
 import { redirect } from "next/navigation";
 import { AsciiField } from "@/components/ascii-field";
 import { PixelBeagle } from "@/components/pixel-beagle";
-import { addWaitlistEmail } from "@/lib/db";
+import { addWaitlistPhone } from "@/lib/waitlist";
 
 async function join(formData: FormData) {
   "use server";
-  const ok = addWaitlistEmail(String(formData.get("email") ?? ""));
+  const ok = await addWaitlistPhone(String(formData.get("phone") ?? ""));
   redirect(ok ? "/?joined=1" : "/?joined=0");
 }
 
@@ -19,7 +19,7 @@ export default async function Landing({
   return (
     <div className="landing">
       <AsciiField className="landing-field" rows={44} cols={160} />
-      <PixelBeagle targetIds={["waitlist-email", "hero-title"]} />
+      <PixelBeagle targetIds={["waitlist-phone", "hero-title"]} />
       <div className="landing-inner">
         <div className="kicker">Beagle</div>
         <h1 id="hero-title">The friend who knows your group</h1>
@@ -32,13 +32,12 @@ export default async function Landing({
         ) : (
           <>
             <form action={join} className="waitlist">
-              <input id="waitlist-email" type="email" name="email" required placeholder="you@example.com" aria-label="Email address" />
+              <input id="waitlist-phone" type="tel" name="phone" required placeholder="(647) 555-0132" aria-label="Phone number" />
               <button className="primary" type="submit">Join the waitlist</button>
             </form>
-            {joined === "0" && <p className="joined err">that email didn't look right — try again?</p>}
+            {joined === "0" && <p className="joined err">that number didn&apos;t look right — try again?</p>}
           </>
         )}
-        <a className="console-link" href="/home">operator console →</a>
       </div>
     </div>
   );

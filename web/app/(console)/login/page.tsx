@@ -4,16 +4,8 @@
 // the social-network shape (users keyed by number) without any auth stack.
 import { redirect } from "next/navigation";
 import { ensureProfile } from "@/lib/db";
+import { normalizePhone } from "@/lib/phone";
 import { setUser } from "@/lib/session";
-
-// "6475550132" / "(647) 555-0132" / "+1 647..." -> "+16475550132"
-function normalizePhone(raw: string): string | null {
-  const digits = raw.replace(/\D/g, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  if (raw.trim().startsWith("+") && digits.length >= 8) return `+${digits}`;
-  return null;
-}
 
 async function signIn(formData: FormData) {
   "use server";
