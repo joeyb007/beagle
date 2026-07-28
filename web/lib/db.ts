@@ -375,3 +375,36 @@ export function ensureProfile(handle: string, name?: string): void {
     )
     .run(handle, name ?? handle, JSON.stringify({ name: name ?? handle }));
 }
+
+// ------------------------------------------------- home mockups: activity + groups
+
+export interface ActivityRow {
+  chat_id: string;
+  handle: string;
+  direction: "in" | "out";
+  text: string;
+  ts: string;
+}
+
+/** Latest agent traffic (the message log) — "what Beagle's been up to". */
+export function recentActivity(limit = 10): ActivityRow[] {
+  try {
+    return db()
+      .prepare("SELECT chat_id, handle, direction, text, ts FROM messages ORDER BY id DESC LIMIT ?")
+      .all(limit) as ActivityRow[];
+  } catch {
+    return []; // messages table may not exist on an old db
+  }
+}
+
+/** Groups this handle belongs to, with a staleness read for the pulse dot. */
+export function groupsFor(handle: string): (GroupRow & { daysSince: number | null })[] {
+  return listGroupsWithHangouts()
+    .filter((g) => g.members.includes(handle))
+    .map((g) => ({
+      ...g,
+      daysSince: g.lastHangout
+        ? Math.floor((Date.now() - new Date(g.lastHangout.time).getTime()) / 86400000)
+        : null,
+    }));
+}
