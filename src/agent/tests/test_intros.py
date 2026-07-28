@@ -85,6 +85,31 @@ async def test_pass_rows_are_never_texted(db):
     assert messaging.texts == []
 
 
+async def test_intro_now_upserts_delivers_and_returns_text(db):
+    worker, messaging, _ = make_worker(db)
+
+    text = await worker.intro_now("+1647", "+1415")
+
+    assert text is not None and "beagle" in text
+    assert "—" not in text  # dash strip applies to drafted intros
+    chat, sent = messaging.texts[0]
+    assert chat == "dm-+1415"
+    assert sent == text
+    row = sqlite3.connect(db).execute(
+        "SELECT decision, status FROM intros WHERE handle='+1647' AND match_handle='+1415'"
+    ).fetchone()
+    assert row == ("intro", "sent")
+
+
+async def test_intro_now_failed_send_returns_none_and_marks_skipped(db):
+    worker, messaging, _ = make_worker(db)
+    messaging.fail_handles.add("+1415")
+
+    assert await worker.intro_now("+1647", "+1415") is None
+    status = sqlite3.connect(db).execute("SELECT status FROM intros").fetchone()[0]
+    assert status == "skipped"
+
+
 async def test_failed_send_marks_skipped_not_pending_forever(db):
     sqlite3.connect(db).execute(
         "INSERT INTO intros (handle, match_handle, decision) VALUES ('+1647', '+1999', 'intro')"

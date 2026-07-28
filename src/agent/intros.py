@@ -6,6 +6,7 @@ import json
 import sqlite3
 from datetime import datetime
 
+from src.agent.planner_chat import _no_dashes
 from src.contracts import LLMRouter, MessagingPort
 
 INTRO_PROMPT = (
@@ -72,7 +73,32 @@ class IntroWorker:
         conn.close()
         return len(rows)
 
-    async def _deliver(self, conn: sqlite3.Connection, row: sqlite3.Row) -> bool:
+    async def intro_now(self, handle: str, match_handle: str) -> str | None:
+        """Immediate path for the make_intro tool / API: upsert the intro row,
+        deliver right away, return the drafted text (None if delivery failed)."""
+        conn = sqlite3.connect(self._db_path)
+        conn.row_factory = sqlite3.Row
+        conn.execute(
+            "INSERT INTO intros (handle, match_handle, decision) VALUES (?, ?, 'intro')"
+            " ON CONFLICT(handle, match_handle) DO UPDATE SET decision = 'intro',"
+            " status = 'pending'",
+            (handle, match_handle),
+        )
+        conn.commit()
+        row = conn.execute(
+            "SELECT id, handle, match_handle FROM intros WHERE handle = ? AND match_handle = ?",
+            (handle, match_handle),
+        ).fetchone()
+        text = await self._deliver(conn, row)
+        conn.execute(
+            "UPDATE intros SET status = ? WHERE id = ?",
+            ("sent" if text else "skipped", row["id"]),
+        )
+        conn.commit()
+        conn.close()
+        return text
+
+    async def _deliver(self, conn: sqlite3.Connection, row: sqlite3.Row) -> str | None:
         def profile(handle: str) -> tuple[str, str]:
             p = conn.execute(
                 "SELECT name, json FROM profiles WHERE handle = ?", (handle,)
@@ -82,22 +108,24 @@ class IntroWorker:
         name, prof = profile(row["handle"])
         match_name, match_prof = profile(row["match_handle"])
 
-        text = await self._llm.complete(
-            tier="frontier",
-            input=INTRO_PROMPT.format(
-                name=name,
-                handle=row["handle"],
-                profile=prof,
-                match_name=match_name,
-                match_profile=match_prof,
-            ),
+        text = _no_dashes(
+            await self._llm.complete(
+                tier="frontier",
+                input=INTRO_PROMPT.format(
+                    name=name,
+                    handle=row["handle"],
+                    profile=prof,
+                    match_name=match_name,
+                    match_profile=match_prof,
+                ),
+            )
         )
         target = self._demo_target or row["match_handle"]
         try:
             chat = await self._messaging.open_direct(target)
             await self._messaging.send_text(chat, text)
             print(f"[intros] warm intro sent: {name} -> {match_name}")
-            return True
+            return text
         except Exception as e:
             print(f"[intros] intro to {row['match_handle']} failed: {e}")
-            return False
+            return None

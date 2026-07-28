@@ -71,6 +71,7 @@ async def lifespan(app: FastAPI):
     app.state.outreach = outreach
     app.state.orchestrator = orchestrator
     app.state.messaging = messaging
+    app.state.intro_worker = intros
     print("[beagle] agent listening — say 'Hey Beagle' in the group chat")
     yield
     spark_task.cancel()
@@ -118,6 +119,39 @@ async def profile_chat(req: ProfileChatRequest) -> dict:
         history=req.history,
     )
     return {"reply": reply}
+
+
+class MatchesRequest(BaseModel):
+    handle: str
+    query: str | None = None
+    free_day: int | None = None
+    limit: int = 4
+
+
+@app.post("/api/matches")
+async def matches(req: MatchesRequest) -> dict:
+    from src.agent.matching import find_matches
+
+    return {
+        "matches": find_matches(
+            os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
+            req.handle,
+            query=req.query,
+            free_day=req.free_day,
+            limit=req.limit,
+        )
+    }
+
+
+class IntroRequest(BaseModel):
+    handle: str
+    match_handle: str
+
+
+@app.post("/api/intro")
+async def intro(req: IntroRequest) -> dict:
+    text = await app.state.intro_worker.intro_now(req.handle, req.match_handle)
+    return {"ok": text is not None, "message": text}
 
 
 class PlannerChatRequest(BaseModel):
