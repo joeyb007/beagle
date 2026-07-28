@@ -1137,7 +1137,20 @@ table.data { font-size: 12.5px; }
   position: fixed; z-index: 70; width: 220px;
   background: var(--card); border: 1px solid var(--line); border-radius: 10px;
   box-shadow: 0 12px 34px rgb(29 28 36 / 0.18); padding: 12px 14px;
+  transform: translateY(-50%);
+  animation: heat-pop-in 200ms ease both;
 }
+.heat-pop.left { transform: translate(-100%, -50%); }
+.heat-pop::before {
+  content: ""; position: absolute; top: 50%; width: 12px; height: 12px;
+  background: var(--card); border: 1px solid var(--line);
+  transform: translateY(-50%) rotate(45deg);
+}
+.heat-pop.right::before { left: -7px; border-right: 0; border-top: 0; }
+.heat-pop.left::before { right: -7px; border-left: 0; border-bottom: 0; }
+@keyframes heat-pop-in { from { opacity: 0; } to { opacity: 1; } }
+.heat-pop-head { position: sticky; top: 0; }
+.heat-pop-list { max-height: 170px; overflow-y: auto; padding-right: 4px; }
 .heat-pop-when { margin: 0; font-size: 12px; color: var(--muted); text-transform: capitalize; }
 .heat-pop-count { margin: 2px 0 8px; font-weight: 600; }
 .heat-pop ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
@@ -1147,8 +1160,4 @@ table.data { font-size: 12.5px; }
   box-shadow: 0 0 0 3px rgb(52 199 89 / 0.18);
 }
 .heat-pop-empty { margin: 0; font-size: 13px; }
-.heat-pop-close {
-  position: absolute; top: 6px; right: 10px; background: none; border: 0;
-  font-size: 16px; color: var(--muted); cursor: pointer; padding: 2px;
-}
-.heat-pop-close:hover { color: var(--ink); }
+

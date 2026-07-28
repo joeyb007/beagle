@@ -36,8 +36,9 @@ function hourLabel(h: number): string {
 export function WeekHeat({ people, crews }: { people: HeatPerson[]; crews: HeatCrew[] }) {
   const [filter, setFilter] = useState<number | "all">("all");
   const [drag, setDrag] = useState<Span | null>(null);
-  const [pinned, setPinned] = useState<(Span & { x: number; y: number }) | null>(null);
+  const [pinned, setPinned] = useState<(Span & { x: number; y: number; side: "right" | "left" }) | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
 
   const pool = useMemo(() => {
     if (filter === "all") return people;
@@ -56,23 +57,26 @@ export function WeekHeat({ people, crews }: { people: HeatPerson[]; crews: HeatC
   const hours = Array.from({ length: LAST_HOUR - FIRST_HOUR }, (_, i) => FIRST_HOUR + i);
   const max = Math.max(1, ...hours.flatMap((h) => DAYS.map((_, d) => countAt(d, h))));
 
-  // finalize the drag anywhere on the page
+  // finalize the drag anywhere on the page; tooltip anchors to the span's middle
   useEffect(() => {
     if (!drag) return;
     function up() {
       setDrag((d) => {
         if (d && gridRef.current) {
-          const lastCell = gridRef.current.querySelector<HTMLElement>(
-            `[data-day="${d.day}"][data-hour="${Math.max(d.start, d.end)}"]`
-          );
-          const grid = gridRef.current.getBoundingClientRect();
-          const r = lastCell?.getBoundingClientRect();
-          if (r) {
-            const rightSpace = grid.right - r.right;
+          const lo = Math.min(d.start, d.end);
+          const hi = Math.max(d.start, d.end);
+          const cell = (h: number) =>
+            gridRef.current!.querySelector<HTMLElement>(`[data-day="${d.day}"][data-hour="${h}"]`);
+          const first = cell(lo)?.getBoundingClientRect();
+          const last = cell(hi)?.getBoundingClientRect();
+          if (first && last) {
+            const midY = (first.top + last.bottom) / 2;
+            const side = window.innerWidth - last.right > 260 ? "right" : "left";
             setPinned({
               ...d,
-              x: rightSpace > 240 ? r.right + 10 : r.left - 230,
-              y: Math.max(r.top - 8, grid.top),
+              x: side === "right" ? last.right + 14 : first.left - 14,
+              y: midY,
+              side,
             });
           }
         }
@@ -82,6 +86,16 @@ export function WeekHeat({ people, crews }: { people: HeatPerson[]; crews: HeatC
     window.addEventListener("mouseup", up);
     return () => window.removeEventListener("mouseup", up);
   }, [drag]);
+
+  // click anywhere outside the tooltip closes it
+  useEffect(() => {
+    if (!pinned) return;
+    function away(e: MouseEvent) {
+      if (!popRef.current?.contains(e.target as Node)) setPinned(null);
+    }
+    document.addEventListener("mousedown", away);
+    return () => document.removeEventListener("mousedown", away);
+  }, [pinned]);
 
   const active = drag ?? pinned;
   const inSpan = (day: number, hour: number) =>
@@ -140,16 +154,19 @@ export function WeekHeat({ people, crews }: { people: HeatPerson[]; crews: HeatC
 
       {spanNorm && (
         <div
-          className="heat-pop notice-in"
+          ref={popRef}
+          className={`heat-pop ${spanNorm.side}`}
           style={{ left: spanNorm.x, top: spanNorm.y }}
           role="tooltip"
         >
-          <p className="heat-pop-when">
-            {DAYS[spanNorm.day]} {hourLabel(spanNorm.start)}–{hourLabel(spanNorm.end + 1)}
-          </p>
-          <p className="heat-pop-count">{freed.length} free</p>
+          <div className="heat-pop-head">
+            <p className="heat-pop-when">
+              {DAYS[spanNorm.day]} {hourLabel(spanNorm.start)}–{hourLabel(spanNorm.end + 1)}
+            </p>
+            <p className="heat-pop-count">{freed.length} free</p>
+          </div>
           {freed.length > 0 && (
-            <ul>
+            <ul className="heat-pop-list">
               {freed.map((p) => (
                 <li key={p.name}>
                   <span className="status-dot" />
@@ -160,9 +177,6 @@ export function WeekHeat({ people, crews }: { people: HeatPerson[]; crews: HeatC
             </ul>
           )}
           {freed.length === 0 && <p className="muted heat-pop-empty">beagle can still ask around</p>}
-          <button type="button" className="heat-pop-close" onClick={() => setPinned(null)} aria-label="Close">
-            ×
-          </button>
         </div>
       )}
     </section>
