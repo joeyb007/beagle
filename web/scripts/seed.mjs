@@ -69,13 +69,13 @@ const CRISTIANO = "+14165550204";
 const LEANDRO = "+14165550205";
 
 const lockInCrew = [
-  [CAM, "Cam Fletcher", {
+  [CAM, "Cam", {
     cuisines: ["korean fried chicken", "wings"], vibe: ["loud", "competitive"],
     hard_nos: ["museums"], typical_availability: "sunday mornings (post run club)",
     persona_label: "the hype man",
     notes: "declares every plan 'the best night of our lives' in advance. right about half the time.",
   }, 0.3],
-  [PAUL, "Paul Cseke", {
+  [PAUL, "Paul", {
     cuisines: ["pho", "smash burgers"], vibe: ["low-key", "competitive"],
     hard_nos: ["clubs"], typical_availability: "sunday mornings, sharp",
     persona_label: "the strategist",
