@@ -343,20 +343,6 @@ export function setArtifactNote(planId: string, note: string): void {
   db().prepare("UPDATE artifacts SET note = ? WHERE plan_id = ?").run(note, planId);
 }
 
-export interface RoutingRow {
-  ts: string;
-  model: string;
-  tier: string;
-  cost_estimate: number | null;
-  latency_ms: number | null;
-}
-
-export function listRoutingLog(): RoutingRow[] {
-  return db()
-    .prepare("SELECT ts, model, tier, cost_estimate, latency_ms FROM routing_log ORDER BY id DESC LIMIT 200")
-    .all() as RoutingRow[];
-}
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Landing-page waitlist. Idempotent; creates the table on demand so a
