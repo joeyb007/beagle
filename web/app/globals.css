@@ -911,11 +911,16 @@ table.data { font-size: 12.5px; }
   display: grid; place-items: center;
   background: color-mix(in srgb, var(--paper) 35%, transparent);
   backdrop-filter: blur(2px);
+  animation: overlay-in 300ms ease both;
+}
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .auth-modal {
   max-width: 340px; text-align: center; padding: 28px 26px;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
-  animation: modal-in 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: modal-in 440ms cubic-bezier(0.22, 1, 0.36, 1) 60ms both;
 }
 .auth-modal h2 { margin: 0 0 6px; }
 .auth-cta {
@@ -924,7 +929,8 @@ table.data { font-size: 12.5px; }
 }
 .auth-cta:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); }
 @keyframes modal-in {
-  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  60% { transform: translateY(-2px) scale(1.005); }
   to { opacity: 1; transform: none; }
 }
 
