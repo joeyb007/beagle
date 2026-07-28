@@ -1119,10 +1119,15 @@ html { scroll-behavior: smooth; }
   background: none; border: 1px solid var(--line); border-radius: 999px;
   padding: 5px 12px; cursor: pointer;
   animation: msg-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease, transform 140ms ease;
+  transition: color 190ms ease, border-color 190ms ease, background-color 190ms ease,
+    transform 190ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 190ms ease;
 }
-.suggest-pill:hover { color: var(--ink); border-color: var(--copper); background: var(--hover); transform: translateY(-1px); }
-.suggest-pill:active { transform: none; }
+.suggest-pill:hover {
+  color: #fff; border-color: var(--copper); background: var(--copper);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--copper) 35%, transparent);
+}
+.suggest-pill:active { transform: translateY(0) scale(0.98); }
 .pchat-bar { display: flex; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--line); }
 .pchat-bar input {
   flex: 1;
@@ -1318,3 +1323,11 @@ html { scroll-behavior: smooth; }
 .status-dot.off { background: var(--line); box-shadow: none; }
 .roster-head { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0; }
 .upnext-cta { font-weight: 500; }
+
+.pop-close {
+  position: absolute; top: 8px; right: 12px;
+  background: none; border: 0; font-size: 18px; line-height: 1;
+  color: var(--muted); cursor: pointer; padding: 2px 4px;
+  transition: color 140ms ease, transform 140ms ease;
+}
+.pop-close:hover { color: var(--ink); transform: scale(1.15); }

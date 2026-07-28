@@ -84,6 +84,9 @@ export function UpNextCard({ plan }: { plan: UpNextDetail }) {
       </Link>
 
       <div className={`upnext-pop${open ? " open" : ""}`} aria-hidden={!open}>
+        <button type="button" className="pop-close" onClick={() => setOpen(false)} aria-label="Close">
+          ×
+        </button>
         <p className="roster-head">going</p>
         <ul>
           {going.map((r) => (
