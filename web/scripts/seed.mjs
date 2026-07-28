@@ -329,7 +329,7 @@ A("plan-li-gokarts",
     { title: "Blow", artist: "Kesha" },
     { title: "S&M", artist: "Rihanna" },
   ],
-  [photo("canyon-drive"), photo("night-moon")],
+  [photo("shot-76"), photo("shot-102")],
   4, "public",
   "cristiano demanded rematches until the staff turned the lights off. paul kept the lap times"),
 
@@ -348,7 +348,7 @@ A("plan-li-sunrise",
     { title: "Stay", artist: "Rihanna ft. Mikky Ekko" },
     { title: "Clarity", artist: "Zedd ft. Foxes" },
   ],
-  [photo("fog-ridge"), photo("summit-scramble")],
+  [photo("shot-29"), photo("shot-37")],
   4, "private",
   "five of six made it. fortune said 'if the sun needs me it knows where i live'"),
 
@@ -369,7 +369,7 @@ A("plan-li-lake",
     { title: "Fancy", artist: "Iggy Azalea ft. Charli XCX" },
     { title: "Teenage Dream", artist: "Katy Perry" },
   ],
-  [photo("alpine-lake"), photo("lake-sunset"), photo("river-lookout")],
+  [photo("shot-11"), photo("shot-13"), photo("shot-16")],
   4, "public",
   "leandro's aux, zero skips. fortune showed up at 2:40 with two new friends"),
 
@@ -406,7 +406,7 @@ A("plan-li-market",
     { title: "Worth It", artist: "Fifth Harmony" },
     { title: "7/11", artist: "Beyonce" },
   ],
-  [photo("city-towers"), photo("night-moon")],
+  [photo("shot-33"), photo("shot-103")],
   4, "private",
   "four stalls deep before anyone checked a price. cristiano won the claw machine on principle"),
 
@@ -453,18 +453,18 @@ const photoNotes = {
     "/uploads/harbor-night.jpg": "nobody wanted to call it",
   },
   "plan-li-gokarts": {
-    "/uploads/canyon-drive.jpg": "lap 11. the overtake cristiano still denies",
+    "/uploads/shot-76.jpg": "lap 11. the overtake cristiano still denies",
     "note:1": "cam yelled 'best night of our lives' before we even raced. correct, for once",
   },
   "plan-li-sunrise": {
-    "/uploads/fog-ridge.jpg": "worth it. barely. don't tell paul",
+    "/uploads/shot-29.jpg": "worth it. barely. don't tell paul",
   },
   "plan-li-lake": {
-    "/uploads/lake-sunset.jpg": "the speaker survived the canoe. barely",
+    "/uploads/shot-13.jpg": "the speaker survived the canoe. barely",
     "note:1": "fortune's two strangers are in the gc now. obviously",
   },
   "plan-li-market": {
-    "/uploads/night-moon.jpg": "claw machine: cristiano 1, machine 0",
+    "/uploads/shot-103.jpg": "claw machine: cristiano 1, machine 0",
   },
 };
 const setNotes = db.prepare("UPDATE artifacts SET photo_notes = ? WHERE plan_id = ?");
@@ -650,9 +650,9 @@ const friendHandles = FRIEND_NAMES.map((name, i) => {
 });
 
 const PHOTO_POOL = [
-  "golden-hour-bridge", "city-towers", "waterfall-trail", "alpine-lake",
-  "summit-scramble", "northern-lights", "night-moon", "canyon-drive",
-  "river-lookout", "fog-ridge", "harbor-night", "snow-summit", "lake-sunset",
+  "shot-10", "shot-12", "shot-15", "shot-17", "shot-18", "shot-28",
+  "shot-49", "shot-50", "shot-55", "shot-58", "shot-85", "shot-95",
+  "shot-98", "hilltop-castle",
 ];
 const TRACK_POOL = [
   ["Dog Days Are Over", "Florence + The Machine"], ["Electric Feel", "MGMT"],
