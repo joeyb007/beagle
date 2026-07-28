@@ -123,9 +123,12 @@ export function MotivesBand() {
     if (!asked && m.spots_left === 0) return <span className="motive-state">full</span>;
     const first = m.host_name.split(" ")[0];
     // one button across none -> pending -> in, so the green sweep transitions
-    // in place and the checked state survives polls and reloads
+    // in place and the checked state survives polls and reloads; the status
+    // caption sits to the button's left on the same bottom row
     return (
       <div className="motive-act">
+        {m.my_status === "pending" && <span className="muted motive-wait">waiting on {first}</span>}
+        {m.my_status === "in" && <span className="muted motive-wait">{first} said yes</span>}
         <button
           type="button"
           className={`motive-join${asked ? " asked" : ""}`}
@@ -140,8 +143,6 @@ export function MotivesBand() {
           )}
           {m.my_status === "in" ? "you're in" : asked ? "asked" : "ask to join"}
         </button>
-        {m.my_status === "pending" && <span className="muted motive-wait">waiting on {first}</span>}
-        {m.my_status === "in" && <span className="muted motive-wait">{first} said yes</span>}
       </div>
     );
   }
