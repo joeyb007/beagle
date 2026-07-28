@@ -75,7 +75,7 @@ h2 { font-size: 15px; font-weight: 600; margin: 28px 0 10px; }
   margin-bottom: 16px;
 }
 label.field { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 4px; }
-input[type="text"], input[type="tel"], input[type="password"], input[type="email"], textarea, select {
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]), textarea, select {
   width: 100%;
   font: inherit;
   padding: 8px 10px;
@@ -398,7 +398,7 @@ button.primary, a.button {
   font-weight: 500;
   margin-top: 12px;
 }
-input[type="text"], input[type="tel"], input[type="password"], input[type="email"], textarea, select { background: var(--paper); border-radius: 6px; }
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]), textarea, select { background: var(--paper); border-radius: 6px; }
 table.data { font-size: 12.5px; }
 
 /* the keepsake page stays the one warm, serif "document" surface on purpose */
