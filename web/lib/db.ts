@@ -408,3 +408,15 @@ export function groupsFor(handle: string): (GroupRow & { daysSince: number | nul
         : null,
     }));
 }
+
+/** Handles with a Google token — the availability grid marks them synced. */
+export function googleSyncedHandles(): Set<string> {
+  try {
+    const rows = db()
+      .prepare("SELECT DISTINCT handle FROM oauth_tokens WHERE provider='google'")
+      .all() as { handle: string }[];
+    return new Set(rows.map((r) => r.handle));
+  } catch {
+    return new Set();
+  }
+}
