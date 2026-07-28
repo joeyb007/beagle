@@ -86,6 +86,7 @@ class MemoryChatRequest(BaseModel):
     plan_id: str
     question: str
     history: list[dict] = []
+    handle: str | None = None
 
 
 @app.post("/api/memory-chat")
@@ -96,6 +97,7 @@ async def memory_chat(req: MemoryChatRequest) -> dict:
         plan_id=req.plan_id,
         question=req.question,
         history=req.history,
+        handle=req.handle,
     )
     return {"reply": reply}
 

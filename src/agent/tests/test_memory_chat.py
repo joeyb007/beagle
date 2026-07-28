@@ -53,3 +53,32 @@ async def test_chat_gets_full_hangout_context_and_replies(db):
 async def test_unknown_plan_id_gets_graceful_reply(db):
     reply = await chat_about_memory(ScriptedLLM(), db, plan_id="nope", question="?", history=[])
     assert "don't remember" in reply.lower()
+
+
+async def test_asker_handle_injects_real_texts_as_style_exemplars(db):
+    conn = sqlite3.connect(db)
+    conn.execute(
+        "INSERT INTO messages (chat_id, handle, direction, text)"
+        " VALUES ('gc1', '+1555', 'in', 'lowk down for whatever tbh')"
+    )
+    conn.execute(
+        "INSERT INTO messages (chat_id, handle, direction, text)"
+        " VALUES ('gc1', '+1999', 'in', 'count me in!!')"
+    )
+    conn.commit()
+    conn.close()
+
+    llm = ScriptedLLM(default="bet")
+    await chat_about_memory(
+        llm, db, plan_id="p1", question="what happened?", history=[], handle="+1555"
+    )
+    prompt = llm.calls[-1]["input"]
+    assert "lowk down for whatever tbh" in prompt  # the asker's own voice
+    assert "count me in!!" in prompt  # the crew's voice
+    assert "mirror their vibe" in prompt
+
+
+async def test_no_handle_means_no_style_block(db):
+    llm = ScriptedLLM(default="bet")
+    await chat_about_memory(llm, db, plan_id="p1", question="what happened?", history=[])
+    assert "mirror their vibe" not in llm.calls[-1]["input"]

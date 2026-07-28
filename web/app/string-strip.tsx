@@ -14,10 +14,11 @@ interface CardState {
 }
 
 function datePhrase(iso: string): string {
-  const d = new Date(iso);
-  const weekday = d.toLocaleDateString(undefined, { weekday: "long" });
-  const month = d.toLocaleDateString(undefined, { month: "long" });
-  return `One ${weekday} in ${month}`;
+  return new Date(iso).toLocaleDateString(undefined, {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
@@ -87,6 +88,7 @@ export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
 
       {card && (
         <div
+          key={card.memory.plan_id}
           className={`memory-pop${closing ? " closing" : ""}`}
           style={{ left: card.x, top: card.y }}
           onMouseEnter={cancelHide}
@@ -94,7 +96,6 @@ export function StringStrip({ memories }: { memories: PhotoMemory[] }) {
         >
           <div className="memory-pop-date">{datePhrase(card.memory.time)}</div>
           <div className="memory-pop-place">{card.memory.place}</div>
-          {card.memory.note && <div className="memory-pop-note">“{card.memory.note}”</div>}
           {card.memory.others.length > 0 && (
             <div className="muted">with {card.memory.others.join(" & ")}</div>
           )}

@@ -20,7 +20,7 @@ export function SparkButton({ planId, photo }: { planId: string; photo: string }
 
   return (
     <button className={`spark ${phase}`} onClick={spark} disabled={phase !== "idle"}>
-      {phase === "idle" && <>✨ remind the group</>}
+      {phase === "idle" && <>send this memory to the group</>}
       {phase === "loading" && (
         <>
           <span className="spark-spinner" aria-hidden /> sending the memory…
