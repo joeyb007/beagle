@@ -3,7 +3,7 @@
 // [avatar + content] so the eye can sort the inbox at a glance: join
 // requests need a decision, texts back are the payoff, you're-ins are
 // reminders. When there's nothing, the page renders no rail at all.
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { IntroReply, JoinedMotive, MotiveAsk } from "@/lib/db";
 
@@ -27,6 +27,20 @@ export function ActivityRail({
 }) {
   const router = useRouter();
   const [decided, setDecided] = useState<Record<string, "in" | "declined">>({});
+  const [atTop, setAtTop] = useState(true);
+  const [atBottom, setAtBottom] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const updateFades = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setAtTop(el.scrollTop < 6);
+    setAtBottom(el.scrollTop + el.clientHeight > el.scrollHeight - 6);
+  }, []);
+
+  useEffect(() => {
+    updateFades();
+  }, [asks, replies, joined, updateFades]);
 
   async function decide(a: MotiveAsk, decision: "in" | "declined") {
     const key = `${a.motive_id}:${a.asker_handle}`;
@@ -42,6 +56,9 @@ export function ActivityRail({
   return (
     <aside className="intro-rail card">
       <p className="rail-head">for you</p>
+
+      <div className={`rail-scroll-wrap${atTop ? "" : " fade-t"}${atBottom ? "" : " fade-b"}`}>
+      <div className="rail-scroll" ref={scrollRef} onScroll={updateFades}>
 
       {asks.map((a) => {
         const key = `${a.motive_id}:${a.asker_handle}`;
@@ -109,6 +126,11 @@ export function ActivityRail({
           </div>
         </div>
       ))}
+
+      </div>
+      <span className="rail-chev t" aria-hidden />
+      <span className="rail-chev b" aria-hidden />
+      </div>
     </aside>
   );
 }

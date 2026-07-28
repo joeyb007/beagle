@@ -707,18 +707,41 @@ html { scroll-behavior: smooth; }
 /* the inbox rail: only rows that need you or reward you */
 .match-layout.solo { grid-template-columns: 1fr; }
 /* the deck defines the row height; the rail never raises it (height: 0
-   keeps it out of track sizing) and scrolls its own overflow instead */
+   keeps it out of track sizing). Overflow scrolls inside, scrollbar hidden,
+   top/bottom fades signal the rest. */
 .intro-rail {
   margin-top: 18px; padding: 16px 18px;
   height: 0; min-height: calc(100% - 18px);
-  overflow-y: auto;
+  display: flex; flex-direction: column;
 }
-.intro-rail::-webkit-scrollbar { width: 7px; }
-.intro-rail::-webkit-scrollbar-track { background: transparent; }
-.intro-rail::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--copper) 35%, var(--line));
-  border-radius: 999px;
+.rail-scroll-wrap { position: relative; flex: 1; min-height: 0; display: flex; }
+.rail-scroll { flex: 1; min-width: 0; overflow-y: auto; scrollbar-width: none; }
+.rail-scroll::-webkit-scrollbar { display: none; }
+.rail-scroll-wrap::before,
+.rail-scroll-wrap::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 34px;
+  z-index: 2; pointer-events: none; opacity: 0; transition: opacity 220ms ease;
 }
+.rail-scroll-wrap::before { top: 0; background: linear-gradient(180deg, var(--card), transparent); }
+.rail-scroll-wrap::after { bottom: 0; background: linear-gradient(0deg, var(--card), transparent); }
+.rail-scroll-wrap.fade-t::before { opacity: 1; }
+.rail-scroll-wrap.fade-b::after { opacity: 1; }
+/* little grey chevrons riding the fades */
+.rail-chev {
+  position: absolute; left: 50%; width: 8px; height: 8px;
+  z-index: 3; pointer-events: none; opacity: 0;
+  transition: opacity 220ms ease;
+}
+.rail-chev.t {
+  top: 5px; transform: translateX(-50%) rotate(45deg);
+  border-top: 2px solid var(--muted); border-left: 2px solid var(--muted);
+}
+.rail-chev.b {
+  bottom: 5px; transform: translateX(-50%) rotate(45deg);
+  border-bottom: 2px solid var(--muted); border-right: 2px solid var(--muted);
+}
+.rail-scroll-wrap.fade-t .rail-chev.t { opacity: 0.8; }
+.rail-scroll-wrap.fade-b .rail-chev.b { opacity: 0.8; }
 @media (max-width: 1080px) {
   .intro-rail { height: auto; min-height: 0; max-height: 420px; }
 }
