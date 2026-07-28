@@ -60,6 +60,47 @@ const crew = [
   }, 0.7],
 ];
 
+// The "lock in" crew — the demo GC. Fictional 555 numbers so nothing ever
+// texts a real stranger; swap in real numbers for the live demo.
+const CAM = "+14165550201";
+const PAUL = "+14165550202";
+const FORTUNE = "+14165550203";
+const CRISTIANO = "+14165550204";
+const LEANDRO = "+14165550205";
+
+const lockInCrew = [
+  [CAM, "Cam Fletcher", {
+    cuisines: ["korean fried chicken", "wings"], vibe: ["loud", "competitive"],
+    hard_nos: ["museums"], typical_availability: "weeknights after 9",
+    persona_label: "the hype man",
+    notes: "declares every plan 'the best night of our lives' in advance. right about half the time.",
+  }, 0.3],
+  [PAUL, "Paul Cseke", {
+    cuisines: ["pho", "smash burgers"], vibe: ["low-key", "competitive"],
+    hard_nos: ["clubs"], typical_availability: "weekends and wednesday nights",
+    persona_label: "the strategist",
+    notes: "shows up with a spreadsheet energy but no spreadsheet. calls dibs on navigator.",
+  }, 0.55],
+  [FORTUNE, "Fortune", {
+    cuisines: ["jollof", "tacos"], vibe: ["spontaneous", "loud"],
+    hard_nos: ["early mornings"], typical_availability: "friday and saturday nights",
+    persona_label: "the wildcard",
+    notes: "40 minutes late, arrives with two strangers who become everyone's friends",
+  }, 0.2],
+  [CRISTIANO, "Cristiano", {
+    cuisines: ["steak", "espresso"], vibe: ["competitive", "late night"],
+    hard_nos: ["hiking"], typical_availability: "late nights",
+    persona_label: "the closer",
+    notes: "will not leave a game unfinished. any game. anyone's game.",
+  }, 0.6],
+  [LEANDRO, "Leandro", {
+    cuisines: ["churrasco", "acai"], vibe: ["casual", "outdoors"],
+    hard_nos: ["karaoke"], typical_availability: "weekend afternoons",
+    persona_label: "the calm one",
+    notes: "brings the speaker, never fights over the aux, somehow always drives",
+  }, 0.45],
+];
+
 // The nearby pool — swipe-deck candidates, graded overlap with Joseph.
 const nearby = [
   ["+14155550101", "Sam K.", {
@@ -108,7 +149,7 @@ const nearby = [
 db.prepare("DELETE FROM profiles WHERE handle LIKE '+1555%'").run();
 db.prepare("DELETE FROM artifacts WHERE plan_id LIKE 'plan-demo-%'").run();
 
-for (const [handle, name, data, score] of [...crew, ...nearby]) {
+for (const [handle, name, data, score] of [...crew, ...lockInCrew, ...nearby]) {
   profile.run(handle, name, JSON.stringify({ handle, name, ...data }), score);
 }
 
@@ -118,6 +159,7 @@ const group = db.prepare("INSERT INTO groups (id, name, members, chat_id) VALUES
 group.run(1, "the usual suspects", JSON.stringify([JOSEPH, MADHAV, ANTHONY, MAX]), null);
 group.run(2, "roomies", JSON.stringify([JOSEPH, MAX]), null);
 group.run(3, "ex-coworkers 🫠", JSON.stringify([JOSEPH, MADHAV, ANTHONY]), null);
+group.run(4, "lock in", JSON.stringify([JOSEPH, CAM, PAUL, FORTUNE, CRISTIANO, LEANDRO]), null);
 
 // ---------------------------------------------------------------- artifacts
 const photo = (id) => `/uploads/${id}.jpg`;
@@ -222,6 +264,73 @@ A("plan-ggp-picnic",
   ],
   [], 1, "private", null);
 
+// ---- the "lock in" archive: five months of the demo GC actually using it
+A("plan-li-gokarts",
+  { name: "Go-kart grand prix", area: "K1 Speed", note: "cristiano called winner before we left the gc" },
+  "2026-03-14T19:30:00", [JOSEPH, CAM, PAUL, FORTUNE, CRISTIANO, LEANDRO],
+  [
+    { title: "Ride", artist: "Twenty One Pilots" },
+    { title: "Sicko Mode", artist: "Travis Scott" },
+    { title: "Mo Bamba", artist: "Sheck Wes" },
+  ],
+  [photo("canyon-drive"), photo("night-moon")],
+  4, "public",
+  "cristiano demanded rematches until the staff turned the lights off. paul kept the lap times"),
+
+A("plan-li-sunrise",
+  { name: "Sunrise mission", area: "Grouse lookout", note: "leandro drove, paul brought a thermos like a legend" },
+  "2026-04-26T05:45:00", [JOSEPH, CAM, PAUL, CRISTIANO, LEANDRO],
+  [
+    { title: "Sun Comes Up", artist: "Rudimental" },
+    { title: "Wide Awake", artist: "Parcels" },
+  ],
+  [photo("fog-ridge"), photo("summit-scramble")],
+  4, "private",
+  "five of six made it. fortune said 'if the sun needs me it knows where i live'"),
+
+A("plan-li-lake",
+  { name: "Lake day reset", area: "Buntzen Lake", note: "one speaker, zero plans, all day" },
+  "2026-05-30T13:00:00", [JOSEPH, CAM, PAUL, FORTUNE, CRISTIANO, LEANDRO],
+  [
+    { title: "Island In The Sun", artist: "Weezer" },
+    { title: "Doses & Mimosas", artist: "Cherub" },
+    { title: "Location", artist: "Khalid" },
+    { title: "Borderline", artist: "Tame Impala" },
+  ],
+  [photo("alpine-lake"), photo("lake-sunset"), photo("river-lookout")],
+  4, "public",
+  "leandro's aux, zero skips. fortune showed up at 2:40 with two new friends"),
+
+A("plan-li-trivia",
+  { name: "Trivia night takeover", area: "The Annex", note: "paul's window: wednesday. paul's plan: domination" },
+  "2026-06-17T20:00:00", [JOSEPH, CAM, PAUL, CRISTIANO],
+  [
+    { title: "The Less I Know The Better", artist: "Tame Impala" },
+  ],
+  [],
+  4, "private",
+  "second place. paul has not recovered. we do not discuss round five"),
+
+A("plan-li-market",
+  { name: "Night market sweep", area: "Richmond night market", note: "fortune's 9pm idea that actually worked" },
+  "2026-07-11T21:00:00", [JOSEPH, CAM, FORTUNE, CRISTIANO],
+  [
+    { title: "Peaches", artist: "Justin Bieber" },
+    { title: "Nights", artist: "Frank Ocean" },
+  ],
+  [photo("city-towers"), photo("night-moon")],
+  4, "private",
+  "four stalls deep before anyone checked a price. cristiano won the claw machine on principle"),
+
+A("plan-li-champ",
+  { name: "Championship night: kbbq + fifa", area: "Gen Korean BBQ, then cristiano's", note: "controllers charged, grudges optional" },
+  "2026-07-31T20:00:00", [JOSEPH, CAM, PAUL, FORTUNE, CRISTIANO, LEANDRO],
+  [
+    { title: "HUMBLE.", artist: "Kendrick Lamar" },
+    { title: "Family Ties", artist: "Baby Keem" },
+  ],
+  [], 4, "private", null);
+
 // post-its — per-photo AND free-standing ("note:*") — extra agent context,
 // keepsake-page only, scattered through the year
 const photoNotes = {
@@ -246,6 +355,20 @@ const photoNotes = {
   },
   "plan-harbor": {
     "/uploads/harbor-night.jpg": "nobody wanted to call it",
+  },
+  "plan-li-gokarts": {
+    "/uploads/canyon-drive.jpg": "lap 11. the overtake cristiano still denies",
+    "note:1": "cam yelled 'best night of our lives' before we even raced. correct, for once",
+  },
+  "plan-li-sunrise": {
+    "/uploads/fog-ridge.jpg": "worth it. barely. don't tell paul",
+  },
+  "plan-li-lake": {
+    "/uploads/lake-sunset.jpg": "the speaker survived the canoe. barely",
+    "note:1": "fortune's two strangers are in the gc now. obviously",
+  },
+  "plan-li-market": {
+    "/uploads/night-moon.jpg": "claw machine: cristiano 1, machine 0",
   },
 };
 const setNotes = db.prepare("UPDATE artifacts SET photo_notes = ? WHERE plan_id = ?");
@@ -315,17 +438,68 @@ const threads = {
     ["+13475550788", "in", "the word", "-9 days"],
     ["beagle", "out", "say less. scouting patios now 🐶", "-9 days"],
   ],
+  // the demo GC: five months of actually using it
+  "web:4": [
+    [CAM, "in", "new gc. lock in.", "-137 days"],
+    [PAUL, "in", "locking into what exactly", "-137 days"],
+    [CAM, "in", "greatness", "-137 days"],
+    [JOSEPH, "in", "added beagle. it plans so we actually leave the house", "-137 days"],
+    ["beagle", "out", "hey lock in, i'm beagle. i learn what everyone's into, find when you're all free, and set the thing up. say the word when you want a night 🐶", "-137 days"],
+    [CRISTIANO, "in", "i need to drive something fast and legal", "-136 days"],
+    [JOSEPH, "in", "@beagle handle that", "-136 days"],
+    ["beagle", "out", "on it. dming everyone for schedules, brb 🐶", "-136 days"],
+    ["beagle", "out", "verdict: saturday 7:30 works for all six. k1 speed has open slots. locking unless someone objects", "-136 days"],
+    [FORTUNE, "in", "i'll be there at 7:30 (8:15)", "-136 days"],
+    ["beagle", "out", "locked: go-kart grand prix, saturday 7:30. fortune i booked you for 8:15", "-136 days"],
+    [CAM, "in", "BEST NIGHT OF OUR LIVES INCOMING", "-136 days"],
+    [CRISTIANO, "in", "rematch gets scheduled tonight or i riot", "-134 days"],
+    ["beagle", "out", "grudge logged. it'll resurface at the right moment 🐶", "-134 days"],
+    [PAUL, "in", "who's up for a sunrise hike. serious inquiries only", "-95 days"],
+    [FORTUNE, "in", "if the sun needs me it knows where i live", "-95 days"],
+    ["beagle", "out", "5 of 6 in for sunday 5:45am, grouse lookout. leandro's driving. fortune i'll send you the pictures", "-94 days"],
+    [LEANDRO, "in", "thermos count: one. paul you legend", "-92 days"],
+    [LEANDRO, "in", "borrowed my cousin's speaker. need a lake", "-60 days"],
+    ["beagle", "out", "saturday 1pm is clean for all six. buntzen lake, leandro drives, fortune arrives at 2:40. some things i just know now", "-60 days"],
+    [FORTUNE, "in", "slander. accurate slander", "-60 days"],
+    ["beagle", "out", "it's been three weeks since the lake. cam has typed and deleted four times. someone say the word", "-42 days"],
+    [CAM, "in", "TRIVIA. tomorrow", "-42 days"],
+    ["beagle", "out", "wednesday 8pm works for four of you, the annex has a table. paul this is your window", "-42 days"],
+    [PAUL, "in", "i've been preparing my whole life", "-42 days"],
+    [CAM, "in", "we do not talk about round five", "-40 days"],
+    [FORTUNE, "in", "who's up RIGHT NOW", "-17 days"],
+    ["beagle", "out", "cam and cristiano are free, night market's open till 1. joseph's a maybe. that's a quorum 🐶", "-17 days"],
+    [JOSEPH, "in", "fine. one hour (four hours)", "-17 days"],
+    [CRISTIANO, "in", "claw machine owes me nothing. i took everything", "-16 days"],
+    [JOSEPH, "in", "boys. friday. thoughts", "-3 days"],
+    [CRISTIANO, "in", "kbbq then fifa at mine. non negotiable", "-3 days"],
+    [CAM, "in", "negotiable if you unplug my controller again", "-3 days"],
+    [JOSEPH, "in", "@beagle settle it", "-3 days"],
+    ["beagle", "out", "checked all six calendars: friday 8pm is clean across the board. gen korean bbq first, fifa at cristiano's after. locking in one hour unless someone objects", "-3 days"],
+    [PAUL, "in", "objection withheld strategically", "-3 days"],
+    ["beagle", "out", "locked: championship night, friday 8pm. kbbq then fifa at cristiano's. controllers charged, grudges optional. calendar invites are out", "-3 days"],
+    [CAM, "in", "BEST NIGHT OF OUR LIVES INCOMING (again)", "-3 days"],
+    [LEANDRO, "in", "i'll drive. obviously", "-2 days"],
+    [FORTUNE, "in", "there by 8 sharp (8:40)", "-2 days"],
+    [PAUL, "in", "beagle drop the fifa power rankings", "-4 hours"],
+    ["beagle", "out", "1. cristiano 2. paul 3. cam 4. joseph 5. leandro 6. fortune, retired undefeated, never played 🐶", "-4 hours"],
+    [CRISTIANO, "in", "the list is correct and friday it gets embarrassing", "-1 hours"],
+  ],
 };
 for (const [chatId, rows] of Object.entries(threads)) {
   for (const [handle, direction, text, ts] of rows) msg.run(chatId, handle, direction, text, ts);
 }
 
-// Inbox rail: Kaito asks into Joseph's motive; Sam texts back after his intro.
+// Inbox rail: Kaito asks into Joseph's motive; Sam texts back after his intro
+// (the intro row must predate the reply for reply-detection to fire).
 db.prepare(
   "INSERT INTO motive_joins (motive_id, handle) SELECT id, '+14155550103' FROM motives WHERE host_handle = ? AND text LIKE 'pickup volleyball%'"
 ).run(JOSEPH);
 db.prepare(
-  "INSERT INTO messages (chat_id, handle, direction, text) VALUES ('dm-+14155550101', '+14155550101', 'in', 'yo joseph! beagle told me about you, sounds like we have the same taste in literally everything. tacos saturday?')"
+  "INSERT INTO intros (handle, match_handle, decision, status, message, created_at)" +
+  " VALUES (?, '+14155550101', 'intro', 'sent', 'hey! i''m beagle, joseph''s hangout dog. you two are basically taste twins, he''s at ' || ? || ' if you''re down 🐶', datetime('now', '-3 hours'))"
+).run(JOSEPH, JOSEPH);
+db.prepare(
+  "INSERT INTO messages (chat_id, handle, direction, text, ts) VALUES ('dm-+14155550101', '+14155550101', 'in', 'yo joseph! beagle told me about you, sounds like we have the same taste in literally everything. tacos saturday?', datetime('now', '-2 hours'))"
 ).run();
 
 db.prepare("DELETE FROM routing_log").run();
@@ -341,4 +515,4 @@ for (const c of [
   ["claude-haiku-4-5-20251001", "cheap", 0.0003, 296],
 ]) log.run(...c);
 
-console.log(`seeded ${dbPath}: ${crew.length} crew + ${nearby.length} nearby, 3 groups, 7 hangouts, real photos`);
+console.log(`seeded ${dbPath}: ${crew.length + lockInCrew.length} crew + ${nearby.length} nearby, 4 groups, 13 hangouts, real photos`);
