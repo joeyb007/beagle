@@ -270,7 +270,9 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
 /* ---- home: the polaroid string ---- */
 .string-wrap { position: relative; margin: 0 -106px 0 -48px; padding: 12px 0 8px; overflow: hidden; }
 .string-line { position: absolute; top: 20px; left: 0; right: 0; height: 2px; background: var(--copper); opacity: 0.45; }
-.string-track { display: flex; gap: 26px; width: max-content; animation: string-drift 40s linear infinite; padding: 0 24px; }
+/* 13px side padding keeps the track exactly periodic (padding sum = one gap),
+   so the -50% loop restart lands photos and wire precisely where they were */
+.string-track { display: flex; gap: 26px; width: max-content; animation: string-drift 40s linear infinite; padding: 0 13px; }
 .string-wrap:hover .string-track { animation-play-state: paused; }
 .string-print { background: #fff; padding: 7px 7px 22px; border: 1px solid var(--line); box-shadow: 0 3px 8px rgb(29 28 36 / 0.14); transform: rotate(var(--tilt, 0deg)); position: relative; margin-top: 6px; }
 .string-print::before { content: ""; position: absolute; top: -12px; left: 50%; width: 3px; height: 14px; transform: translateX(-50%); background: var(--copper); opacity: 0.6; }
@@ -1173,22 +1175,30 @@ html { scroll-behavior: smooth; }
 .avail-dot.on { background: #4a9d6b; }
 .avail-foot { font-size: 12px; margin: 12px 0 0; }
 
-/* ---- polaroid string, hung properly: sag, pins, sway ---- */
-.string-line {
-  height: 26px; top: 8px; background: none; opacity: 1;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='26' viewBox='0 0 260 26'%3E%3Cpath d='M0 4 Q 65 24 130 14 T 260 4' fill='none' stroke='%23b0764a' stroke-width='1.6' opacity='0.55'/%3E%3C/svg%3E");
-  background-repeat: repeat-x; background-size: 260px 26px;
+/* ---- polaroid string, hung properly: sag, pins, sway ----
+   The wire is painted on the moving track (not the container) with one dip
+   per print, so it drifts with the photos and every pin sits in its dip.
+   Sag period = print outer width (img clamp + 14px padding + 2px border)
+   + the 26px flex gap; with 13px track padding a dip centers on each print. */
+.string-line { display: none; }
+.string-track {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='20' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M0 3 Q 50 21 100 3' fill='none' stroke='%238a5a34' stroke-width='2' opacity='0.85'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: calc(clamp(150px, 12vw, 230px) + 42px) 20px;
+  background-position: 0 0;
 }
 .string-print { margin-top: 10px; }
-.string-track > *:nth-child(4n + 1) { transform: rotate(-2.2deg) translateY(2px); }
-.string-track > *:nth-child(4n + 2) { transform: rotate(1.4deg) translateY(12px); }
-.string-track > *:nth-child(4n + 3) { transform: rotate(-1deg) translateY(8px); }
-.string-track > *:nth-child(4n + 4) { transform: rotate(2.4deg) translateY(4px); }
+.string-print::before { display: none; } /* old straight-line thread, retired */
+.string-track > *:nth-child(4n + 1) { transform: rotate(-2.2deg); }
+.string-track > *:nth-child(4n + 2) { transform: rotate(1.4deg); }
+.string-track > *:nth-child(4n + 3) { transform: rotate(-1deg); }
+.string-track > *:nth-child(4n + 4) { transform: rotate(2.4deg); }
 .string-print::after {
   content: ""; position: absolute; top: -7px; left: 50%; transform: translateX(-50%) rotate(3deg);
   width: 9px; height: 16px; border-radius: 2px;
-  background: linear-gradient(180deg, #c8a273, #a97e50);
-  box-shadow: 0 1px 2px rgb(29 28 36 / 0.25);
+  background: linear-gradient(180deg, #a97e50, #7d552f);
+  border: 1px solid rgb(90 58 28 / 0.55);
+  box-shadow: 0 1px 3px rgb(29 28 36 / 0.35);
 }
 .string-print { transform-origin: top center; transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1); }
 .string-wrap:hover .string-print:hover { animation: print-sway 1.6s ease-in-out infinite; }
