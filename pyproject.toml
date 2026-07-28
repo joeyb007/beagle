@@ -20,6 +20,7 @@ dependencies = [
     "google-auth-oauthlib",
     "sqlite-vec",
     "sentence-transformers",  # CLIP-style image + text embeddings
+    "fastembed",          # ONNX text embeddings — semantic matching engine
 ]
 
 [dependency-groups]
