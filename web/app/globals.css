@@ -790,6 +790,15 @@ html { scroll-behavior: smooth; }
   font-size: 11px; margin: 8px 2px 0; padding-top: 8px;
   border-top: 1px solid var(--line);
 }
+.chat-count { margin-left: 8px; font-size: 12.5px; }
+.chat-preview {
+  margin: 7px 0 0; font-size: 13px; color: var(--ink);
+  display: flex; align-items: baseline; gap: 5px; max-width: 560px;
+}
+.chat-preview-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.chat-preview-ago { flex-shrink: 0; font-size: 12px; }
+.chat-preview-who { font-weight: 600; }
+.chat-preview-beagle { font-weight: 600; color: var(--copper); }
 .chat-rail {
   display: flex; flex-direction: column; gap: 10px;
   height: 0; min-height: 100%; /* never raises the row; thread decides */
