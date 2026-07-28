@@ -179,16 +179,12 @@ export function PixelBeagle({
       style={{ width: FW * SCALE, height: FH * SCALE }}
       aria-hidden="true"
     >
-      {mood === "think" && (
-        <span className="dog-bubble think">
-          <i /><i /><i />
-        </span>
-      )}
-      {mood === "talk" && (
-        <span className="dog-bubble talk">
-          <i /><i /><i />
-        </span>
-      )}
+      <span className={`dog-bubble think${mood === "think" ? " on" : ""}`}>
+        <i /><i /><i />
+      </span>
+      <span className={`dog-bubble talk${mood === "talk" ? " on" : ""}`}>
+        <i /><i /><i />
+      </span>
       <canvas ref={canvasRef} width={FW} height={FH} style={{ width: "100%", height: "100%" }} />
     </div>
   );
