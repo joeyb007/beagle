@@ -745,6 +745,52 @@ html { scroll-behavior: smooth; }
 @media (max-width: 1080px) {
   .intro-rail { height: auto; min-height: 0; max-height: 420px; }
 }
+
+/* ---- chat detail: live thread mirror + context rail ---- */
+.chat-layout {
+  display: grid; grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  gap: 26px; align-items: start; margin-top: 10px;
+}
+@media (max-width: 1080px) { .chat-layout { grid-template-columns: 1fr; } }
+.thread-card {
+  display: flex; flex-direction: column;
+  height: min(66vh, 640px); padding: 14px 16px 10px;
+}
+.thread-card .rail-scroll-wrap { flex: 1; min-height: 0; }
+.thread-scroll { padding: 4px 6px 8px 2px; }
+.thread-empty { font-size: 13px; margin: 8px 4px; }
+.thread-msg { display: flex; flex-direction: column; align-items: flex-start; margin-top: 2px; }
+.thread-msg.first { margin-top: 10px; }
+.thread-msg.me { align-items: flex-end; }
+.thread-sender {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--muted); margin: 0 0 3px 10px;
+}
+.thread-msg.beagle .thread-sender { color: var(--copper); }
+.thread-time {
+  align-self: center; font-size: 10.5px; color: var(--muted);
+  margin: 10px 0 4px; font-family: var(--mono);
+}
+.thread-bubble {
+  max-width: 78%; padding: 7px 12px; font-size: 13.5px; line-height: 1.45;
+  border-radius: 14px; border-bottom-left-radius: 4px;
+  background: var(--hover); color: var(--ink);
+}
+.thread-msg.me .thread-bubble {
+  background: var(--blue); color: #fff;
+  border-radius: 14px; border-bottom-right-radius: 4px;
+}
+.thread-msg.beagle .thread-bubble {
+  background: color-mix(in srgb, var(--copper) 12%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--copper) 30%, transparent);
+}
+.thread-foot {
+  font-size: 11px; margin: 8px 2px 0; padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.chat-rail { display: flex; flex-direction: column; gap: 10px; }
+.chat-rail-head { margin: 8px 0 2px; font-size: 15px; }
+.chat-rail .card { margin-bottom: 0; }
 .rail-head {
   font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--muted); margin: 0 0 10px;

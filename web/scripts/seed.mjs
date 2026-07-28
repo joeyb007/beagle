@@ -285,6 +285,41 @@ motive.run("+14155550105", "bouldering intro sesh, newbies welcome", "tomorrow 7
 motive.run("+14155550107", "thrift run + listening party after", "this weekend", 2);
 motive.run("+14155550101", "taco truck tour, three stops minimum", "saturday 1pm", 3);
 motive.run("+14155550106", "karaoke basement, zero judgment", "tonight late", 4);
+// Group threads: the chats page mirrors these (chat_id = web:<group id>).
+db.prepare("DELETE FROM messages WHERE chat_id LIKE 'web:%'").run();
+const msg = db.prepare(
+  "INSERT INTO messages (chat_id, handle, direction, text, ts) VALUES (?, ?, ?, ?, datetime('now', ?))"
+);
+const threads = {
+  "web:1": [
+    ["+19295550252", "in", "yo who's around this weekend", "-3 days"],
+    ["+13475550788", "in", "i could do saturday, sunday's dead for me", "-3 days"],
+    [JOSEPH, "in", "saturday works. @beagle find us something", "-3 days"],
+    ["beagle", "out", "on it. sniffing everyone's schedules, brb 🐶", "-3 days"],
+    ["beagle", "out", "ok: saturday 7pm works for all four of you. thinking tacos el rey, patio's open and nobody's vetoed tacos yet", "-3 days"],
+    ["+19145550081", "in", "tacos el rey goes crazy, i'm in", "-3 days"],
+    ["+19295550252", "in", "in", "-3 days"],
+    ["beagle", "out", "locked: tacos el rey, saturday 7pm. calendar invites are out, don't be late anthony", "-2 days"],
+    ["+13475550788", "in", "one time i was late ONE time", "-2 days"],
+  ],
+  "web:2": [
+    ["+19145550081", "in", "rent's due and the fridge is a crime scene", "-5 days"],
+    [JOSEPH, "in", "grocery run + cook night? @beagle when are we both free", "-5 days"],
+    ["beagle", "out", "you two overlap thursday after 7. want me to pencil in a cook night?", "-5 days"],
+    ["+19145550081", "in", "yes chef", "-5 days"],
+    ["beagle", "out", "thursday 7:30, cook night at the apartment. i'll remind you wednesday to actually buy groceries", "-5 days"],
+  ],
+  "web:3": [
+    ["+19295550252", "in", "we haven't done happy hour since the reorg lol", "-9 days"],
+    ["beagle", "out", "flagging that this chat has been quiet for 3 weeks. someone say the word and i'll find a bar", "-9 days"],
+    ["+13475550788", "in", "the word", "-9 days"],
+    ["beagle", "out", "say less. scouting patios now 🐶", "-9 days"],
+  ],
+};
+for (const [chatId, rows] of Object.entries(threads)) {
+  for (const [handle, direction, text, ts] of rows) msg.run(chatId, handle, direction, text, ts);
+}
+
 // Inbox rail: Kaito asks into Joseph's motive; Sam texts back after his intro.
 db.prepare(
   "INSERT INTO motive_joins (motive_id, handle) SELECT id, '+14155550103' FROM motives WHERE host_handle = ? AND text LIKE 'pickup volleyball%'"

@@ -335,6 +335,28 @@ export function listSwipes(handle: string): SwipeRow[] {
     .all(handle) as SwipeRow[];
 }
 
+export interface ThreadMsg {
+  id: number;
+  handle: string; // sender; 'beagle' for outbound agent messages
+  direction: "in" | "out";
+  text: string;
+  ts: string;
+}
+
+/** A group's effective agent chat id: the iMessage space once known,
+ *  otherwise the web-session fallback the orchestrator uses. */
+export function effectiveChatId(group: { id: number; chat_id: string | null }): string {
+  return group.chat_id ?? `web:${group.id}`;
+}
+
+export function chatThread(chatId: string, afterId = 0, limit = 200): ThreadMsg[] {
+  return db()
+    .prepare(
+      "SELECT id, handle, direction, text, ts FROM messages WHERE chat_id = ? AND id > ? ORDER BY id ASC LIMIT ?"
+    )
+    .all(chatId, afterId, limit) as ThreadMsg[];
+}
+
 export interface MotiveAsk {
   motive_id: number;
   motive_text: string;
