@@ -1,11 +1,20 @@
 "use client";
-// The inbox rail: only rows that need you or reward you. Asks on your
-// motives come with the decision; intros that got a text back surface the
-// payoff; motives you're in sit as quiet reminders. When there's nothing,
-// the page renders no rail at all.
+// The inbox rail: typed rows, one anatomy. Every item is [type label] +
+// [avatar + content] so the eye can sort the inbox at a glance: join
+// requests need a decision, texts back are the payoff, you're-ins are
+// reminders. When there's nothing, the page renders no rail at all.
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { IntroReply, JoinedMotive, MotiveAsk } from "@/lib/db";
+
+function TypeTag({ kind, label }: { kind: "ask" | "reply" | "in"; label: string }) {
+  return (
+    <p className={`rail-type ${kind}`}>
+      <span className="rail-type-dot" />
+      {label}
+    </p>
+  );
+}
 
 export function ActivityRail({
   asks,
@@ -34,17 +43,20 @@ export function ActivityRail({
     <aside className="intro-rail card">
       <p className="rail-head">for you</p>
 
-      {asks.length > 0 && (
-        <div className="rail-group">
-          {asks.map((a) => {
-            const key = `${a.motive_id}:${a.asker_handle}`;
-            const done = decided[key];
-            return (
-              <div key={key} className="rail-ask">
-                <p className="rail-ask-line">
-                  <strong>{a.asker_name}</strong> asked into{" "}
-                  <span className="rail-motive">&ldquo;{a.motive_text}&rdquo;</span>
+      {asks.map((a) => {
+        const key = `${a.motive_id}:${a.asker_handle}`;
+        const done = decided[key];
+        return (
+          <div key={key} className="rail-item">
+            <TypeTag kind="ask" label="wants in" />
+            <div className="rail-body">
+              <span className="avatar sm">{a.asker_name[0]}</span>
+              <div className="rail-content">
+                <p className="rail-line">
+                  <strong>{a.asker_name}</strong>
+                  <span className="muted"> asked to join</span>
                 </p>
+                <p className="rail-sub rail-motive">&ldquo;{a.motive_text}&rdquo;</p>
                 {done ? (
                   <p className={`rail-decided${done === "in" ? " yes" : ""}`}>
                     {done === "in" ? "they're in, beagle's telling them" : "passed, no hard feelings"}
@@ -60,34 +72,43 @@ export function ActivityRail({
                   </div>
                 )}
               </div>
-            );
-          })}
-        </div>
-      )}
+            </div>
+          </div>
+        );
+      })}
 
-      {replies.length > 0 && (
-        <div className="rail-group">
-          {replies.map((r) => (
-            <div key={r.handle} className="rail-reply">
-              <p className="rail-ask-line">
-                <span className="status-dot" /> <strong>{r.name}</strong> texted back
+      {replies.map((r) => (
+        <div key={r.handle} className="rail-item">
+          <TypeTag kind="reply" label="texted back" />
+          <div className="rail-body">
+            <span className="avatar sm">{r.name[0]}</span>
+            <div className="rail-content">
+              <p className="rail-line">
+                <strong>{r.name}</strong>
+                <span className="muted"> replied to the intro</span>
               </p>
               <p className="rail-snippet">&ldquo;{r.last_text}&rdquo;</p>
             </div>
-          ))}
+          </div>
         </div>
-      )}
+      ))}
 
-      {joined.length > 0 && (
-        <div className="rail-group">
-          {joined.map((j, i) => (
-            <p key={i} className="rail-joined">
-              you&apos;re in: <strong>{j.motive_text}</strong>
-              <span className="muted"> · {j.time_window} · w/ {j.host_name.split(" ")[0]}</span>
-            </p>
-          ))}
+      {joined.map((j, i) => (
+        <div key={i} className="rail-item">
+          <TypeTag kind="in" label="you're in" />
+          <div className="rail-body">
+            <span className="avatar sm">{j.host_name[0]}</span>
+            <div className="rail-content">
+              <p className="rail-line">
+                <strong>{j.motive_text}</strong>
+              </p>
+              <p className="rail-sub muted">
+                {j.time_window} · hosted by {j.host_name.split(" ")[0]}
+              </p>
+            </div>
+          </div>
         </div>
-      )}
+      ))}
     </aside>
   );
 }

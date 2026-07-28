@@ -711,12 +711,25 @@ html { scroll-behavior: smooth; }
   font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--muted); margin: 0 0 10px;
 }
-.rail-group { padding: 4px 0 10px; border-bottom: 1px solid var(--line); }
-.rail-group:last-of-type { border-bottom: 0; padding-bottom: 0; }
-.rail-ask { padding: 5px 0 9px; }
-.rail-ask-line { font-size: 13px; margin: 0 0 7px; line-height: 1.45; }
+/* one anatomy per item: [type tag] then [avatar + content] */
+.rail-item { padding: 10px 0 12px; border-bottom: 1px solid var(--line); }
+.rail-item:last-of-type { border-bottom: 0; padding-bottom: 0; }
+.rail-type {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 9.5px; text-transform: uppercase;
+  letter-spacing: 0.09em; color: var(--muted); margin: 0 0 7px;
+}
+.rail-type-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.rail-type.ask .rail-type-dot { background: var(--copper); }
+.rail-type.reply .rail-type-dot { background: #16a34a; }
+.rail-type.in .rail-type-dot { background: var(--blue); }
+.rail-body { display: flex; gap: 9px; align-items: flex-start; }
+.rail-body .avatar.sm { margin-top: 1px; }
+.rail-content { min-width: 0; flex: 1; }
+.rail-line { font-size: 13.5px; margin: 0; line-height: 1.4; }
+.rail-sub { font-size: 12.5px; margin: 2px 0 0; line-height: 1.4; }
 .rail-motive { color: var(--copper); }
-.rail-ask-actions { display: flex; gap: 8px; }
+.rail-ask-actions { display: flex; gap: 8px; margin-top: 8px; }
 .rail-yes {
   font: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
   color: #fff; background: var(--copper); border: 1px solid var(--copper);
@@ -732,14 +745,12 @@ html { scroll-behavior: smooth; }
   transition: color 160ms ease, border-color 160ms ease;
 }
 .rail-no:hover { color: var(--ink); border-color: var(--muted); }
-.rail-decided { font-size: 12px; color: var(--muted); margin: 0; animation: notice-in 240ms cubic-bezier(0.22, 1, 0.36, 1); }
+.rail-decided { font-size: 12px; color: var(--muted); margin: 8px 0 0; animation: notice-in 240ms cubic-bezier(0.22, 1, 0.36, 1); }
 .rail-decided.yes { color: #16a34a; font-weight: 600; }
-.rail-reply { padding: 5px 0 8px; }
 .rail-snippet {
   font-family: var(--serif); font-style: italic; font-size: 12.5px;
-  color: var(--muted); margin: 0; line-height: 1.5;
+  color: var(--muted); margin: 4px 0 0; line-height: 1.5;
 }
-.rail-joined { font-size: 12.5px; margin: 7px 0 0; line-height: 1.45; }
 .mm-stack { position: relative; min-height: 380px; }
 .dossier {
   background: var(--card); border: 1px solid var(--line); border-radius: 12px;
@@ -1608,8 +1619,17 @@ html { scroll-behavior: smooth; }
 }
 
 /* ---- motives band: asked/in green checked button + fit progress bar ---- */
-.motive-act { margin-top: auto; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
-.motive-act .motive-join { margin-top: 0; }
+/* bottom row of the card: status caption left, button right; with no
+   caption (not asked yet) the button keeps its original left position */
+.motive-act {
+  margin-top: auto; width: 100%;
+  display: flex; align-items: center; gap: 8px;
+}
+.motive-act .motive-join { margin-top: 0; flex-shrink: 0; white-space: nowrap; }
+.motive-act .motive-wait {
+  flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .motive-join.asked {
   display: inline-flex; align-items: center; gap: 6px;
   background: #16a34a; border-color: #16a34a; color: #fff;
