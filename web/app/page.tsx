@@ -12,7 +12,7 @@ export default function Landing() {
         <div className="kicker">Beagle</div>
         <h1 id="hero-title">The friend who knows your group</h1>
         <p className="pitch">
-          Paste your group chat. Beagle learns who everyone really is — then plans your hangouts
+          Paste your group chat. Beagle learns who everyone really is, then plans your hangouts
           right in iMessage.
         </p>
         <WaitlistForm />
