@@ -18,7 +18,7 @@ export function PhotoUpload({ planId, hasPhotos }: { planId: string; hasPhotos: 
     const resp = await fetch(`/api/hangouts/${planId}/photos`, { method: "POST", body: form });
     setBusy(false);
     if (!resp.ok) {
-      setError("Upload didn’t stick — try a smaller image.");
+      setError("Upload didn’t stick. Try a smaller image.");
       return;
     }
     router.refresh();
@@ -35,15 +35,15 @@ export function PhotoUpload({ planId, hasPhotos }: { planId: string; hasPhotos: 
         onChange={(e) => upload(e.target.files)}
       />
       {hasPhotos ? (
-        <button className="primary" onClick={() => input.current?.click()} disabled={busy}>
-          {busy ? "Uploading…" : "Add more photos"}
+        <button className="keepsake-add" onClick={() => input.current?.click()} disabled={busy}>
+          {busy ? "developing…" : "+ tape another print"}
         </button>
       ) : (
         <button className="photo-invite" onClick={() => input.current?.click()} disabled={busy}>
           <span className="photo-invite-frame" aria-hidden>📸</span>
           <span>
             <strong>{busy ? "Uploading…" : "No photos yet"}</strong>
-            <span className="muted">drop in the first one from that night — it turns this plan into a keepsake</span>
+            <span className="muted">drop in the first one from that night, it turns this plan into a keepsake</span>
           </span>
         </button>
       )}

@@ -148,6 +148,25 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
   padding: 48px;
 }
 .keepsake { max-width: 660px; margin: 0 auto; }
+.keepsake-back {
+  display: inline-block; font-size: 12.5px; color: var(--muted);
+  text-decoration: none; margin-bottom: 14px;
+  transition: color 150ms ease, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.keepsake-back:hover { color: var(--ink); transform: translateX(-2px); }
+/* upload reads like part of the corkboard, not a web-app primary */
+.keepsake-add {
+  font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+  color: var(--copper); background: none;
+  border: 1.5px dashed color-mix(in srgb, var(--copper) 55%, transparent);
+  border-radius: 8px; padding: 8px 16px;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.keepsake-add:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--copper) 8%, transparent);
+  border-color: var(--copper); transform: translateY(-1px);
+}
+.keepsake-add:disabled { opacity: 0.6; cursor: default; }
 .keepsake h1 { font-size: 34px; }
 .keepsake .date { color: var(--copper); font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; }
 
