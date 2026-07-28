@@ -9,6 +9,63 @@ import { PixelBeagle } from "@/components/pixel-beagle";
 interface Msg {
   role: "assistant" | "user";
   text: string;
+  attachments?: Attachment[];
+}
+
+type Attachment =
+  | { type: "slots"; duration_hours: number; slots: { day: string; date: string; start: string; end: string; free: string[]; count: number }[] }
+  | { type: "venues"; venues: { name: string; area: string | null; note: string | null; url: string | null }[] }
+  | { type: "plan_started"; crew: string; occasion: string; members: string[] }
+  | { type: "nudged"; crew: string; message: string };
+
+function AttachmentView({ a }: { a: Attachment }) {
+  if (a.type === "slots") {
+    return (
+      <div className="attach attach-slots">
+        {a.slots.map((s, i) => (
+          <div key={i} className="slot-chip" title={s.free.join(", ")}>
+            <span className="slot-when">{s.day} {s.date} · {s.start}–{s.end}</span>
+            <span className="slot-who">
+              <span className="status-dot" />{s.count} free · {s.free.map((n) => n.split(" ")[0]).join(", ")}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (a.type === "venues") {
+    return (
+      <div className="attach attach-venues">
+        {a.venues.map((v) => (
+          <div key={v.name} className="venue-card">
+            <strong>{v.name}</strong>
+            {v.area && <span className="muted"> · {v.area}</span>}
+            {v.note && <p className="muted">{v.note}</p>}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (a.type === "plan_started") {
+    return (
+      <div className="attach plan-card">
+        <span className="plan-badge">plan started</span>
+        <strong>{a.occasion}</strong>
+        <p className="muted">
+          {a.crew} · DMing {a.members.map((n) => n.split(" ")[0]).join(", ")}
+        </p>
+      </div>
+    );
+  }
+  if (a.type === "nudged") {
+    return (
+      <div className="attach plan-card">
+        <span className="plan-badge">nudge sent</span>
+        <p className="muted">to {a.crew}: &ldquo;{a.message}&rdquo;</p>
+      </div>
+    );
+  }
+  return null;
 }
 
 export function PlannerChat({
@@ -62,7 +119,7 @@ export function PlannerChat({
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
   }, [messages, busy, typing, hydrated, storageKey]);
 
-  async function reveal(full: string) {
+  async function reveal(full: string, attachments?: Attachment[]) {
     setTyping(true);
     setMessages((m) => [...m, { role: "assistant", text: "" }]);
     for (let i = 0; i < full.length && alive.current; i += 3) {
@@ -72,7 +129,7 @@ export function PlannerChat({
       await new Promise((r) => setTimeout(r, 26));
     }
     if (alive.current) {
-      setMessages((m) => [...m.slice(0, -1), { role: "assistant", text: full }]);
+      setMessages((m) => [...m.slice(0, -1), { role: "assistant", text: full, attachments }]);
       setTyping(false);
     }
   }
@@ -92,7 +149,7 @@ export function PlannerChat({
       });
       const data = await resp.json();
       setBusy(false);
-      await reveal(data.reply ?? "…");
+      await reveal(data.reply ?? "…", data.attachments?.length ? data.attachments : undefined);
     } catch {
       setBusy(false);
       await reveal("lost the scent. try that again?");
@@ -121,7 +178,12 @@ export function PlannerChat({
       <div className="pchat-scroll" ref={scroller}>
         {messages.map((m, i) => (
           <div key={i} className={`pchat-msg ${m.role}`}>
-            <p>{m.text}</p>
+            <div className="pchat-msg-body">
+              <p>{m.text}</p>
+              {m.attachments?.map((a, j) => (
+                <AttachmentView key={j} a={a} />
+              ))}
+            </div>
           </div>
         ))}
       </div>

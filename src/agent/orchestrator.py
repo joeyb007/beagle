@@ -245,6 +245,30 @@ class Orchestrator:
 
     # ------------------------------------------------- intake: snapshot first
 
+    async def start_plan(
+        self, *, initiator: str, chat_id: str, participants: list[str], occasion: str
+    ) -> None:
+        """Programmatic session start (planner chat, workers): explicit roster,
+        no group-membership lookup. Same pipeline from the snapshot onward."""
+        await self._context.snapshot(chat_id, participants)
+        profiles: dict[str, Profile] = {}
+        for handle in participants:
+            profiles[handle] = (
+                await self._profiles.get(handle) or Profile(handle=handle, name=handle)
+            )
+        now = datetime.now()
+        session = Session(
+            session_id=str(uuid4()),
+            occasion=occasion or "a hangout",
+            date_window=Interval(start=now, end=now + timedelta(days=7)),
+            group_chat_id=chat_id,
+            members=participants,
+            member_states={h: MemberState() for h in participants},
+        )
+        active = ActiveSession(session=session, profiles=profiles, initiator=initiator)
+        self.sessions[chat_id] = active
+        await self._fan_out(active)
+
     async def _start_session(self, m: InboundMessage) -> None:
         chat = ChatRef(id=m.chat_id)
         participants = await self._messaging.get_participants(chat)

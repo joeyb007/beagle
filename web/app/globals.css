@@ -1342,3 +1342,35 @@ html { scroll-behavior: smooth; }
   transition: color 140ms ease, transform 140ms ease;
 }
 .pop-close:hover { color: var(--ink); transform: scale(1.15); }
+
+/* chat attachments: slots, venues, plan cards */
+.pchat-msg-body { max-width: 85%; display: flex; flex-direction: column; gap: 8px; }
+.pchat-msg.user .pchat-msg-body { align-items: flex-end; }
+.pchat-msg .pchat-msg-body p { max-width: none; }
+.attach { animation: msg-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.attach-slots { display: flex; flex-direction: column; gap: 6px; }
+.slot-chip {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  border: 1px solid var(--line); border-radius: 9px; padding: 7px 11px;
+  font-size: 12.5px; background: var(--card);
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+.slot-chip:hover { border-color: var(--copper); transform: translateX(2px); }
+.slot-when { font-weight: 600; white-space: nowrap; }
+.slot-who { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.attach-venues { display: flex; flex-direction: column; gap: 6px; }
+.venue-card {
+  border: 1px solid var(--line); border-radius: 9px; padding: 8px 12px;
+  font-size: 13px; background: var(--card);
+}
+.venue-card p { margin: 2px 0 0; font-size: 12px; }
+.plan-card {
+  border: 1px solid color-mix(in srgb, var(--copper) 45%, var(--line));
+  border-radius: 10px; padding: 10px 13px; font-size: 13px;
+  background: color-mix(in srgb, var(--copper) 6%, var(--card));
+}
+.plan-card p { margin: 3px 0 0; font-size: 12px; }
+.plan-badge {
+  display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--copper); font-weight: 700; margin-bottom: 3px; margin-right: 8px;
+}

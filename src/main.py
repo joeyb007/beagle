@@ -129,15 +129,16 @@ async def planner_chat(req: PlannerChatRequest) -> dict:
     from src.agent.planner_chat import chat_with_planner
 
     orch = app.state.orchestrator
-    reply = await chat_with_planner(
+    result = await chat_with_planner(
         orch._llm,
         orch._calendar,
         os.environ.get("DATABASE_PATH", str(REPO_ROOT / "data.sqlite")),
         handle=req.handle,
         question=req.question,
         history=req.history,
+        orchestrator=orch,
     )
-    return {"reply": reply}
+    return result
 
 
 class BeagleTakeRequest(BaseModel):
