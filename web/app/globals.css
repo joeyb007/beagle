@@ -1111,3 +1111,20 @@ table.data { font-size: 12.5px; }
   .string-track { animation: none; }
   .string-wrap:hover .string-print:hover { animation: none; }
 }
+
+/* gcal-style week heat */
+.week-grid {
+  display: grid; grid-template-columns: 52px repeat(7, 1fr);
+  gap: 3px; margin-top: 14px; align-items: stretch;
+}
+.week-hour { font-size: 10px; color: var(--muted); font-family: var(--mono); align-self: center; text-align: right; padding-right: 6px; }
+.week-cell {
+  position: relative; height: 22px; border: 0; border-radius: 4px; cursor: pointer; padding: 0;
+  background: color-mix(in srgb, var(--copper) calc(var(--heat, 0) * 88%), var(--hover));
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.week-cell:hover { transform: scale(1.12); box-shadow: 0 2px 8px rgb(29 28 36 / 0.18); z-index: 2; }
+.week-count { font-size: 10px; font-family: var(--mono); color: rgb(255 255 255 / 0.9); opacity: 0; }
+.week-cell:hover .week-count { opacity: 1; }
+.slot-modal h2 { text-transform: capitalize; }
+.slot-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }

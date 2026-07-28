@@ -3,7 +3,7 @@
 // up-next and your self-editable card sit beside it; the availability heat
 // map shows the week; the polaroid string closes the page.
 import Link from "next/link";
-import { availableDays } from "@/lib/availability";
+import { availableBlocks } from "@/lib/availability";
 import {
   googleSyncedHandles,
   groupsFor,
@@ -13,7 +13,7 @@ import {
 } from "@/lib/db";
 import { currentUser } from "@/lib/session";
 import { StringStrip } from "@/app/string-strip";
-import { AvailabilityGrid, GridCrew } from "./availability-grid";
+import { HeatCrew, HeatPerson, WeekHeat } from "./week-heat";
 import { PlannerChat } from "./planner-chat";
 import { YouCard } from "./you-card";
 
@@ -51,17 +51,18 @@ export default async function Home() {
     "how do i start a plan?",
   ];
 
-  const crews: GridCrew[] = groups.map((g) => ({
+  // whole friend graph (not just crews) so the heatmap scales with the network
+  const people: HeatPerson[] = listProfiles()
+    .filter((p) => !p.data.nearby && p.handle !== user.handle)
+    .map((p) => ({
+      name: p.name,
+      blocks: availableBlocks(p.data.typical_availability ?? null),
+      synced: synced.has(p.handle),
+    }));
+  const crews: HeatCrew[] = groups.map((g) => ({
     id: g.id,
     name: g.name,
-    members: g.members.map((h) => {
-      const p = byHandle.get(h);
-      return {
-        name: p?.name ?? h,
-        days: availableDays(p?.data.typical_availability ?? null),
-        synced: synced.has(h),
-      };
-    }),
+    members: g.members.map((h) => byHandle.get(h)?.name ?? h),
   }));
 
   return (
@@ -103,7 +104,7 @@ export default async function Home() {
         </div>
       </div>
 
-      {crews.length > 0 && <AvailabilityGrid crews={crews} />}
+      {people.length > 0 && <WeekHeat people={people} crews={crews} />}
 
       <StringStrip memories={memories} />
     </>
