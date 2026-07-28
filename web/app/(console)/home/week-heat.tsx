@@ -38,6 +38,7 @@ export function WeekHeat({ people, crews }: { people: HeatPerson[]; crews: HeatC
   const [drag, setDrag] = useState<Span | null>(null);
   const [pinned, setPinned] = useState<(Span & { x: number; y: number; side: "right" | "left" }) | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
 
   const pool = useMemo(() => {
@@ -69,12 +70,14 @@ export function WeekHeat({ people, crews }: { people: HeatPerson[]; crews: HeatC
             gridRef.current!.querySelector<HTMLElement>(`[data-day="${d.day}"][data-hour="${h}"]`);
           const first = cell(lo)?.getBoundingClientRect();
           const last = cell(hi)?.getBoundingClientRect();
-          if (first && last) {
-            const midY = (first.top + last.bottom) / 2;
-            const side = window.innerWidth - last.right > 260 ? "right" : "left";
+          const home = sectionRef.current?.getBoundingClientRect();
+          if (first && last && home) {
+            // coordinates relative to the card so the tooltip scrolls with it
+            const midY = (first.top + last.bottom) / 2 - home.top;
+            const side = home.right - last.right > 250 ? "right" : "left";
             setPinned({
               ...d,
-              x: side === "right" ? last.right + 14 : first.left - 14,
+              x: side === "right" ? last.right - home.left + 14 : first.left - home.left - 14,
               y: midY,
               side,
             });
@@ -112,7 +115,7 @@ export function WeekHeat({ people, crews }: { people: HeatPerson[]; crews: HeatC
   const freed = spanNorm ? freeForSpan(spanNorm) : [];
 
   return (
-    <section className="card avail">
+    <section className="card avail" ref={sectionRef}>
       <div className="avail-head">
         <h2>When everyone&apos;s free</h2>
         <CrewDropdown

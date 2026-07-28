@@ -1170,8 +1170,9 @@ html { scroll-behavior: smooth; }
 }
 .dd-opt.cur { font-weight: 600; }
 .dd-opt.cur .dd-dot { transform: scale(1); opacity: 1; }
+.avail { position: relative; }
 .heat-pop {
-  position: fixed; z-index: 70; width: 220px;
+  position: absolute; z-index: 40; width: 220px;
   background: var(--card); border: 1px solid var(--line); border-radius: 10px;
   box-shadow: 0 12px 34px rgb(29 28 36 / 0.18); padding: 12px 14px;
   transform: translateY(-50%);
