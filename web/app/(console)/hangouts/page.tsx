@@ -7,6 +7,29 @@ import { PolaroidStack } from "@/components/polaroid-stack";
 import { ArtifactStore } from "@/lib/artifact-store";
 import { listGroupsWithHangouts, setArtifactVisibility } from "@/lib/db";
 
+const ICON = {
+  width: 11, height: 11, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+  strokeWidth: 2.4, strokeLinecap: "round", strokeLinejoin: "round",
+} as const;
+
+function Lock() {
+  return (
+    <svg {...ICON} aria-hidden>
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </svg>
+  );
+}
+
+function Unlock() {
+  return (
+    <svg {...ICON} aria-hidden>
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 7.8-1.3" />
+    </svg>
+  );
+}
+
 async function toggleVisibility(formData: FormData) {
   "use server";
   setArtifactVisibility(
@@ -63,6 +86,7 @@ export default function Memories() {
                     className={`chip vis-chip ${a.visibility === "public" ? "chip-public" : "chip-private"}`}
                     title={`make ${a.visibility === "public" ? "private" : "public"}`}
                   >
+                    {a.visibility === "public" ? <Unlock /> : <Lock />}
                     <span className="vis-now">{a.visibility}</span>
                     <span className="vis-swap">
                       make {a.visibility === "public" ? "private" : "public"}
