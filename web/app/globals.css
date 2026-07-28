@@ -280,19 +280,8 @@ table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
 @keyframes string-drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .string-track { animation: none; } }
 
-/* ---- matches: swipe deck ---- */
-.deck { position: relative; max-width: 380px; height: 460px; margin-top: 8px; }
-.swipe-card { position: absolute; inset: 0; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; box-shadow: 0 8px 24px rgb(29 28 36 / 0.10); touch-action: none; user-select: none; display: flex; flex-direction: column; gap: 14px; }
-.swipe-card.top { cursor: grab; }
-.swipe-card.top:active { cursor: grabbing; }
-.swipe-head { display: flex; gap: 12px; align-items: center; }
-.swipe-name { font-family: var(--serif); font-size: 22px; font-weight: 600; }
+/* ---- matches: shared bits (dossier uses the day pills + free row) ---- */
 .swipe-days { border-top: 1px dashed var(--line); padding-top: 12px; }
-.swipe-reasons { margin: 0; padding-left: 18px; color: var(--muted); flex: 1; }
-.swipe-actions { display: flex; justify-content: center; gap: 22px; }
-.round { width: 54px; height: 54px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); font-size: 20px; cursor: pointer; }
-.round.pass:hover { border-color: #a04545; color: #a04545; }
-.round.like:hover { border-color: var(--fern); }
 
 /* ---- chats ---- */
 .chat-card { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
@@ -389,7 +378,6 @@ h2 { font-size: 14px; }
 
 /* ---- surfaces: hairlines over shadows ---- */
 .card { border-radius: 8px; padding: 16px 18px; box-shadow: none; }
-.swipe-card { border-radius: 10px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 14px rgb(0 0 0 / 0.05); }
 .memory-card { border-radius: 8px; }
 .login-card { border-radius: 8px; box-shadow: none; }
 .thumb, .memory-cover { border-radius: 0 0 0 0; }
@@ -695,7 +683,7 @@ html { scroll-behavior: smooth; }
   mask-image: linear-gradient(to right, transparent 0, #000 70px, #000 calc(100% - 70px), transparent 100%);
 }
 
-/* ---- matches mockups: A sniff-report dossier / B chat intros ---- */
+/* ---- matches: sniff-report dossier page + intro cards (page & chat) ---- */
 .mm-stage { max-width: 620px; margin-top: 18px; }
 .mm-stack { position: relative; min-height: 380px; }
 .dossier {
@@ -759,9 +747,6 @@ html { scroll-behavior: smooth; }
 .mm-connect:active { transform: translateY(0) scale(0.97); }
 .mm-done { max-width: 620px; }
 
-.intro-thread { max-width: 640px; display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
-.intro-thread .mchat-msg { max-width: 85%; }
-.intro-beat { display: flex; flex-direction: column; gap: 10px; }
 .intro-card {
   display: flex; gap: 14px; align-items: flex-start;
   border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
@@ -770,50 +755,9 @@ html { scroll-behavior: smooth; }
 .intro-card-photo img {
   width: 84px; height: 68px; object-fit: cover; border-radius: 6px; display: block;
 }
-.intro-pills { display: flex; gap: 8px; margin-left: 12px; }
-.suggest-pill.intro-yes { border-color: var(--copper); color: var(--copper); }
-.suggest-pill.intro-yes:hover { color: #fff; }
-
-/* ---- matches stage: deck + live ranking queue ---- */
-.match-stage {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 380px;
-  gap: 28px;
-  flex: 1;
-  align-items: start;
-  margin-top: 8px;
-}
-.match-deck-col { display: flex; justify-content: center; padding-top: 10px; }
-.match-deck-col .deck { max-width: 420px; width: 420px; height: 560px; margin-top: 0; }
-.swipe-persona { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--copper); margin: 1px 0 2px; }
-.match-queue {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 16px 18px;
-}
-.queue-head {
-  display: flex; justify-content: space-between; align-items: baseline;
-  font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--muted); padding-bottom: 10px; border-bottom: 1px solid var(--line); margin-bottom: 4px;
-}
-.queue-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 0; border-bottom: 1px solid var(--line);
-  transition: opacity 0.25s ease-in-out;
-}
-.queue-row:last-of-type { border-bottom: 0; }
-.queue-row.seen { opacity: 0.35; }
-.queue-row.current .queue-name { font-weight: 600; }
-.queue-rank { font-family: var(--mono); font-size: 11px; color: var(--muted); width: 18px; }
-.queue-name { flex: 1; min-width: 0; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.queue-persona { color: var(--muted); font-size: 12px; }
-.queue-sim { display: flex; align-items: center; gap: 8px; width: 108px; flex-shrink: 0; }
-.sim-bar { flex: 1; height: 4px; border-radius: 999px; background: var(--line); overflow: hidden; }
-.sim-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--blue); }
-.sim-num { font-family: var(--mono); font-size: 11px; color: var(--muted); width: 22px; text-align: right; }
-.queue-foot { margin: 10px 0 0; font-size: 12px; }
-@media (max-width: 1100px) { .match-stage { grid-template-columns: 1fr; } .match-queue { order: 2; } }
+.intro-why { font-size: 12.5px; margin: 6px 0 0; }
+.attach-intros { display: flex; flex-direction: column; gap: 8px; }
+.attach-intros .intro-card { margin-left: 0; max-width: none; }
 
 /* take bar: analytics chat */
 .take-chat-toggle {
@@ -824,37 +768,6 @@ html { scroll-behavior: smooth; }
 .take-chat { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 12px; }
 .take-loading { display: flex; align-items: center; gap: 8px; color: var(--muted); }
 
-/* ---- people page, native edition: memory hooks + beagle's pitch ---- */
-.swipe-card { padding: 0 22px 20px; overflow: hidden; gap: 10px; }
-.swipe-card .swipe-actions { margin-top: auto; }
-.swipe-photo {
-  margin: 0 -22px 16px;
-  position: relative;
-  height: 150px;
-  background: linear-gradient(120deg, #d9d4c9, #efece4);
-}
-.swipe-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.swipe-photo-cap {
-  position: absolute; left: 0; right: 0; bottom: 0;
-  padding: 18px 14px 8px;
-  font-size: 12px; color: #fff;
-  background: linear-gradient(transparent, rgb(0 0 0 / 0.55));
-}
-.swipe-name { font-family: var(--serif); font-size: 21px; font-weight: 600; }
-.swipe-says { font-size: 13.5px; color: var(--copper); margin: 12px 0 2px; }
-.deck-toast {
-  position: absolute; left: 50%; top: -46px; transform: translateX(-50%);
-  white-space: nowrap;
-  background: var(--ink); color: #fff;
-  font-size: 13px; padding: 8px 14px; border-radius: 999px;
-  animation: toast-in 0.25s ease-out;
-  z-index: 10;
-}
-@keyframes toast-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
 /* chat fake-stream */
 .stream-word {
   display: inline-block;
@@ -864,12 +777,6 @@ html { scroll-behavior: smooth; }
   from { opacity: 0; transform: translateY(3px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.round.like { color: var(--fern); font-weight: 700; }
-.queue-mark { font-size: 11.5px; white-space: nowrap; }
-.queue-mark.intro { color: var(--fern); }
-.queue-mark.pass { color: var(--muted); }
-.queue-row.seen { opacity: 0.55; }
-
 /* ---- photo post-its (keepsake only) ---- */
 .print-stack { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .postit {
@@ -890,22 +797,6 @@ html { scroll-behavior: smooth; }
 .postit.solo { width: 190px; min-height: 96px; font-size: 13.5px; transform: rotate(-1.2deg); }
 .print-stack.solo:nth-child(odd) .postit.solo { transform: rotate(2deg); }
 .postit.solo:hover { transform: rotate(0deg) translateY(-2px); }
-
-/* swipe deck: hover + press feel */
-.swipe-card { transition: box-shadow 0.22s ease-in-out, border-color 0.22s ease-in-out; }
-.swipe-card:not(.top) { transition: transform 0.3s ease-in-out, box-shadow 0.22s ease-in-out; }
-.swipe-card.top:hover { box-shadow: 0 6px 16px rgb(0 0 0 / 0.07), 0 14px 34px rgb(0 0 0 / 0.10); border-color: #d8d4cb; }
-.swipe-card.top:active { box-shadow: 0 2px 8px rgb(0 0 0 / 0.08); }
-.round {
-  transition: transform 0.16s ease-in-out, box-shadow 0.16s ease-in-out,
-    border-color 0.16s ease-in-out, color 0.16s ease-in-out, background 0.16s ease-in-out;
-}
-.round:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 4px 12px rgb(29 28 36 / 0.14); }
-.round:active { transform: scale(0.94) translateY(0); box-shadow: 0 1px 3px rgb(29 28 36 / 0.12); transition-duration: 0.07s; }
-/* icon color floods the button on hover; glyph goes white */
-.round.pass { color: #a04545; }
-.round.pass:hover { background: #a04545; border-color: #a04545; color: #fff; }
-.round.like:hover { background: var(--fern); border-color: var(--fern); color: #fff; }
 
 /* ---- landing (public page — kept from FE redesign) ---- */
 .landing {

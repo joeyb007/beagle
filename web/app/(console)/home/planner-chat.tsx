@@ -16,7 +16,9 @@ type Attachment =
   | { type: "slots"; duration_hours: number; slots: { day: string; date: string; start: string; end: string; free: string[]; count: number }[] }
   | { type: "venues"; venues: { name: string; area: string | null; note: string | null; url: string | null }[] }
   | { type: "plan_started"; crew: string; occasion: string; members: string[] }
-  | { type: "nudged"; crew: string; message: string };
+  | { type: "nudged"; crew: string; message: string }
+  | { type: "intros"; people: { handle: string; name: string; persona: string | null; km: number | null; tastes: string[]; days: number[]; why: string }[] }
+  | { type: "intro_sent"; name: string; message: string };
 
 function AttachmentView({ a }: { a: Attachment }) {
   if (a.type === "slots") {
@@ -62,6 +64,38 @@ function AttachmentView({ a }: { a: Attachment }) {
       <div className="attach plan-card">
         <span className="plan-badge">nudge sent</span>
         <p className="muted">to {a.crew}: &ldquo;{a.message}&rdquo;</p>
+      </div>
+    );
+  }
+  if (a.type === "intros") {
+    return (
+      <div className="attach attach-intros">
+        {a.people.map((p) => (
+          <div key={p.handle} className="intro-card">
+            <div className="intro-card-body">
+              <strong>{p.name}</strong>
+              {p.persona && <span className="muted"> · {p.persona}</span>}
+              {p.km != null && <span className="muted"> · {p.km} km</span>}
+              {p.tastes.length > 0 && (
+                <div className="chips" style={{ margin: "6px 0 0" }}>
+                  {p.tastes.map((t) => (
+                    <span key={t} className="chip chip-likes">{t}</span>
+                  ))}
+                </div>
+              )}
+              <p className="intro-why muted">{p.why}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (a.type === "intro_sent") {
+    return (
+      <div className="attach plan-card">
+        <span className="plan-badge">intro sent</span>
+        <strong>{a.name}</strong>
+        <p className="muted">&ldquo;{a.message}&rdquo;</p>
       </div>
     );
   }

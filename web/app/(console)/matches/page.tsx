@@ -1,37 +1,81 @@
-// People: swipe through nearby candidates, ranked by cosine similarity over
-// the same earned taste vectors the agent builds — highest similarity on top.
-import { nearbyMatches } from "@/lib/similarity";
+// People: Beagle's curated picks, ranked by the agent's semantic matching
+// engine (person-card embeddings + cosine KNN). Falls back to the local
+// taste-vector cosine when the agent is down, so the page always renders.
+import { nearbyMatches, wouldLove } from "@/lib/similarity";
 import { currentUser } from "@/lib/session";
-import { MatchStage } from "./match-stage";
-import { SwipeCard } from "./swipe-deck";
+import { DossierStack, MatchCard } from "./dossier";
+
+const AGENT = process.env.AGENT_URL ?? "http://127.0.0.1:8100";
+
+interface AgentMatch {
+  handle: string;
+  name: string;
+  km: number | null;
+  days: number[];
+  reasons: string[];
+  persona: string | null;
+  tastes: string[];
+  says: string;
+}
+
+async function agentMatches(handle: string): Promise<AgentMatch[] | null> {
+  try {
+    const resp = await fetch(`${AGENT}/api/matches`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ handle, limit: 4 }),
+      signal: AbortSignal.timeout(4000),
+      cache: "no-store",
+    });
+    if (!resp.ok) return null;
+    const { matches } = (await resp.json()) as { matches: AgentMatch[] };
+    return matches;
+  } catch {
+    return null;
+  }
+}
 
 export default async function Matches() {
   const user = await currentUser();
   if (!user) return null; // AuthGate shows the sign-in modal
 
-  const matches = nearbyMatches(user.handle);
-  const cards: SwipeCard[] = matches.map((m) => ({
-    handle: m.handle,
-    match_name: m.name,
-    score: m.score,
-    reasons: m.reasons,
-    days: m.days,
-    km: m.km,
-    persona: m.persona,
-    tastes: m.tastes,
-    says: m.says,
-    hook: m.hook,
-  }));
+  const fromAgent = await agentMatches(user.handle);
+  const seed = (h: string) => [...h].reduce((s, ch) => s + ch.charCodeAt(0), 0);
+  const cards: MatchCard[] = (
+    fromAgent ??
+    nearbyMatches(user.handle).map((m) => ({
+      handle: m.handle,
+      name: m.name,
+      km: m.km,
+      days: m.days,
+      reasons: m.reasons,
+      persona: m.persona,
+      tastes: m.tastes,
+      says: m.says,
+    }))
+  )
+    .slice(0, 4)
+    .map((m) => ({
+      handle: m.handle,
+      match_name: m.name,
+      reasons: m.reasons,
+      days: m.days,
+      km: m.km,
+      persona: m.persona,
+      tastes: m.tastes,
+      says: m.says,
+      hook: wouldLove(user.handle, m.tastes, seed(m.handle)),
+    }));
 
   return (
     <>
-      <p className="eyebrow">beagle&apos;s intros</p>
-      <h1>People your plans would love</h1>
+      <p className="eyebrow">beagle&apos;s picks</p>
+      <h1>People worth meeting</h1>
       <p className="sub">
-        Beagle matched {matches.length} people nearby against everything it knows about you. Swipe
-        right and it texts the intro for you — that&apos;s the whole point of a dog with a phone.
+        Beagle sniffed out {cards.length} people near you this week. Say the word and he texts the
+        warm intro for you.
       </p>
-      <MatchStage cards={cards} />
+      <DossierStack cards={cards} />
     </>
   );
 }
