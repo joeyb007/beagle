@@ -173,6 +173,36 @@ TOOL_DEFS = [
         },
     },
     {
+        "name": "find_people",
+        "description": (
+            "Find new people nearby worth meeting: Beagle's curated picks, ranked by real "
+            "similarity (tastes, vibe, availability). Use when the user wants to meet someone "
+            "new, expand the circle, or find company beyond their crews. Optional free-text "
+            "query ('someone into climbing') and day filter."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "What they're looking for, optional"},
+                "free_day": {"type": "string", "description": "Day name like 'friday', optional"},
+                "limit": {"type": "integer", "description": "Max picks, default 3"},
+            },
+        },
+    },
+    {
+        "name": "make_intro",
+        "description": (
+            "Have Beagle text a warm intro to one of the nearby picks on the user's behalf "
+            "(who your friend is, why you two fit, their number). Use only after the user "
+            "confirms they want the intro."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {"name": {"type": "string", "description": "The pick's name"}},
+            "required": ["name"],
+        },
+    },
+    {
         "name": "nudge_crew",
         "description": "Send a short warm stir-the-group message to a quiet crew, from Beagle. Use only when the user asks you to nudge/stir them.",
         "input_schema": {
@@ -221,6 +251,77 @@ class PlannerTools:
         return (
             f"plan started for {g['name']}: DMing {', '.join(names)} about '{occasion}'.",
             {"type": "plan_started", "crew": g["name"], "occasion": occasion, "members": names},
+        )
+
+    async def tool_find_people(
+        self, query: str = "", free_day: str | None = None, limit: int = 3
+    ) -> tuple[str, dict | None]:
+        from src.agent.matching import find_matches
+
+        day = None
+        if free_day:
+            fd = free_day.strip().lower()[:3]
+            day = DAY_NAMES.index(fd) if fd in DAY_NAMES else None
+        matches = find_matches(
+            self._db, self._handle, query=query or None, free_day=day, limit=limit
+        )
+        if not matches:
+            return "no new people nearby right now. beagle keeps sniffing.", None
+        lines = [
+            f"- {m['name']}" + (f" ({m['persona']})" if m["persona"] else "")
+            + (f", {m['km']} km" if m["km"] is not None else "")
+            + (f": {'; '.join(m['reasons'])}" if m["reasons"] else "")
+            for m in matches
+        ]
+        people = [
+            {
+                "handle": m["handle"],
+                "name": m["name"],
+                "persona": m["persona"],
+                "km": m["km"],
+                "tastes": m["tastes"][:4],
+                "days": m["days"],
+                "why": ", ".join(m["reasons"]) or m["says"],
+            }
+            for m in matches
+        ]
+        return (
+            "nearby picks, best fit first:\n" + "\n".join(lines),
+            {"type": "intros", "people": people},
+        )
+
+    async def tool_make_intro(self, name: str) -> tuple[str, dict | None]:
+        import os
+
+        from src.agent.intros import IntroWorker
+        from src.agent.matching import find_matches
+
+        needle = name.strip().lower()
+        # resolve among the nearby pool (including already-swiped, so retries work)
+        pool = [
+            {"handle": r["handle"], "name": r["name"]}
+            for r in _rows(self._db, "SELECT handle, name, json FROM profiles")
+            if json.loads(r["json"]).get("nearby") is True
+        ]
+        hit = next(
+            (p for p in pool if needle in p["name"].lower() or p["name"].lower().startswith(needle)),
+            None,
+        )
+        if hit is None:
+            picks = ", ".join(m["name"] for m in find_matches(self._db, self._handle))
+            return f"no nearby pick named '{name}'. current picks: {picks or 'none'}", None
+        worker = IntroWorker(
+            db_path=self._db,
+            messaging=self._orch._messaging,
+            llm=self._orch._llm,
+            demo_target=os.environ.get("BEAGLE_INTRO_TARGET"),
+        )
+        text = await worker.intro_now(self._handle, hit["handle"])
+        if text is None:
+            return f"couldn't reach {hit['name']} right now, intro not sent", None
+        return (
+            f"warm intro texted to {hit['name']}: {text}",
+            {"type": "intro_sent", "name": hit["name"], "message": text},
         )
 
     async def tool_nudge_crew(self, crew: str, note: str = "") -> tuple[str, dict | None]:
