@@ -3,6 +3,7 @@
 // flip-through polaroid stacks ride the rail beside it.
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { FadeScroll } from "@/components/fade-scroll";
 import { PolaroidStack } from "@/components/polaroid-stack";
 import { SelfEditModal } from "@/components/self-edit-modal";
 import { ArtifactStore } from "@/lib/artifact-store";
@@ -44,6 +45,7 @@ export default async function ChatDetail({ params }: { params: Promise<{ id: str
         <div className="chat-rail">
           <div className="card">
             <h2 className="chat-rail-head">People</h2>
+            <FadeScroll maxHeight={214}>
             <div className="member-list">
               {group.members.map((h) => {
                 const p = profiles.get(h);
@@ -73,6 +75,7 @@ export default async function ChatDetail({ params }: { params: Promise<{ id: str
                 );
               })}
             </div>
+            </FadeScroll>
           </div>
 
           <h2 className="chat-rail-head">Upcoming</h2>
@@ -90,19 +93,25 @@ export default async function ChatDetail({ params }: { params: Promise<{ id: str
 
           <h2 className="chat-rail-head">Past hangouts</h2>
           {past.length === 0 && <div className="card">None yet — the first one becomes a keepsake.</div>}
-          {past.map((a) => (
-            <Link key={a.plan_id} href={`/hangouts/${a.plan_id}`} style={{ textDecoration: "none" }}>
-              <div className="card chat-card">
-                <div>
-                  <div className="chat-name">{a.place.name}</div>
-                  <div className="muted">{fmt(a.time)}{a.isKeepsake ? " · 📸 keepsake" : ""}</div>
-                </div>
-                {a.photos.length > 0 && (
-                  <PolaroidStack photos={a.photos} alt={`photos from ${a.place.name}`} />
-                )}
+          {past.length > 0 && (
+            <FadeScroll fill>
+              <div className="past-list">
+                {past.map((a) => (
+                  <Link key={a.plan_id} href={`/hangouts/${a.plan_id}`} style={{ textDecoration: "none" }}>
+                    <div className="card chat-card">
+                      <div>
+                        <div className="chat-name">{a.place.name}</div>
+                        <div className="muted">{fmt(a.time)}{a.isKeepsake ? " · 📸 keepsake" : ""}</div>
+                      </div>
+                      {a.photos.length > 0 && (
+                        <PolaroidStack photos={a.photos} alt={`photos from ${a.place.name}`} />
+                      )}
+                    </div>
+                  </Link>
+                ))}
               </div>
-            </Link>
-          ))}
+            </FadeScroll>
+          )}
         </div>
       </div>
     </>
