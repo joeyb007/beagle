@@ -128,22 +128,6 @@ export function PlannerChat({
 
       <PixelBeagle targetIds={["pchat-input"]} host=".pchat" mood={mood} />
 
-      {messages.length === 1 && !busy && !typing && (
-        <div className="pchat-suggest">
-          {chips.map((c, i) => (
-            <button
-              key={c}
-              type="button"
-              className="suggest-pill"
-              style={{ animationDelay: `${140 + i * 80}ms` }}
-              onClick={() => send(c)}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      )}
-
       <form
         className="pchat-bar"
         onSubmit={(e) => {
@@ -163,6 +147,22 @@ export function PlannerChat({
           {busy || typing ? "…" : "send"}
         </button>
       </form>
+
+      {messages.length === 1 && !busy && !typing && (
+        <div className="pchat-suggest">
+          {chips.map((c, i) => (
+            <button
+              key={c}
+              type="button"
+              className="suggest-pill"
+              style={{ animationDelay: `${140 + i * 80}ms` }}
+              onClick={() => send(c)}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

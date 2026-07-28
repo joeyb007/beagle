@@ -1112,7 +1112,7 @@ html { scroll-behavior: smooth; }
 }
 .pchat-suggest {
   display: flex; gap: 8px; flex-wrap: wrap;
-  padding: 10px 14px 0; border-top: 1px solid var(--line);
+  padding: 0 14px 12px;
 }
 .suggest-pill {
   font: inherit; font-size: 12.5px; color: var(--muted);
@@ -1124,7 +1124,6 @@ html { scroll-behavior: smooth; }
 .suggest-pill:hover { color: var(--ink); border-color: var(--copper); background: var(--hover); transform: translateY(-1px); }
 .suggest-pill:active { transform: none; }
 .pchat-bar { display: flex; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--line); }
-.pchat-suggest + .pchat-bar { border-top: 0; padding-top: 10px; }
 .pchat-bar input {
   flex: 1;
   transition: border-color 180ms ease, box-shadow 180ms ease;
