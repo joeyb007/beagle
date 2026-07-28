@@ -1,8 +1,9 @@
 "use client";
-// Animated pixel beagle living on the landing headline. Real sprite-sheet
-// animation: walk/wag are 8-frame 48x32 strips, idle/sit single frames.
-// Positioned absolute inside .landing (scroll-safe; no per-frame rect reads —
-// layout is re-measured only via ResizeObserver). Static sit pose under
+// Animated pixel beagle. Real sprite-sheet animation: walk/wag are 8-frame
+// 48x32 strips, idle/sit single frames. Lives absolutely inside a positioned
+// host (landing hero, chat card) and perches on a target element's top edge.
+// Moods: "free" wanders/sits/wags on his own; "think" sits with a thought
+// bubble; "talk" wags with a speech bubble. Static sit pose under
 // prefers-reduced-motion. Art: "Dog Pack" by bat (megamicrobats.itch.io).
 import { useEffect, useRef } from "react";
 
@@ -18,18 +19,31 @@ const ANIMS: Record<AnimName, { src: string; frames: number; ms: number }> = {
   sit: { src: "/dog/sit.png", frames: 1, ms: 400 },
 };
 
-export function PixelBeagle({ targetIds }: { targetIds: string[] }) {
-  const ref = useRef<HTMLCanvasElement>(null);
+export type BeagleMood = "free" | "think" | "talk";
+
+export function PixelBeagle({
+  targetIds,
+  host = ".landing",
+  mood = "free",
+}: {
+  targetIds: string[];
+  host?: string;
+  mood?: BeagleMood;
+}) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const moodRef = useRef<BeagleMood>(mood);
+  moodRef.current = mood;
 
   useEffect(() => {
-    const el = ref.current;
-    // first existing target wins (e.g. email input, falling back to the
-    // headline once the post-join state removes the form)
+    const wrap = wrapRef.current;
+    const el = canvasRef.current;
+    // first existing target wins
     const hero = targetIds
       .map((id) => document.getElementById(id))
       .find((n): n is HTMLElement => n != null);
-    const host = el?.closest(".landing") as HTMLElement | null;
-    if (!el || !hero || !host) return;
+    const hostEl = wrap?.closest(host) as HTMLElement | null;
+    if (!wrap || !el || !hero || !hostEl) return;
     const ctx = el.getContext("2d");
     if (!ctx) return;
     ctx.imageSmoothingEnabled = false;
@@ -41,8 +55,6 @@ export function PixelBeagle({ targetIds }: { targetIds: string[] }) {
       imgs[name] = img;
     });
 
-    // Headline box in .landing's coordinate space (absolute positioning is
-    // scroll-safe; only re-measured when layout actually changes).
     let minX = 0;
     let maxX = 0;
     let perchY = 0;
@@ -68,13 +80,13 @@ export function PixelBeagle({ targetIds }: { targetIds: string[] }) {
         ctx.drawImage(img, frame * FW, 0, FW, FH, 0, 0, FW, FH);
         ctx.restore();
       }
-      el.style.transform = `translate(${x}px, ${perchY}px)`;
-      el.style.visibility = "visible"; // hidden in CSS until first placement
+      wrap.style.transform = `translate(${x}px, ${perchY}px)`;
+      wrap.style.visibility = "visible"; // hidden in CSS until first placement
     };
 
     const measure = () => {
       const hr = hero.getBoundingClientRect();
-      const lr = host.getBoundingClientRect();
+      const lr = hostEl.getBoundingClientRect();
       minX = hr.left - lr.left + 6;
       maxX = hr.right - lr.left - FW * SCALE - 6;
       perchY = hr.top - lr.top - FH * SCALE + 2; // paws rest on the target's top edge
@@ -84,11 +96,11 @@ export function PixelBeagle({ targetIds }: { targetIds: string[] }) {
         placed = true;
       }
       x = Math.max(minX, Math.min(maxX, x));
-      draw(); // static reposition — safe in reduced-motion too
+      draw();
     };
     measure();
     const ro = new ResizeObserver(measure);
-    ro.observe(host);
+    ro.observe(hostEl);
     ro.observe(hero);
 
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -107,7 +119,20 @@ export function PixelBeagle({ targetIds }: { targetIds: string[] }) {
       if (now - last < 33) return;
       last = now;
 
-      if (now >= nextThinkAt) {
+      const m = moodRef.current;
+      if (m === "think") {
+        if (state !== "sit") {
+          state = "sit";
+          frame = 0;
+          nextThinkAt = now; // re-decide the moment mood frees up
+        }
+      } else if (m === "talk") {
+        if (state !== "wag") {
+          state = "wag";
+          frame = 0;
+          nextThinkAt = now;
+        }
+      } else if (now >= nextThinkAt) {
         if (state === "walk") {
           // arrived (or timed out mid-walk): settle
           state = Math.random() < 0.45 ? "wag" : Math.random() < 0.5 ? "sit" : "idle";
@@ -125,7 +150,7 @@ export function PixelBeagle({ targetIds }: { targetIds: string[] }) {
         }
       }
 
-      if (state === "walk") {
+      if (state === "walk" && m === "free") {
         const dx = targetX - x;
         x += Math.sign(dx) * Math.min(Math.abs(dx), 1.6);
         if (dx !== 0) facing = Math.sign(dx);
@@ -145,16 +170,26 @@ export function PixelBeagle({ targetIds }: { targetIds: string[] }) {
       ro.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetIds.join(",")]);
+  }, [targetIds.join(","), host]);
 
   return (
-    <canvas
-      ref={ref}
-      width={FW}
-      height={FH}
-      style={{ width: FW * SCALE, height: FH * SCALE }}
+    <div
+      ref={wrapRef}
       className="pixel-beagle"
+      style={{ width: FW * SCALE, height: FH * SCALE }}
       aria-hidden="true"
-    />
+    >
+      {mood === "think" && (
+        <span className="dog-bubble think">
+          <i /><i /><i />
+        </span>
+      )}
+      {mood === "talk" && (
+        <span className="dog-bubble talk">
+          <i /><i /><i />
+        </span>
+      )}
+      <canvas ref={canvasRef} width={FW} height={FH} style={{ width: "100%", height: "100%" }} />
+    </div>
   );
 }
