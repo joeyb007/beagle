@@ -32,7 +32,7 @@ export default async function Landing({
         ) : (
           <>
             <form action={join} className="waitlist">
-              <input id="waitlist-phone" type="tel" name="phone" required placeholder="(647) 555-0132" aria-label="Phone number" />
+              <input id="waitlist-phone" type="tel" name="phone" required placeholder="(555) 123-4567" aria-label="Phone number" />
               <button className="primary" type="submit">Join the waitlist</button>
             </form>
             {joined === "0" && <p className="joined err">that number didn&apos;t look right — try again?</p>}

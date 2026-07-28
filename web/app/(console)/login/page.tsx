@@ -30,7 +30,7 @@ export default async function Login({
       <form action={signIn} className="card login-form">
         <label>
           Phone number
-          <input type="tel" name="phone" required autoFocus placeholder="(647) 555-0132" />
+          <input type="tel" name="phone" required autoFocus placeholder="(555) 123-4567" />
         </label>
         <label>
           Password
