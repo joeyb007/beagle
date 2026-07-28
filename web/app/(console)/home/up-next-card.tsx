@@ -61,13 +61,14 @@ export function UpNextCard({ plan }: { plan: UpNextDetail }) {
 
       <div className="upnext-body">
         <div className="count-big" aria-label="Time until the hangout">
-          <span className="count-big-num">{big.value}</span>
-          <span className="count-big-label">{big.label}</span>
+          {/* server and client clocks/locales differ; client wins quietly */}
+          <span className="count-big-num" suppressHydrationWarning>{big.value}</span>
+          <span className="count-big-label" suppressHydrationWarning>{big.label}</span>
         </div>
 
         <div className="upnext-info">
           <p className="upnext-when">
-            {when}
+            <span suppressHydrationWarning>{when}</span>
             {plan.groupName && (
               <span className="muted"> · from {plan.groupName}</span>
             )}
