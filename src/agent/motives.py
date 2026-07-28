@@ -32,6 +32,14 @@ def _rows(conn: sqlite3.Connection, sql: str, args: tuple = ()) -> list[sqlite3.
     return conn.execute(sql, args).fetchall()
 
 
+def _stretch(raw: float) -> float:
+    """Display-contrast curve for embedding cosines, which cluster near 0.7:
+    a fixed linear stretch around that center so percents spread out. Fixed
+    (not per-list normalized) so a motive's score is stable across reloads
+    and radius changes. Order-preserving."""
+    return max(0.3, min(0.97, 0.5 + (raw - 0.7) * 2.5))
+
+
 def _overlap_score(motive_text: str, my_data: dict) -> float:
     """Offline fallback: how much of the motive's wording hits my tastes."""
     words = set(motive_text.lower().replace(",", " ").replace("+", " ").split())
@@ -90,7 +98,7 @@ def list_motives(db_path: str, handle: str, *, radius_km: float | None = None) -
             elif my_vec is not None:
                 motive_doc = f"{m['text']}. {m['time_window']}. hosted by {person_card(host_name, host_data)}"
                 vec = [float(x) for x in next(iter(model.embed([motive_doc])))]
-                score = _cosine_dense(my_vec, vec)
+                score = _stretch(_cosine_dense(my_vec, vec))
             else:
                 score = _overlap_score(m["text"], my_data)
             out.append(

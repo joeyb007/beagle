@@ -119,14 +119,30 @@ export function MotivesBand() {
 
   function action(m: Motive) {
     if (m.my_status === "host") return <span className="motive-state">yours · waiting for bites</span>;
-    if (m.my_status === "in") return <span className="motive-state in">you&apos;re in · {m.host_name.split(" ")[0]} said yes</span>;
-    if (m.my_status === "pending")
-      return <span className="motive-state">asked · waiting on {m.host_name.split(" ")[0]}</span>;
-    if (m.spots_left === 0) return <span className="motive-state">full</span>;
+    const asked = m.my_status === "pending" || m.my_status === "in";
+    if (!asked && m.spots_left === 0) return <span className="motive-state">full</span>;
+    const first = m.host_name.split(" ")[0];
+    // one button across none -> pending -> in, so the green sweep transitions
+    // in place and the checked state survives polls and reloads
     return (
-      <button type="button" className="motive-join" onClick={() => join(m.id)}>
-        ask to join
-      </button>
+      <div className="motive-act">
+        <button
+          type="button"
+          className={`motive-join${asked ? " asked" : ""}`}
+          disabled={asked}
+          onClick={() => join(m.id)}
+        >
+          {asked && (
+            <svg className="spark-check" viewBox="0 0 24 24" width="15" height="15" aria-hidden>
+              <circle className="ck-circle" cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
+              <path className="ck-mark" d="M7 12.5l3.4 3.4L17 9" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+          {m.my_status === "in" ? "you're in" : asked ? "asked" : "ask to join"}
+        </button>
+        {m.my_status === "pending" && <span className="muted motive-wait">waiting on {first}</span>}
+        {m.my_status === "in" && <span className="muted motive-wait">{first} said yes</span>}
+      </div>
     );
   }
 
@@ -186,6 +202,11 @@ export function MotivesBand() {
             <div className="motive-fit">
               {m.my_status === "host" ? "your motive" : `${Math.round(m.score * 100)}% your thing`}
             </div>
+            {m.my_status !== "host" && (
+              <div className="motive-fit-bar" aria-hidden>
+                <span style={{ width: `${Math.round(m.score * 100)}%` }} />
+              </div>
+            )}
             <p className="motive-text">{m.text}</p>
             <p className="motive-host">
               {m.host_name}

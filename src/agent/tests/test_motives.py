@@ -6,7 +6,7 @@ import sqlite3
 
 import pytest
 
-from src.agent.motives import create_motive, list_motives, request_join
+from src.agent.motives import _stretch, create_motive, list_motives, request_join
 from src.agent.stubs import ScriptedLLM, StubMessaging
 
 SCHEMA = open("schema.sql").read()
@@ -36,6 +36,14 @@ def db(tmp_path):
     conn.commit()
     conn.close()
     return path
+
+
+def test_stretch_spreads_display_band_stably():
+    assert _stretch(0.70) == pytest.approx(0.5)
+    assert _stretch(0.74) == pytest.approx(0.6)
+    assert _stretch(0.95) == 0.97  # clamped high
+    assert _stretch(0.2) == 0.3  # clamped low
+    assert _stretch(0.75) > _stretch(0.71)  # order preserved
 
 
 def test_listing_scores_and_orders_by_fit(db):

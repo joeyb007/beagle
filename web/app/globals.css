@@ -703,30 +703,42 @@ html { scroll-behavior: smooth; }
   background: linear-gradient(135deg, color-mix(in srgb, var(--copper) 16%, white), var(--hover));
 }
 
-/* intros-in-flight rail: the receipts */
+/* the inbox rail: only rows that need you or reward you */
+.match-layout.solo { grid-template-columns: minmax(0, 620px); }
 .intro-rail { margin-top: 18px; padding: 16px 18px; }
 .rail-head {
   font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--muted); margin: 0 0 10px;
 }
-.rail-empty { font-size: 13px; margin: 0; }
-.rail-row { border-bottom: 1px solid var(--line); }
-.rail-row:last-of-type { border-bottom: 0; }
-.rail-row-top {
-  display: flex; align-items: center; gap: 8px; width: 100%;
-  background: none; border: 0; padding: 9px 0; font: inherit;
-  text-align: left; cursor: pointer;
+.rail-group { padding: 4px 0 10px; border-bottom: 1px solid var(--line); }
+.rail-group:last-of-type { border-bottom: 0; padding-bottom: 0; }
+.rail-ask { padding: 5px 0 9px; }
+.rail-ask-line { font-size: 13px; margin: 0 0 7px; line-height: 1.45; }
+.rail-motive { color: var(--copper); }
+.rail-ask-actions { display: flex; gap: 8px; }
+.rail-yes {
+  font: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+  color: #fff; background: var(--copper); border: 1px solid var(--copper);
+  border-radius: 999px; padding: 4px 12px;
+  transition: filter 160ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.rail-name { font-size: 13.5px; font-weight: 500; white-space: nowrap; }
-.rail-meta { font-size: 12px; margin-left: auto; white-space: nowrap; }
-.rail-message {
+.rail-yes:hover { filter: brightness(1.07); transform: translateY(-1px); }
+.rail-yes:active { transform: scale(0.97); }
+.rail-no {
+  font: inherit; font-size: 12px; cursor: pointer;
+  color: var(--muted); background: none; border: 1px solid var(--line);
+  border-radius: 999px; padding: 4px 12px;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+.rail-no:hover { color: var(--ink); border-color: var(--muted); }
+.rail-decided { font-size: 12px; color: var(--muted); margin: 0; animation: notice-in 240ms cubic-bezier(0.22, 1, 0.36, 1); }
+.rail-decided.yes { color: #16a34a; font-weight: 600; }
+.rail-reply { padding: 5px 0 8px; }
+.rail-snippet {
   font-family: var(--serif); font-style: italic; font-size: 12.5px;
-  color: var(--muted); margin: 0 0 10px; line-height: 1.5;
+  color: var(--muted); margin: 0; line-height: 1.5;
 }
-.rail-foot { font-size: 12px; margin: 10px 0 0; }
-.rail-note { font-size: 11.5px; margin: 12px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
-.rail-note a { color: var(--blue); text-decoration: none; }
-.rail-note a:hover { text-decoration: underline; }
+.rail-joined { font-size: 12.5px; margin: 7px 0 0; line-height: 1.45; }
 .mm-stack { position: relative; min-height: 380px; }
 .dossier {
   background: var(--card); border: 1px solid var(--line); border-radius: 12px;
@@ -1592,4 +1604,31 @@ html { scroll-behavior: smooth; }
 .pstack.single:hover .pstack-card.slot0 { transform: rotate(-3deg); }
 @media (prefers-reduced-motion: reduce) {
   .pstack-card { transition: none; }
+}
+
+/* ---- motives band: asked/in green checked button + fit progress bar ---- */
+.motive-act { margin-top: auto; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.motive-act .motive-join { margin-top: 0; }
+.motive-join.asked {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #16a34a; border-color: #16a34a; color: #fff;
+  cursor: default;
+  transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease;
+}
+.motive-join.asked:disabled { opacity: 1; }
+.motive-wait { font-size: 11.5px; }
+
+.motive-fit-bar {
+  height: 4px; border-radius: 999px; background: var(--line);
+  overflow: hidden; margin: 0 0 8px;
+}
+.motive-fit-bar > span {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--copper) 55%, #fff), var(--copper));
+  transform-origin: left center;
+  animation: fit-fill 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes fit-fill { from { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .motive-fit-bar > span { animation: none; }
 }
