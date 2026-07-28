@@ -72,3 +72,14 @@ export async function waitlistCount(): Promise<number> {
   const row = sqliteEnsure().prepare("SELECT COUNT(*) AS n FROM waitlist").get() as { n: number };
   return row.n;
 }
+
+/** Is this number already on the list? (Blur-time check from the landing.) */
+export async function hasWaitlistPhone(raw: string): Promise<boolean> {
+  const phone = normalizePhone(raw);
+  if (!phone) return false;
+  if (PG_URL) {
+    const res = await (await pg()).query("SELECT 1 FROM waitlist WHERE phone = $1", [phone]);
+    return res.rowCount > 0;
+  }
+  return !!sqliteEnsure().prepare("SELECT 1 FROM waitlist WHERE phone = ?").get(phone);
+}
