@@ -30,6 +30,7 @@ export function LoginForm() {
 
   return (
     <form
+      noValidate
       action={formAction}
       className={`card login-form${invalid ? " field-invalid" : ""}`}
       onSubmit={(e) => {
@@ -71,7 +72,7 @@ export function LoginForm() {
         </label>
       )}
       {invalid && (
-        <p className="login-err notice-in">that number doesn&apos;t look right — try again?</p>
+        <p className="login-err notice-in">that number doesn&apos;t look right. Try again?</p>
       )}
       <button className="primary" type="submit" disabled={pending}>
         {pending ? "Signing in…" : "Sign in"}

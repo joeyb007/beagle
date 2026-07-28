@@ -49,7 +49,7 @@ export function WaitlistForm() {
 
   return (
     <>
-      <form ref={formRef} action={formAction} onSubmit={onSubmit} className={`waitlist${stateClass}`}>
+      <form ref={formRef} action={formAction} onSubmit={onSubmit} noValidate className={`waitlist${stateClass}`}>
         <input
           id="waitlist-phone"
           type="tel"
@@ -70,9 +70,8 @@ export function WaitlistForm() {
       {invalid && (
         <div className="auth-overlay wl-overlay" role="alertdialog" aria-modal="true" aria-label="Invalid number">
           <div className="card auth-modal modal-err">
-            <div className="wl-woof">🙈</div>
             <h2>That doesn&apos;t look like a number</h2>
-            <p className="muted">ten digits does it — like (555) 123-4567.</p>
+            <p className="muted">ten digits does it, like (555) 123-4567.</p>
             <button className="primary auth-cta" onClick={dismiss}>Try again</button>
           </div>
         </div>
@@ -80,9 +79,8 @@ export function WaitlistForm() {
       {duplicate && (
         <div className="auth-overlay wl-overlay" role="alertdialog" aria-modal="true" aria-label="Already on the list">
           <div className="card auth-modal modal-dup">
-            <div className="wl-woof">🐕</div>
             <h2>Already on the list</h2>
-            <p className="muted">this number&apos;s saved from before — you&apos;re good.</p>
+            <p className="muted">this number&apos;s saved from before. You&apos;re good.</p>
             <button className="primary auth-cta" onClick={dismiss}>Okay</button>
           </div>
         </div>
@@ -90,7 +88,6 @@ export function WaitlistForm() {
       {success && (
         <div className="auth-overlay wl-overlay" role="dialog" aria-modal="true" aria-label="You're on the list">
           <div className="card auth-modal">
-            <div className="wl-woof">🐶</div>
             <h2>You&apos;re on the list</h2>
             <p className="muted">Saved. We&apos;ll bark at this number when it&apos;s your turn.</p>
             <button className="primary auth-cta" onClick={() => setDismissed(true)}>

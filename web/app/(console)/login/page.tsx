@@ -8,7 +8,7 @@ export default function Login() {
   return (
     <div className="login-wrap">
       <h1>Sign in</h1>
-      <p className="sub">Your number is your account — Beagle takes it from there.</p>
+      <p className="sub">Your number is your account. Beagle takes it from there.</p>
       <LoginForm />
     </div>
   );
