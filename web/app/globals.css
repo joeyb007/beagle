@@ -695,6 +695,85 @@ html { scroll-behavior: smooth; }
   mask-image: linear-gradient(to right, transparent 0, #000 70px, #000 calc(100% - 70px), transparent 100%);
 }
 
+/* ---- matches mockups: A sniff-report dossier / B chat intros ---- */
+.mm-stage { max-width: 620px; margin-top: 18px; }
+.mm-stack { position: relative; min-height: 380px; }
+.dossier {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 24px 28px; position: relative;
+  box-shadow: 0 6px 24px rgb(29 28 36 / 0.08);
+  touch-action: pan-y; cursor: grab;
+  transition: transform 0.32s ease, opacity 0.32s ease;
+}
+.dossier:active { cursor: grabbing; }
+.dossier.under {
+  position: absolute; inset: 0; z-index: 0;
+  transform: scale(0.955) translateY(16px); opacity: 0.55;
+}
+.dossier.top { z-index: 1; }
+.dossier.out-intro { transform: translateX(640px) rotate(24deg) !important; opacity: 0; }
+.dossier.out-pass { transform: translateX(-640px) rotate(-24deg) !important; opacity: 0; }
+.mm-photo {
+  position: absolute; top: -14px; right: 22px; z-index: 2;
+  transform: rotate(3.5deg); margin-top: 0;
+}
+.mm-photo img { width: 108px; height: 84px; object-fit: cover; display: block; }
+.mm-photo-cap {
+  display: block; font-family: var(--serif); font-style: italic;
+  font-size: 10.5px; color: var(--muted); text-align: center; padding-top: 4px;
+}
+.mm-name { font-family: var(--serif); font-size: 27px; margin: 0; line-height: 1.15; }
+.mm-persona { color: var(--copper); font-size: 13px; margin: 2px 0 0; }
+.mm-why-head {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--muted); margin: 16px 0 2px;
+}
+.mm-why { font-size: 14px; margin: 0; max-width: 420px; }
+.mm-pitch {
+  position: relative; margin-top: 16px; max-width: 430px;
+  background: var(--hover); border-radius: 12px; border-bottom-left-radius: 3px;
+  padding: 10px 13px; font-size: 13.5px;
+}
+.mm-pitch-tail {
+  position: absolute; left: -5px; bottom: 0; width: 10px; height: 10px;
+  background: var(--hover); clip-path: polygon(0 100%, 100% 100%, 100% 0);
+}
+.mm-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; }
+.mm-skip {
+  font: inherit; font-size: 13px; color: var(--muted); background: none;
+  border: 0; cursor: pointer; padding: 8px 4px;
+  transition: color 160ms ease;
+}
+.mm-skip:hover { color: var(--ink); }
+.mm-connect {
+  font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
+  color: #fff; background: var(--copper); border: 1px solid var(--copper);
+  border-radius: 999px; padding: 9px 18px;
+  transition: transform 190ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 190ms ease,
+    filter 190ms ease;
+}
+.mm-connect:hover {
+  transform: translateY(-2px) scale(1.04); filter: brightness(1.06);
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--copper) 40%, transparent);
+}
+.mm-connect:active { transform: translateY(0) scale(0.97); }
+.mm-done { max-width: 620px; }
+
+.intro-thread { max-width: 640px; display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+.intro-thread .mchat-msg { max-width: 85%; }
+.intro-beat { display: flex; flex-direction: column; gap: 10px; }
+.intro-card {
+  display: flex; gap: 14px; align-items: flex-start;
+  border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+  background: var(--paper); margin-left: 12px; max-width: 88%;
+}
+.intro-card-photo img {
+  width: 84px; height: 68px; object-fit: cover; border-radius: 6px; display: block;
+}
+.intro-pills { display: flex; gap: 8px; margin-left: 12px; }
+.suggest-pill.intro-yes { border-color: var(--copper); color: var(--copper); }
+.suggest-pill.intro-yes:hover { color: #fff; }
+
 /* ---- matches stage: deck + live ranking queue ---- */
 .match-stage {
   display: grid;
