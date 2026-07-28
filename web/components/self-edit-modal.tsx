@@ -3,6 +3,7 @@
 // for any surface that lists people. Renders its own trigger; only ever
 // edits the signed-in user (the server action ignores client handles).
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { updateSelf } from "@/app/(console)/home/actions";
 import { TagInput } from "@/components/tag-input";
@@ -50,7 +51,9 @@ export function SelfEditModal({ you, triggerClass = "you-edit" }: { you: SelfEdi
         edit
       </button>
 
-      {editing && (
+      {/* portal to <body>: escapes the page's stacking context so the overlay
+          truly covers everything (sidebar included) */}
+      {editing && createPortal(
         <div
           className="auth-overlay wl-overlay"
           role="dialog"
@@ -98,7 +101,8 @@ export function SelfEditModal({ you, triggerClass = "you-edit" }: { you: SelfEdi
               <button className="primary" type="submit">Save</button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

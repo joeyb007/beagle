@@ -3,6 +3,7 @@
 // attributes (the future permission model starts on this surface).
 // Editing happens in a modal popup; list fields are add/remove pills.
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { updateSelf } from "./actions";
 
 export interface YouProps {
@@ -113,7 +114,9 @@ export function YouCard({ you }: { you: YouProps }) {
         {you.availability && <span className="chip chip-vibe">{you.availability}</span>}
       </div>
 
-      {editing && (
+      {/* portal to <body>: escapes the page's stacking context so the overlay
+          truly covers everything (sidebar included) */}
+      {editing && createPortal(
         <div
           className="auth-overlay wl-overlay"
           role="dialog"
@@ -161,7 +164,8 @@ export function YouCard({ you }: { you: YouProps }) {
               <button className="primary" type="submit">Save</button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

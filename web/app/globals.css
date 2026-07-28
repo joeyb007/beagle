@@ -998,7 +998,7 @@ html { scroll-behavior: smooth; }
   70% { transform: translateX(-2px); }
   100% { transform: none; }
 }
-.wl-overlay { position: fixed; inset: 0; z-index: 90; backdrop-filter: blur(5px); }
+.wl-overlay { position: fixed; inset: 0; z-index: 300; backdrop-filter: blur(5px); }
 
 /* signed-out ghost skeleton — same backdrop on every gated page */
 .ghost-page { padding: 8px 4px; }
