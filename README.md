@@ -136,9 +136,5 @@ schema.sql       shared SQLite schema
 sidecar/         Node wrapper for the Photon iMessage SDK (+ fake transport)
 web/             Next.js console (landing, home, social, chats, memories)
 web/scripts/     one-command demo-world seed (people, groups, threads, photos)
-docs/            PRD, branch docs, design specs + implementation plans
+docs/            PRD + branch docs
 ```
-
-The `docs/superpowers/` directory holds the actual design specs and
-implementation plans the features were built from, in order — left in
-deliberately as a build log.

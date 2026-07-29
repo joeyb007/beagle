@@ -24,3 +24,6 @@ sidecar.log
 .playwright-mcp/
 web/*.tsbuildinfo
 .playwright-mcp/
+
+# local agent config
+.claude/
